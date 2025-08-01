@@ -1,0 +1,2 @@
+#!/bin/zsh
+python3 bench_filter.py ../1-inputs/ 2>&1 | tee run_output.txt

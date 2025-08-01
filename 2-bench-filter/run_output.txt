@@ -1,0 +1,134 @@
+****** PrintView ******
+Category: PrintView
+Q: How do you access the printing options of the "Sheet1" worksheet?
+M: var printingOpt = workbook.???["Sheet1"].???;
+A: Worksheets PrintOptions
+Category: PrintView
+Q: How do you enable printing of gridlines in the worksheet?
+M: worksheet.??? = ???;
+A: PrintOptions.PrintGridlines true
+Category: PrintView
+Q: How do you enable printing of row and column headings?
+M: worksheet.??? = ???;
+A: PrintOptions.PrintHeadings true
+Category: PrintView
+Q: How do you set the worksheet to print in landscape orientation?
+M: worksheet.??? = ???;
+A: PrintOptions.Portrait false
+Category: PrintView
+Q: How do you set the paper to A3 for printing?
+M: worksheet.??? = ???.A3;
+A: PrintOptions.PaperType PaperType
+Category: PrintView
+Q: How do you set printing of five copies?
+M: worksheet.??? = 5;
+A: PrintOptions.NumberOfCopies
+Category: PrintView
+Q: How do you set the first visible column in a worksheet to column D?
+M: worksheet.??? = ???;
+A: ViewOptions.FirstVisibleColumn 3
+Category: PrintView
+Q: How do you set the worksheet zoom level to 125%?
+M: worksheet.??? = ???;
+A: ViewOptions.Zoom 125
+Category: PrintView
+Q: How do you set the print area to a specific cell range (E1:U7)?
+M: worksheet.???(worksheet.???("E1","U7"));
+A: NamedRanges.SetPrintArea Cells.GetSubrange
+Subtotal for PrintView: 9 rows
+
+****** Reading ******
+Category: Reading
+Q: How do you load an Excel file from a path?
+M: var workbook=???(Path.Combine(Program.ReadPath,"Reading.xlsx"));
+A: ExcelFile.Load
+Category: Reading
+Q: How do you iterate through all cells currently allocated in a row?
+M: foreach (ExcelCell cell in row.???)
+A: AllocatedCells
+Category: Reading
+Q: How do you read an enum type of a cell's value?
+M: Console.Write($"{value} [{cell.???}] ");
+A: ValueType
+Subtotal for Reading: 3 rows
+
+****** Formatting ******
+Category: Formatting
+Q: How to set cell A1 text to bold?
+M: worksheet.Cells["A1"].???=???;
+A: Style.Font.Weight ExcelFont.BoldWeight
+Category: Formatting
+Q: How do you set the right border of a cell?
+M: worksheet.Cells["A4"].???=LineStyle.Thin;
+A: Style.Borders[IndividualBorder.Right].LineStyle
+Category: Formatting
+Q: How do you format a cell to display a number with a unit (e.g., meters)?
+M: worksheet.Cells["A2"].???="#\" m\"";
+A: Style.NumberFormat
+Category: Formatting
+Q: How do you set a cell's background color?
+M: worksheet.Cells["A3"].???(???.FromArgb(221,235,247));
+A: Style.FillPattern.SetSolid SpreadsheetColor
+Category: Formatting
+Q: How do you style a merged cell range to italic?
+M: worksheet.Cells.GetSubrange("A5","B5").???=true;
+A: Style.Font.Italic
+Category: Formatting
+Q: How do you set a font size for a part of a cell's text starting with the 9th character and ending with the 12th character, both inclusive?
+M: worksheet.Cells["A6"].???(8,???).???=18*20;
+A: GetCharacters 4 Font.Size
+Category: Formatting
+Q: How do you set a font name for part of a cell's text starting with the 9th character and ending with the 12th character, both inclusive?
+M: worksheet.Cells["A7"].???(???,4).???="Comic Sans MS";
+A: GetCharacters 8 Font.Name
+Category: Formatting
+Q: How do you autofit the first column to fit its content?
+M: worksheet.Columns[0]???();
+A: .AutoFit
+Category: Formatting
+Q: How do you set the worksheet zoom level to 140%?
+M: worksheet.???=???;
+A: ViewOptions.Zoom 140
+Subtotal for Formatting: 9 rows
+
+****** Charts ******
+Category: Charts
+Q: How do you add a column chart to a worksheet between cells D2 and M25?
+M: var chart=worksheet.???(???,???,???);
+A: Charts.Add ChartType.Column "D2" "M25"
+Category: Charts
+Q: How do you set the chart's data range to (0,0,4,1), including headers?
+M: chart.???(worksheet.???(0,0,4,1),???);
+A: SelectData Cells.GetSubrangeAbsolute true
+Subtotal for Charts: 2 rows
+
+****** Writing ******
+Category: Writing
+Q: How do you assign the text "Hello" to cell A1?
+M: worksheet.Cells["A1"]???="Hello";
+A: .Value
+Category: Writing
+Q: How do you assign the boolean value true to cell A2?
+M: worksheet.Cells["A2"]???=???;
+A: .Value true
+Category: Writing
+Q: How do you write a formula to a cell?
+M: worksheet.Cells["A5"]???="=SUM(A2:A4)";
+A: .Formula
+Category: Writing
+Q: How do you set a cell value using row and column indices?
+M: worksheet.Cells[???,???].Value="Third row, fourth column";
+A: 2 3
+Subtotal for Writing: 4 rows
+
+****** Usage ******
+Category: Usage
+Q: How to set GemBox.Spreadsheet to use the free license?
+M: ???.???("FREE-LIMITED-KEY");
+A: SpreadsheetInfo SetLicense
+Subtotal for Usage: 1 rows
+
+****** Program ******
+Subtotal for Program: 0 rows
+
+Wrote 28 lines to /Users/zsvedic/LOCAL/CODE-2025/GemBox-benchmark/2-bench-filter/test.jsonl

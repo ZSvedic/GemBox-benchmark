@@ -1,0 +1,8 @@
+[project]
+name = "3-benchmark-llm"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "torch>=2.7.1",
+    "transformers>=4.54.1",
+]

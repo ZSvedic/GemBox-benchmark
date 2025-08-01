@@ -1,0 +1,20 @@
+# C# build output
+bin/
+obj/
+
+# Python caches & envs
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# VS Code workspace/settings
+.vscode/
+
+# Ignore everything under the write folder
+write/
+
+# Misc
+*.log
+.DS_Store
