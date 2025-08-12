@@ -7,11 +7,18 @@ from pydantic_ai.providers.openrouter import OpenRouterProvider
 
 dotenv.load_dotenv()
 
-# Question prompts.
-QUESTIONS = [
+# General question prompts.
+GENERAL_QUESTIONS = [
     "What is the capital of France?",
     "Who wrote 'To Kill a Mockingbird'?",
     "Explain the theory of relativity in simple terms.",
+]
+
+# C# programming questions with masked code snippets.
+PROGRAMMING_QUESTIONS = [
+    "Complete this C# method to calculate the factorial of a number: public static int Factorial(int n) { if (n <= 1) return 1; return ???; }",
+    "Fill in the missing part of this C# LINQ query: var result = numbers.Where(x => ???).Select(x => x * 2).ToList();",
+    "Complete this C# async method: public async Task<string> GetDataAsync() { var response = await httpClient.GetAsync(url); return await ???; }",
 ]
 
 # Models with input and output costs.
@@ -33,52 +40,31 @@ def get_model(model_string: str):
     """Get a model instance from a model string."""
     return OpenAIModel(model_string, provider=OpenRouterProvider())
 
-async def benchmark_model_questions(model_name: str):
-    """Benchmark one model on all 3 questions."""
-    print(f"\n{'='*60}")
-    print(f"Benchmarking {model_name} on all questions")
-    print(f"{'='*60}")
+async def benchmark_models_questions(models: list[str], questions: list[str]):
+    """Benchmark multiple models on multiple questions."""
+    print(f"Benchmarking {len(models)} models on {len(questions)} questions")
     
-    model = get_model(model_name)
-    agent = Agent(model)
-    
-    for i, question in enumerate(QUESTIONS, 1):
-        print(f"\nQuestion {i}: {question}")
-        print("-" * 40)
-        
-        try:
-            result = await agent.run(question)
-            print(f"Answer: {result.output}")
-        except Exception as e:
-            print(f"Error: {e}")
-
-async def benchmark_models_question(model_names: list[str], question_index: int = 1):
-    """Benchmark multiple models on a specific question (default: second question - Mockingbird)."""
-    question = QUESTIONS[question_index]
-    print(f"\n{'='*60}")
-    print(f"Benchmarking all models on question {question_index + 1}: {question}")
-    print(f"{'='*60}")
-    
-    for model_name in model_names:
+    for model_name in models:
         print(f"\n--- Testing {model_name} ---")
-        print("-" * 40)
+        model = get_model(model_name)
+        agent = Agent(model)
         
-        try:
-            model = get_model(model_name)
-            agent = Agent(model)
-            result = await agent.run(question)
-            print(f"Answer: {result.output}")
-        except Exception as e:
-            print(f"Error with {model_name}: {e}")
+        for i, question in enumerate(questions, 1):
+            print(f"Q{i}: {question[:50]}...")
+            try:
+                result = await agent.run(question)
+                print(f"A{i}: {result.output[:100]}...")
+            except Exception as e:
+                print(f"Error: {e}")
 
 async def main():
     print("Starting LLM Benchmark Suite...")
     
-    # Benchmark 1: Single model on all questions
-    # await benchmark_model_questions('openai/gpt-4o-mini')
+    # Test one model on all questions
+    await benchmark_models_questions(['openai/gpt-4o-mini'], GENERAL_QUESTIONS)
     
-    # Benchmark 2: All models on the Mockingbird question (index 1)
-    await benchmark_models_question(MODELS, question_index=1)
+    # Test all models on one question
+    await benchmark_models_questions(MODELS, [GENERAL_QUESTIONS[1]])
 
 if __name__ == "__main__":
     asyncio.run(main())
