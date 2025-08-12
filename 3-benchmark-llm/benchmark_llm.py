@@ -110,11 +110,13 @@ def print_model_summary(model_name: str, metrics: list):
     total_time = sum(m['time'] for m in metrics)
     avg_speed = calculate_speed(total_tokens, total_time)
     
-    print(f"\n  Model Summary: {model_name}")
-    print(f"  Total Cost: ${total_cost:.6f}")
-    print(f"  Total Tokens: {total_tokens}")
-    print(f"  Total Time: {total_time:.2f}s")
-    print(f"  Average Speed: {avg_speed:.1f} tokens/sec")
+    # Only show model summary if there are multiple questions
+    if len(metrics) > 1:
+        print(f"\n  Model Summary: {model_name}")
+        print(f"  Total Cost: ${total_cost:.6f}")
+        print(f"  Total Tokens: {total_tokens}")
+        print(f"  Total Time: {total_time:.2f}s")
+        print(f"  Average Speed: {avg_speed:.1f} tokens/sec")
     
     return {
         'model': model_name,
@@ -176,18 +178,19 @@ async def benchmark_models_questions(models: list[str], questions: list[str]):
         model_data = print_model_summary(model_name, model_metrics)
         performance_data.append(model_data)
     
-    # Print overall summary
-    print_benchmark_summary(performance_data)
+    # Print overall summary only if multiple models
+    if len(models) > 1:
+        print_benchmark_summary(performance_data)
     return performance_data
 
 async def main():
     print("Starting LLM Benchmark Suite...")
     
     # Test one model on all questions
-    await benchmark_models_questions(['openai/gpt-4o-mini'], GENERAL_QUESTIONS)
+    await benchmark_models_questions(['openai/gpt-4o-mini'], [PROGRAMMING_QUESTIONS[0]])
     
     # Test all models on one question
-    await benchmark_models_questions(MODELS, [GENERAL_QUESTIONS[1]])
+    # await benchmark_models_questions(MODELS, [GENERAL_QUESTIONS[1]])
 
 if __name__ == "__main__":
     asyncio.run(main())
