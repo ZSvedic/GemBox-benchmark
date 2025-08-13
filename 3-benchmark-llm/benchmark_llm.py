@@ -3,7 +3,7 @@ import asyncio
 import time
 import json
 
-from typing import List
+from typing import List, Union
 from dataclasses import dataclass
 from pydantic import BaseModel
 from pydantic_ai import Agent
@@ -26,10 +26,10 @@ class Metrics:
     time: float
     speed: float
     accuracy: float = None
+    was_cached: bool = False
 
 # Data structure for JSONL questions
-@dataclass
-class QuestionData:
+class QuestionData(BaseModel):
     category: str
     question: str
     masked_code: str
@@ -66,24 +66,14 @@ MODELS = [
 MODEL_NAMES = [model.name for model in MODELS]
 
 def load_questions_from_jsonl(file_path: str) -> List[QuestionData]:
-    """Load questions from a JSONL file."""
+    """Load questions from a JSONL file using Pydantic for automatic parsing and validation."""
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
-            questions = []
-            for line_num, line in enumerate(file, 1):
-                if line.strip():
-                    try:
-                        data = json.loads(line.strip())
-                        questions.append(QuestionData(
-                            category=data['category'],
-                            question=data['question'],
-                            masked_code=data['masked_code'],
-                            answers=data['answers']
-                        ))
-                    except json.JSONDecodeError as e:
-                        print(f"Warning: Invalid JSON on line {line_num}: {e}")
-                        continue
-            
+            questions = [
+                QuestionData.model_validate_json(line.strip())
+                for line in file
+                if line.strip()
+            ]
             print(f"Loaded {len(questions)} questions from {file_path}")
             return questions
     except FileNotFoundError:
@@ -93,24 +83,7 @@ def load_questions_from_jsonl(file_path: str) -> List[QuestionData]:
         print(f"Error loading questions: {e}")
         return []
 
-def get_questions_by_category(questions: List[QuestionData], category: str) -> List[QuestionData]:
-    """Filter questions by category."""
-    return [q for q in questions if q.category == category]
-
-def print_question_summary(questions: List[QuestionData]):
-    """Print a summary of loaded questions by category."""
-    from collections import Counter
-    categories = Counter(q.category for q in questions)
-    
-    print(f"\nQuestion Summary:")
-    for category, count in categories.items():
-        print(f"  {category}: {count} questions")
-    print(f"Total: {len(questions)} questions")
-
 # Utility functions.
-def get_model(model_name: str):
-    return OpenAIModel(model_name, provider=OpenRouterProvider())
-
 def get_model_costs(model_name: str) -> tuple[float, float]:
     for model in MODELS:
         if model.name == model_name:
@@ -133,23 +106,11 @@ def validate_answer(question: str, answer_text: str, result, expected_answers: L
     
     try:
         if "???" in question:
-            # For programming questions, extract completions from the response
-            if hasattr(result.output, 'completions'):
-                model_completions = result.output.completions
-            else:
-                # Fallback: try to parse JSON from string
-                import json
-                model_completions = json.loads(answer_text)['completions']
-            
-            # Compare with expected answers (trim whitespace)
-            model_answers = [str(ans).strip() for ans in model_completions]
-            expected_answers_trimmed = [ans.strip() for ans in expected_answers]
-            
             # Calculate accuracy
-            if len(model_answers) == len(expected_answers_trimmed):
-                correct_completions = sum(1 for m, e in zip(model_answers, expected_answers_trimmed) 
-                                       if m.strip() == e.strip())
-                return correct_completions / len(expected_answers_trimmed)
+            if len(result.output.completions) == len(expected_answers):
+                correct_completions = sum(1 for m, e in zip(result.output.completions, expected_answers) 
+                                       if str(m).strip() == e.strip())
+                return correct_completions / len(expected_answers)
             else:
                 return 0.0
         else:
@@ -159,8 +120,127 @@ def validate_answer(question: str, answer_text: str, result, expected_answers: L
         print(f"  Warning: Could not parse model response for validation: {parse_error}")
         return 0.0
 
+# Cached agent proxy.
+class CachedAgentProxy:
+    ''' A proxy agent that caches responses from a real agent to a specified file. 
+    Once cached, the agent will return the cached response from dict instead of making a real API call. 
+    This proxy only implements the methods it can accurately simulate. '''
+    
+    def __init__(self, agent: Agent, cache_file: str):
+        self.agent = agent
+        self.cache_file = cache_file
+        self.cache = {}
+        self._load_cache()
+    
+    def _load_cache(self):
+        """Load cache from file if it exists."""
+        try:
+            with open(self.cache_file, 'r') as f:
+                self.cache = json.load(f)
+                print(f"Loaded {len(self.cache)} cached responses from {self.cache_file}")
+        except (FileNotFoundError, json.JSONDecodeError):
+            self.cache = {}
+            print(f"No existing cache found, starting with empty cache")
+        
+    async def run(self, *args, **kwargs):
+        if args[0] in self.cache:
+            print("CACHED: ")
+            cached_result = self._reconstruct_result(self.cache[args[0]])
+            cached_result._was_cached = True
+            return cached_result
+        else:
+            result = await self.agent.run(*args, **kwargs)
+            # Cache only the serializable parts of the result
+            cacheable_result = self._make_cacheable(result)
+            self.cache[args[0]] = cacheable_result
+            result._was_cached = False
+            return result
+    
+    def _make_cacheable(self, result):
+        """Extract serializable data from the agent result."""
+        try:
+            # Handle Pydantic models by converting to dict
+            output = getattr(result, 'output', None)
+            if hasattr(output, 'model_dump'):
+                output = output.model_dump()
+            elif hasattr(output, 'dict'):
+                output = output.dict()
+            
+            # Create a simple object with just the essential data
+            cacheable = {
+                'output': output,
+                'usage_data': self._extract_usage(result),
+                'metadata': {
+                    'cached_at': str(type(result)),
+                    'has_output': hasattr(result, 'output'),
+                    'has_usage': hasattr(result, 'usage')
+                }
+            }
+            return cacheable
+        except Exception as e:
+            print(f"Warning: Could not make result cacheable: {e}")
+            return {'error': f'Could not cache result: {e}'}
+    
+    def _extract_usage(self, result):
+        """Extract usage information if available."""
+        try:
+            usage = result.usage() if hasattr(result, 'usage') and callable(result.usage) else None
+            if usage:
+                return {
+                    'request_tokens': getattr(usage, 'request_tokens', 0),
+                    'response_tokens': getattr(usage, 'response_tokens', 0)
+                }
+            return None
+        except:
+            return None
+    
+    def _reconstruct_result(self, cached_data):
+        """Reconstruct a result-like object from cached data."""
+        class CachedResult:
+            def __init__(self, data):
+                # Reconstruct the output - if it was a dict, try to recreate the original structure
+                output_data = data.get('output')
+                if isinstance(output_data, dict) and 'completions' in output_data:
+                    # Try to recreate a CodeCompletion-like object
+                    class CachedCodeCompletion:
+                        def __init__(self, completions):
+                            self.completions = completions
+                    self.output = CachedCodeCompletion(output_data['completions'])
+                else:
+                    self.output = output_data
+                
+                self._cached_usage = data.get('usage_data')
+            
+            def usage(self):
+                if self._cached_usage:
+                    class CachedUsage:
+                        def __init__(self, usage_data):
+                            self.request_tokens = usage_data.get('request_tokens', 0)
+                            self.response_tokens = usage_data.get('response_tokens', 0)
+                    return CachedUsage(self._cached_usage)
+                return None
+        
+        return CachedResult(cached_data)
+    
+    def usage(self):
+        """Return usage statistics from the underlying agent."""
+        return self.agent.usage()
+    
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit - save cache to file."""
+        try:
+            with open(self.cache_file, 'w') as f:
+                json.dump(self.cache, f, indent=2)
+            print(f"Cache saved to {self.cache_file}")
+        except Exception as e:
+            print(f"Warning: Could not save cache to {self.cache_file}: {e}")
+
 # Benchmarking functions.
-async def run_single_question(agent: Agent, question: str, question_num: int, input_cost_per_1m: float, output_cost_per_1m: float, truncate_length: int = 100, expected_answers: List[str] = None) -> Metrics:
+async def run_single_question(agent: Union[Agent, CachedAgentProxy], question: str, question_num: int, input_cost_per_1m: float, output_cost_per_1m: float, truncate_length: int = 100, expected_answers: List[str] = None) -> Metrics:
     """Run a single question and return performance metrics."""
     print(f"Q{question_num}: {display_text(question, truncate_length)}")
     
@@ -215,7 +295,10 @@ async def run_single_question(agent: Agent, question: str, question_num: int, in
         print(f"  Time: {duration:.2f}s (pure inference) | Speed: {speed:.1f} tokens/sec")
         print(f"  Cost: ${cost:.6f}")
         
-        return Metrics(cost, total_tokens, duration, speed, accuracy)
+        # Check if the result was cached
+        was_cached = getattr(result, '_was_cached', False)
+        
+        return Metrics(cost, total_tokens, duration, speed, accuracy, was_cached)
         
     except Exception as e:
         print(f"Error: {e}")
@@ -236,16 +319,21 @@ def print_model_summary(model_name: str, metrics: list[Metrics]) -> dict:
     # Calculate accuracy
     overall_accuracy = calculate_model_accuracy(metrics)
     
+    # Check if any responses were cached
+    was_cached = any(m.was_cached for m in metrics)
+    cache_status = " (CACHED)" if was_cached else ""
+    display_cost = 0.0 if was_cached else total_cost
+    
     if len(metrics) > 1:
-        print(f"\n  Model Summary: {model_name}")
-        print(f"  Total Cost: ${total_cost:.6f}")
+        print(f"\n  Model Summary: {model_name}{cache_status}")
+        print(f"  Total Cost: ${display_cost:.6f}")
         print(f"  Total Tokens: {total_tokens}")
         print(f"  Total Time: {total_time:.2f}s")
         print(f"  Average Speed: {avg_speed:.1f} tokens/sec")
         if overall_accuracy is not None:
             print(f"  Overall Accuracy: {overall_accuracy:.1%}")
     
-    return {"model": model_name, "total_cost": total_cost, "total_tokens": total_tokens, "total_time": total_time, "avg_speed": avg_speed}
+    return {"model": model_name, "total_cost": display_cost, "total_tokens": total_tokens, "total_time": total_time, "avg_speed": avg_speed}
 
 def print_benchmark_summary(performance_data: list[dict]):
     """Print overall benchmark summary and rankings."""
@@ -284,27 +372,28 @@ async def benchmark_models_questions(models: list[str], questions: list, truncat
     async def run_model_benchmark(model_name: str, questions: list[str], truncate_length: int) -> dict:
         """Run benchmark for a single model on all questions in parallel."""
         print(f"\n--- Testing {model_name} ---")
-        agent = Agent(get_model(model_name))
-        input_cost_per_1m, output_cost_per_1m = get_model_costs(model_name)
-        
-        # Create tasks for all questions to run in parallel
-        question_tasks = []
-        for i, question in enumerate(questions, 1):
-            # Handle both QuestionData objects and string questions
-            if hasattr(question, 'question') and hasattr(question, 'masked_code'):
-                # QuestionData object
-                question_text = f"{question.question}\n{question.masked_code}"
-                expected_answers = question.answers
-            else:
-                # String question (fallback)
-                question_text = str(question)
-                expected_answers = None
+        model = OpenAIModel(model_name, provider=OpenRouterProvider())
+        with CachedAgentProxy(Agent(model), "cached_responses.json") as agent:
+            input_cost_per_1m, output_cost_per_1m = get_model_costs(model_name)
             
-            task = run_single_question(agent, question_text, i, input_cost_per_1m, output_cost_per_1m, truncate_length, expected_answers)
-            question_tasks.append(task)
-        
-        # Run all questions for this model in parallel
-        model_metrics = await asyncio.gather(*question_tasks)
+            # Create tasks for all questions to run in parallel
+            question_tasks = []
+            for i, question in enumerate(questions, 1):
+                # Handle both QuestionData objects and string questions
+                if hasattr(question, 'question') and hasattr(question, 'masked_code'):
+                    # QuestionData object
+                    question_text = f"{question.question}\n{question.masked_code}"
+                    expected_answers = question.answers
+                else:
+                    # String question (fallback)
+                    question_text = str(question)
+                    expected_answers = None
+                
+                task = run_single_question(agent, question_text, i, input_cost_per_1m, output_cost_per_1m, truncate_length, expected_answers)
+                question_tasks.append(task)
+            
+            # Run all questions for this model in parallel
+            model_metrics = await asyncio.gather(*question_tasks)
         
         # Print model summary and return data
         model_data = print_model_summary(model_name, model_metrics)
@@ -332,11 +421,7 @@ async def main():
     if not questions:
         print("No questions loaded. Exiting.")
         return
-    else:
-        print_question_summary(questions)
     
-    # Test one model on first 3 questions
-    print(f"\nTesting one model on first 3 questions...")
     await benchmark_models_questions(['openai/gpt-4o-mini'], questions[:3], truncate_length=500)
 
 if __name__ == "__main__":

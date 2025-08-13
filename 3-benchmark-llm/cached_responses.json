@@ -1,0 +1,53 @@
+{
+  "How do you enable printing of gridlines in the worksheet?\nworksheet.??? = ???;\n\nAnswer a coding question related to GemBox Software .NET components.\nReturn a JSON object with a 'completions' array containing only the code strings that should replace the ??? marks, in order. \nCompletions array should not contain any extra whitespace as results will be used for string comparison.\n\nExample question: \nHow do you set the value of cell A1 to Hello?\nworksheet.Cells[???].??? = ???;\nYour response:\n{\"completions\": [\"A1\", \"Value\", \"Hello\"]}\n\nReturn only the JSON object with no explanations, comments, or additional text.": {
+    "output": {
+      "completions": [
+        "PrintGridLines",
+        "true"
+      ]
+    },
+    "usage_data": {
+      "request_tokens": 185,
+      "response_tokens": 21
+    },
+    "metadata": {
+      "cached_at": "<class 'pydantic_ai.agent.AgentRunResult'>",
+      "has_output": true,
+      "has_usage": true
+    }
+  },
+  "How do you enable printing of row and column headings?\nworksheet.??? = ???;\n\nAnswer a coding question related to GemBox Software .NET components.\nReturn a JSON object with a 'completions' array containing only the code strings that should replace the ??? marks, in order. \nCompletions array should not contain any extra whitespace as results will be used for string comparison.\n\nExample question: \nHow do you set the value of cell A1 to Hello?\nworksheet.Cells[???].??? = ???;\nYour response:\n{\"completions\": [\"A1\", \"Value\", \"Hello\"]}\n\nReturn only the JSON object with no explanations, comments, or additional text.": {
+    "output": {
+      "completions": [
+        "PrintHeadings",
+        "true"
+      ]
+    },
+    "usage_data": {
+      "request_tokens": 184,
+      "response_tokens": 37
+    },
+    "metadata": {
+      "cached_at": "<class 'pydantic_ai.agent.AgentRunResult'>",
+      "has_output": true,
+      "has_usage": true
+    }
+  },
+  "How do you access the printing options of the \"Sheet1\" worksheet?\nvar printingOpt = workbook.???[\"Sheet1\"].???;\n\nAnswer a coding question related to GemBox Software .NET components.\nReturn a JSON object with a 'completions' array containing only the code strings that should replace the ??? marks, in order. \nCompletions array should not contain any extra whitespace as results will be used for string comparison.\n\nExample question: \nHow do you set the value of cell A1 to Hello?\nworksheet.Cells[???].??? = ???;\nYour response:\n{\"completions\": [\"A1\", \"Value\", \"Hello\"]}\n\nReturn only the JSON object with no explanations, comments, or additional text.": {
+    "output": {
+      "completions": [
+        "PrintingOptions",
+        "PrintOptions"
+      ]
+    },
+    "usage_data": {
+      "request_tokens": 195,
+      "response_tokens": 37
+    },
+    "metadata": {
+      "cached_at": "<class 'pydantic_ai.agent.AgentRunResult'>",
+      "has_output": true,
+      "has_usage": true
+    }
+  }
+}
