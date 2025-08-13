@@ -332,9 +332,8 @@ async def main():
     if not questions:
         print("No questions loaded. Exiting.")
         return
-    
-    # Display question summary
-    print_question_summary(questions)
+    else:
+        print_question_summary(questions)
     
     # Test one model on first 3 questions
     print(f"\nTesting one model on first 3 questions...")
