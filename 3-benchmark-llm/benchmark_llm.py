@@ -1,7 +1,6 @@
 import dotenv
 import asyncio
 import time
-import json
 
 from typing import List, Union
 from dataclasses import dataclass
@@ -53,7 +52,7 @@ Your response:
 
 Return only the JSON object with no explanations, comments, or additional text."""
 
-# Models with costs.
+# Models with input and output costs.
 MODELS = [
     ModelInfo('openai/gpt-4o-mini', 0.15, 0.60),
     ModelInfo('openai/gpt-5-mini', 0.25, 2.00),
@@ -123,7 +122,14 @@ def validate_answer(question: str, answer_text: str, result, expected_answers: L
         return 0.0
 
 # Benchmarking functions.
-async def run_single_question(agent: Union[Agent, CachedAgentProxy], question: str, question_num: int, input_cost_per_1m: float, output_cost_per_1m: float, truncate_length: int = 100, expected_answers: List[str] = None) -> Metrics:
+async def run_single_question(
+    agent: Union[Agent, CachedAgentProxy], 
+    question: str, 
+    question_num: int, 
+    input_cost_per_1m: float, 
+    output_cost_per_1m: float, 
+    truncate_length: int = 100, 
+    expected_answers: List[str] = None) -> Metrics:
     """Run a single question and return performance metrics."""
     print(f"Q{question_num}: {display_text(question, truncate_length)}")
     
@@ -248,39 +254,39 @@ def print_benchmark_summary(performance_data: list[dict]):
     for i, (model, speed) in enumerate(speed_data, 1):
         print(f"{i}. {model}: {speed:.1f} tokens/sec")
 
+async def run_model_benchmark(model_name: str, questions: list, truncate_length: int) -> dict:
+    """Run benchmark for a single model on all questions in parallel."""
+    print(f"\n--- Testing {model_name} ---")
+    model = OpenAIModel(model_name, provider=OpenRouterProvider())
+    with CachedAgentProxy(Agent(model), "cached_responses.json") as agent:
+        input_cost_per_1m, output_cost_per_1m = get_model_costs(model_name)
+        
+        # Create tasks for all questions to run in parallel
+        question_tasks = []
+        for i, question in enumerate(questions, 1):
+            # Handle both QuestionData objects and string questions
+            if hasattr(question, 'question') and hasattr(question, 'masked_code'):
+                # QuestionData object
+                question_text = f"{question.question}\n{question.masked_code}"
+                expected_answers = question.answers
+            else:
+                # String question (fallback)
+                question_text = str(question)
+                expected_answers = None
+            
+            task = run_single_question(agent, question_text, i, input_cost_per_1m, output_cost_per_1m, truncate_length, expected_answers)
+            question_tasks.append(task)
+        
+        # Run all questions for this model in parallel
+        model_metrics = await asyncio.gather(*question_tasks)
+    
+    # Print model summary and return data
+    model_data = print_model_summary(model_name, model_metrics)
+    return model_data
+
 async def benchmark_models_questions(models: list[str], questions: list, truncate_length: int = 150):
     """Benchmark multiple models on multiple questions in parallel."""
     print(f"\nBenchmarking {len(models)} model(s) on {len(questions)} question(s) in parallel.")
-    
-    async def run_model_benchmark(model_name: str, questions: list[str], truncate_length: int) -> dict:
-        """Run benchmark for a single model on all questions in parallel."""
-        print(f"\n--- Testing {model_name} ---")
-        model = OpenAIModel(model_name, provider=OpenRouterProvider())
-        with CachedAgentProxy(Agent(model), "cached_responses.json") as agent:
-            input_cost_per_1m, output_cost_per_1m = get_model_costs(model_name)
-            
-            # Create tasks for all questions to run in parallel
-            question_tasks = []
-            for i, question in enumerate(questions, 1):
-                # Handle both QuestionData objects and string questions
-                if hasattr(question, 'question') and hasattr(question, 'masked_code'):
-                    # QuestionData object
-                    question_text = f"{question.question}\n{question.masked_code}"
-                    expected_answers = question.answers
-                else:
-                    # String question (fallback)
-                    question_text = str(question)
-                    expected_answers = None
-                
-                task = run_single_question(agent, question_text, i, input_cost_per_1m, output_cost_per_1m, truncate_length, expected_answers)
-                question_tasks.append(task)
-            
-            # Run all questions for this model in parallel
-            model_metrics = await asyncio.gather(*question_tasks)
-        
-        # Print model summary and return data
-        model_data = print_model_summary(model_name, model_metrics)
-        return model_data
     
     # Create tasks for all models to run in parallel
     model_tasks = []
@@ -305,7 +311,7 @@ async def main():
         print("No questions loaded. Exiting.")
         return
     
-    await benchmark_models_questions(['openai/gpt-4o-mini'], questions[:3], truncate_length=500)
+    await benchmark_models_questions(['openai/gpt-4o-mini'], questions[:4], truncate_length=500)
 
 if __name__ == "__main__":
     asyncio.run(main())
