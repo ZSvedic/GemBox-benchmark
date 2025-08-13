@@ -222,7 +222,7 @@ def print_model_summary(model_name: str, metrics: list[Metrics]) -> dict:
         if overall_accuracy is not None:
             print(f"  Overall Accuracy: {overall_accuracy:.1%}")
     
-    return {"model": model_name, "total_cost": display_cost, "total_tokens": total_tokens, "total_time": total_time, "avg_speed": avg_speed}
+    return {"model": model_name, "total_cost": display_cost, "total_tokens": total_tokens, "total_time": total_time, "avg_speed": avg_speed, "overall_accuracy": overall_accuracy}
 
 def print_benchmark_summary(performance_data: list[dict]):
     """Print overall benchmark summary and rankings."""
@@ -253,12 +253,21 @@ def print_benchmark_summary(performance_data: list[dict]):
     
     for i, (model, speed) in enumerate(speed_data, 1):
         print(f"{i}. {model}: {speed:.1f} tokens/sec")
+    
+    print("\nAccuracy Ranking (highest accuracy first):")
+    accuracy_data = [(p['model'], p.get('overall_accuracy', 0.0)) for p in performance_data if p.get('overall_accuracy') is not None]
+    accuracy_data.sort(key=lambda x: x[1], reverse=True)
+    
+    for i, (model, accuracy) in enumerate(accuracy_data, 1):
+        print(f"{i}. {model}: {accuracy:.1%}")
 
 async def run_model_benchmark(model_name: str, questions: list, truncate_length: int) -> dict:
     """Run benchmark for a single model on all questions in parallel."""
     print(f"\n--- Testing {model_name} ---")
     model = OpenAIModel(model_name, provider=OpenRouterProvider())
-    with CachedAgentProxy(Agent(model), "cached_responses.json") as agent:
+    # Create model-specific cache file in cache folder
+    cache_file = f"cache/cached_responses_{model_name.replace('/', '_')}.json"
+    with CachedAgentProxy(Agent(model), cache_file) as agent:
         input_cost_per_1m, output_cost_per_1m = get_model_costs(model_name)
         
         # Create tasks for all questions to run in parallel
@@ -311,7 +320,8 @@ async def main():
         print("No questions loaded. Exiting.")
         return
     
-    await benchmark_models_questions(['openai/gpt-4o-mini'], questions[:4], truncate_length=500)
+    # await benchmark_models_questions(['openai/gpt-4o-mini', 'google/gemini-2.5-flash-lite'], questions[:10], truncate_length=200)
+    await benchmark_models_questions(['google/gemini-2.5-flash-lite', 'openai/gpt-4o-mini'], questions[:10], truncate_length=200)
 
 if __name__ == "__main__":
     asyncio.run(main())
