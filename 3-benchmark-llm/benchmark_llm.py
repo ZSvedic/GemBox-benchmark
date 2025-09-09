@@ -32,7 +32,6 @@ class Context:
 @dataclass
 class ModelInfo:
     openrouter_name: str
-    direct_name: str
     input_cost: float
     output_cost: float
 
@@ -69,16 +68,16 @@ Your response:
 
 Return only the JSON object with no explanations, comments, or additional text."""
 
-# Models with OpenRouter name, direct name, input costs, and output costs.
+# Models with OpenRouter name, input costs, and output costs.
 MODELS = {
-    'gpt-4o-mini': ModelInfo('openai/gpt-4o-mini', 'gpt-4o-mini', 0.15, 0.60),
-    # 'gpt-5-mini': ModelInfo('openai/gpt-5-mini', 'gpt-5-mini', 0.25, 2.00),
-    # 'gpt-5-nano': ModelInfo('openai/gpt-5-nano', 'gpt-5-nano', 0.05, 0.40),
-    # 'claude-3-haiku': ModelInfo('anthropic/claude-3-haiku', 'anthropic:claude-3-haiku', 0.25, 1.35),
-    # 'gemini-2.5-flash': ModelInfo('google/gemini-2.5-flash', 'gemini-2.5-flash', 0.30, 2.50),
-    'gemini-2.5-flash-lite': ModelInfo('google/gemini-2.5-flash-lite', 'gemini-2.5-flash-lite', 0.10, 0.40),
-    # 'codestral-2508': ModelInfo('mistralai/codestral-2508', 'codestral-2508', 0.30, 0.90),
-    # 'deepseek-chat-v3-0324': ModelInfo('deepseek/deepseek-chat-v3-0324', 'deepseek-chat-v3-0324', 0.18, 0.72),
+    'gpt-4o-mini': ModelInfo('openai/gpt-4o-mini', 0.15, 0.60),
+    # 'gpt-5-mini': ModelInfo('openai/gpt-5-mini', 0.25, 2.00),
+    # 'gpt-5-nano': ModelInfo('openai/gpt-5-nano', 0.05, 0.40),
+    # 'claude-3-haiku': ModelInfo('anthropic/claude-3-haiku', 0.25, 1.35),
+    # 'gemini-2.5-flash': ModelInfo('google/gemini-2.5-flash', 0.30, 2.50),
+    'gemini-2.5-flash-lite': ModelInfo('google/gemini-2.5-flash-lite', 0.10, 0.40),
+    # 'codestral-2508': ModelInfo('mistralai/codestral-2508', 0.30, 0.90),
+    # 'deepseek-chat-v3-0324': ModelInfo('deepseek-chat-v3-0324', 0.18, 0.72),
 }
 
 def load_questions_from_jsonl(file_path: str) -> List[QuestionData]:
@@ -285,25 +284,25 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
         model = OpenAIModel(model_name, provider=OpenRouterProvider())
         agent_code = Agent(model, output_type=list[str])
     else:
-        model_name = model_info.direct_name
+        model_name = model_info.openrouter_name.split('/')[-1] # Extract model name from OpenRouter name.
         print(f"\n--- Testing {model_name} ---")
         agent_code = Agent(model_name, output_type=list[str])
 
-    # Create model-specific cache file in cache folder
+    # Create model-specific cache file in cache folder.
     cache_file = f"{context.cache_dir}/cached_responses_{model_name.replace('/', '_')}.json"
     # with CachedAgentProxy(Agent(model), cache_file) as agent:
     input_cost_per_1m, output_cost_per_1m = get_model_costs(model_info)
     
-    # Create tasks for all questions to run in parallel
+    # Create tasks for all questions to run in parallel.    
     question_tasks = []
     for i, question in enumerate(questions, 1):
-        # Handle both QuestionData objects and string questions
+        # Handle both QuestionData objects and string questions.
         if hasattr(question, 'question') and hasattr(question, 'masked_code'):
             # QuestionData object
             question_text = f"{question.question}\n{question.masked_code}"
             expected_answers = question.answers
         else:
-            # String question (fallback)
+            # String question (fallback).
             question_text = str(question)
             expected_answers = None
         
@@ -318,7 +317,7 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
         )
         question_tasks.append(task)
     
-    # Apply parallel limit if specified
+    # Apply parallel limit if specified.
     if context.max_parallel_questions and context.max_parallel_questions < len(question_tasks):
         # Process in batches
         model_metrics = []
@@ -327,12 +326,12 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
             batch_results = await asyncio.gather(*batch)
             model_metrics.extend(batch_results)
     else:
-        # Run all questions for this model in parallel
+        # Run all questions for this model in parallel.
         model_metrics = await asyncio.gather(*question_tasks)
 
-    # END with CachedAgentProxy(Agent(model)
+    # END with CachedAgentProxy(Agent(model)).
     
-    # Print model summary and return data
+    # Print model summary and return data.
     model_data = print_model_summary(model_name, model_metrics)
     return model_data
 
