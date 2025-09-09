@@ -11,8 +11,6 @@ from pydantic_ai.providers.openrouter import OpenRouterProvider
 
 from cached_agent_proxy import CachedAgentProxy
 
-dotenv.load_dotenv()
-
 @dataclass
 class Context:
     # Timing:
@@ -227,7 +225,7 @@ def print_model_summary(model_name: str, metrics: list[Metrics]) -> dict:
         print(f"  Average Speed: {avg_speed:.1f} tokens/sec")
         if overall_accuracy is not None:
             print(f"  Overall Accuracy: {overall_accuracy:.1%}")
-        print(f"  Errors: {error_count} of {total_calls} API calls")
+        print(f"  Errors: {error_count} out of {total_calls} API calls")
     
     return {"model": model_name, "total_cost": display_cost, "total_tokens": total_tokens, "total_time": total_time, "avg_speed": avg_speed, "overall_accuracy": overall_accuracy, "errors": error_count}
 
@@ -247,7 +245,7 @@ def print_benchmark_summary(performance_data: list[dict], total_questions: int):
     print(f"Total Time: {total_time:.2f}s")
     print(f"Overall Speed: {calculate_speed(total_tokens, total_time):.1f} tokens/sec")
     if total_errors:
-        print(f"Total Errors: {total_errors} of {total_questions} API calls")
+        print(f"Total Errors: {total_errors} out of {total_questions} API calls")
     
     # Rankings
     print("\nCost Efficiency Ranking (lowest cost per token first):")
@@ -338,36 +336,31 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
     model_data = print_model_summary(model_name, model_metrics)
     return model_data
 
-async def benchmark_models_questions(context: Context, models: list[ModelInfo], questions: list):
-    """Benchmark multiple models on multiple questions sequentially."""
-    print(f"\nBenchmarking {len(models)} model(s) on {len(questions)} question(s) sequentially.")
-    
-    # Run models sequentially
-    performance_data = []
-    for model in models:
-        model_data = await run_model_benchmark(context, model, questions)
-        performance_data.append(model_data)
-    
-    # Print overall summary only if multiple models
-    if len(models) > 1 and context.verbose:
-        print_benchmark_summary(performance_data, len(questions))
-    return performance_data
-
 async def main():
-    # Create context with default values
-    context = Context()
-    context.verbose = False
-    context.use_open_router = False
+    # Load environment variables from parent directory .env.
+    dotenv.load_dotenv() 
     
-    # Load questions from JSONL file
+    # Load questions from JSONL file.
     jsonl_path = "../2-bench-filter/test.jsonl"
     questions = load_questions_from_jsonl(jsonl_path)
     assert questions is not None
+
+    # Create context.
+    context = Context() 
+    context.verbose = False
+    context.use_open_router = False
+
+    # Define models to benchmark.
+    models = [MODELS['gpt-4o-mini'], MODELS['gemini-2.5-flash-lite']]
     
-    await benchmark_models_questions(
-        context,
-        [MODELS['gpt-4o-mini'], MODELS['gemini-2.5-flash-lite']], 
-        questions[:])
+    print(f"\nBenchmarking {len(models)} model(s) on {len(questions)} question(s) sequentially.")
+    
+    # Run models sequentially.
+    performance_data = [await run_model_benchmark(context, model, questions) for model in models]
+    
+    # Print overall summary only if multiple models.
+    if len(models) > 1 and context.verbose:
+        print_benchmark_summary(performance_data, len(questions))
 
 if __name__ == "__main__":
     asyncio.run(main())
