@@ -111,20 +111,17 @@ def calculate_speed(total_tokens: int, duration: float) -> float:
 def display_text(text: str, max_length: int) -> str:
     return text[:max_length] + "..." if len(text) > max_length else text
 
-def validate_answer(question: str, answer_text: str, result, expected_answers: List[str] = None) -> float:
+def validate_answer(question_num: int, results: list[str], expected_answers: List[str] = None) -> float:
     """Validate model response against expected answers and return accuracy."""
-    assert expected_answers is not None
+    max_length = max(len(results), len(expected_answers))
     
     try:
-        # Calculate accuracy - now result.output is directly a list[str]
-        if len(result.output) == len(expected_answers):
-            correct_completions = sum(1 for m, e in zip(result.output, expected_answers) 
-                                   if str(m).strip() == e.strip())
-            return correct_completions / len(expected_answers)
-        else:
-            return 0.0
-    except Exception as parse_error:
-        print(f"  Warning: Could not parse model response for validation: {parse_error}")
+        # Calculate accuracy
+        correct_completions = sum(1 for res, exp in zip(results, expected_answers) 
+                                if str(res).strip() == exp.strip())
+        return correct_completions / max_length
+    except Exception as parse_ex:
+        print(f"  Warning: Q{question_num} failed with exception: {repr(parse_ex)}")
         return 0.0
 
 # Benchmarking functions.
@@ -162,7 +159,7 @@ async def run_single_question(
         speed = calculate_speed(total_tokens, duration)
         
         # Validate answer if expected answers are provided
-        accuracy = validate_answer(question, answer_text, result, expected_answers)
+        accuracy = validate_answer(question_num, result.output.completions, expected_answers)
         
         # Display results with model identifier for parallel execution clarity
         if context.verbose:
@@ -280,13 +277,13 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
     """Run benchmark for a single model on all questions in parallel."""
     if context.use_open_router:
         model_name = model_info.openrouter_name
-        print(f"\n--- Testing {model_name} ---")
         model = OpenAIModel(model_name, provider=OpenRouterProvider())
-        agent_code = Agent(model, output_type=list[str])
+        agent_code = Agent(model, output_type=CodeCompletion)
     else:
         model_name = model_info.openrouter_name.split('/')[-1] # Extract model name from OpenRouter name.
-        print(f"\n--- Testing {model_name} ---")
-        agent_code = Agent(model_name, output_type=list[str])
+        agent_code = Agent(model_name, output_type=CodeCompletion)
+
+    print(f"\n--- Testing {model_name} ---")
 
     # Create model-specific cache file in cache folder.
     cache_file = f"{context.cache_dir}/cached_responses_{model_name.replace('/', '_')}.json"
