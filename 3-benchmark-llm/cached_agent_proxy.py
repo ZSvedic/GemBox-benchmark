@@ -7,10 +7,11 @@ class CachedAgentProxy:
     Once cached, the agent will return the cached response from dict instead of making a real API call. 
     This proxy only implements the methods it can accurately simulate. '''
     
-    def __init__(self, agent: Agent, cache_file: str):
+    def __init__(self, agent: Agent, cache_file: str, verbose: bool = False):
         self.agent = agent
         self.cache_file = cache_file
         self.cache = {}
+        self.verbose = verbose
         self._load_cache()
     
     def _load_cache(self):
@@ -25,7 +26,8 @@ class CachedAgentProxy:
         
     async def run(self, *args, **kwargs):
         if args[0] in self.cache:
-            print("CACHED: ")
+            if self.verbose:
+                print("CACHE HIT")
             cached_result = self._reconstruct_result(self.cache[args[0]])
             cached_result._was_cached = True
             return cached_result
@@ -110,12 +112,14 @@ class CachedAgentProxy:
     def __enter__(self):
         """Context manager entry."""
         return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Context manager exit - save cache to file."""
+
+    def close(self):
         try:
             with open(self.cache_file, 'w') as f:
                 json.dump(self.cache, f, indent=2)
             print(f"Cache saved to {self.cache_file}")
         except Exception as e:
             print(f"Warning: Could not save cache to {self.cache_file}: {e}")
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()

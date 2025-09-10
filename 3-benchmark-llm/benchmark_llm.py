@@ -20,11 +20,10 @@ class Context:
     verbose: bool = True
     truncate_length: int = 150  # For display text truncation
     # Calling:
-    max_parallel_questions: int = None  # Limit parallel question execution
+    max_parallel_questions: int = 50  # Limit parallel question execution
     max_retries: int = 0        # Number of retries for failed requests
     # Caching:
     use_caching: bool = False   # Whether to use CachedAgentProxy
-    cache_dir: str = "cache"    # Directory for cache files
     # Model:
     use_open_router: bool = True
 
@@ -66,7 +65,7 @@ worksheet.Cells[???].??? = ???;
 Your response:
 {"completions": ["A1", "Value", "Hello"]}
 
-Return only the JSON object with no explanations, comments, or additional text."""
+Below is the question and masked code. Return only the JSON object with no explanations, comments, or additional text. """
 
 # Models with OpenRouter name, input costs, and output costs.
 MODELS = {
@@ -99,11 +98,8 @@ def load_questions_from_jsonl(file_path: str) -> List[QuestionData]:
         return []
 
 # Utility functions.
-def get_model_costs(model_info: ModelInfo) -> tuple[float, float]:
-    return model_info.input_cost, model_info.output_cost
-
-def calculate_cost(input_tokens: int, output_tokens: int, input_cost: float, output_cost: float) -> float:
-    return (input_tokens / 1_000_000) * input_cost + (output_tokens / 1_000_000) * output_cost
+def calculate_cost(input_tokens: int, output_tokens: int, model: ModelInfo) -> float:
+    return (input_tokens / 1_000_000) * model.input_cost + (output_tokens / 1_000_000) * model.output_cost
 
 def calculate_speed(total_tokens: int, duration: float) -> float:
     return total_tokens / duration if duration > 0 else 0
@@ -111,12 +107,10 @@ def calculate_speed(total_tokens: int, duration: float) -> float:
 def display_text(text: str, max_length: int) -> str:
     return text[:max_length] + "..." if len(text) > max_length else text
 
-def validate_answer(question_num: int, results: list[str], expected_answers: List[str] = None) -> float:
+def calculate_accuracy(question_num: int, results: list[str], expected_answers: List[str] = None) -> float:
     """Validate model response against expected answers and return accuracy."""
     max_length = max(len(results), len(expected_answers))
-    
     try:
-        # Calculate accuracy
         correct_completions = sum(1 for res, exp in zip(results, expected_answers) 
                                 if str(res).strip() == exp.strip())
         return correct_completions / max_length
@@ -125,66 +119,37 @@ def validate_answer(question_num: int, results: list[str], expected_answers: Lis
         return 0.0
 
 # Benchmarking functions.
-async def run_single_question(
-    context: Context,
-    agent_code: Union[Agent, CachedAgentProxy],
-    question: str, 
-    question_num: int, 
-    input_cost_per_1m: float, 
-    output_cost_per_1m: float, 
-    expected_answers: List[str] = None) -> Metrics:
+async def get_question_task(context: Context, model: ModelInfo, agent_code: Union[Agent, CachedAgentProxy],
+    question_num: int, question: str, expected_answers: List[str] = None) -> Metrics:
     """Run a single question and return performance metrics."""
     if context.verbose:
         print(f"Q{question_num}: {display_text(question, context.truncate_length)}")
     
     try:
         # Prepare question and get response
-        full_question = f"{question}\n\n{PROGRAMMING_PROMPT}"
-        
-        # Start timing immediately before the API call (pure model inference time)
+        full_question = f"{PROGRAMMING_PROMPT}\n\n{question}"
         start_time = time.time()
         result = await asyncio.wait_for(agent_code.run(full_question), timeout=context.timeout_seconds)
-        answer_text = str(result.output)
-        
-        # End timing immediately after the API call (pure model inference time)
         duration = time.time() - start_time
-        
-        # Extract token usage
-        usage = result.usage() if callable(result.usage) else None
-        input_tokens = getattr(usage, 'request_tokens', 0) if usage else int(len(full_question.split()) * 1.3)
-        output_tokens = getattr(usage, 'response_tokens', 0) if usage else 0
-        
-        total_tokens = input_tokens + output_tokens
-        cost = calculate_cost(input_tokens, output_tokens, input_cost_per_1m, output_cost_per_1m)
+        # Calculate tokens and cost.
+        usage = result.usage()
+        total_tokens = usage.request_tokens + usage.response_tokens
+        cost = calculate_cost(usage.request_tokens, usage.response_tokens, model)
         speed = calculate_speed(total_tokens, duration)
-        
-        # Validate answer if expected answers are provided
-        accuracy = validate_answer(question_num, result.output.completions, expected_answers)
-        
-        # Display results with model identifier for parallel execution clarity
+        # Calculate accuracy.
+        accuracy = calculate_accuracy(question_num, result.output.completions, expected_answers)
+        # Display results.  
         if context.verbose:
-            print(f"A{question_num}: {display_text(answer_text, context.truncate_length)}")
-            if accuracy is not None:
-                if accuracy == 1.0:
-                    status = "✓ CORRECT"
-                    print(f"  {status}")
-                elif accuracy > 0:
-                    status = f"✗ PARTIAL ({accuracy:.1%})"
-                    print(f"  {status}")
-                else:
-                    status = "✗ INCORRECT"
-                    print(f"  {status}")
-                
-                if accuracy < 1.0 and expected_answers:
-                    print(f"  Expected: {expected_answers}")
-                
-            print(f"  Tokens: {input_tokens} input + {output_tokens} output = {total_tokens} total")
-            print(f"  Time: {duration:.2f}s (pure inference) | Speed: {speed:.1f} tokens/sec")
-            print(f"  Cost: ${cost:.6f}")
-        
-        # Check if the result was cached
+            print(f"A{question_num}: {display_text(result.output, context.truncate_length)}")
+            if accuracy == 1.0:
+                print("✓ CORRECT")
+            elif accuracy > 0:
+                print(f"✗ PARTIAL ({accuracy:.1%}), expected: {expected_answers}")
+            else:
+                print(f"✗ INCORRECT, expected: {expected_answers}")
+        # Check if the result was cached.
         was_cached = getattr(result, '_was_cached', False)
-        
+        # Return metrics.
         return Metrics(cost, total_tokens, duration, speed, accuracy, was_cached, False)
         
     except Exception as e:
@@ -273,8 +238,8 @@ def print_benchmark_summary(performance_data: list[dict], total_questions: int):
         error_rate = errors / total if total > 0 else 0
         print(f"{i}. {model}: {errors}/{total} API calls ({error_rate:.1%})")
 
-async def run_model_benchmark(context: Context, model_info: ModelInfo, questions: list) -> dict:
-    """Run benchmark for a single model on all questions in parallel."""
+def get_model_agent(context: Context, model_info: ModelInfo) -> (str, Union[Agent, CachedAgentProxy]):
+    """Get a model name and agent."""
     if context.use_open_router:
         model_name = model_info.openrouter_name
         model = OpenAIModel(model_name, provider=OpenRouterProvider())
@@ -282,51 +247,37 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
     else:
         model_name = model_info.openrouter_name.split('/')[-1] # Extract model name from OpenRouter name.
         agent_code = Agent(model_name, output_type=CodeCompletion)
+    return model_name, agent_code
 
+async def run_model_benchmark(context: Context, model_info: ModelInfo, questions: list) -> dict:
+    """Run benchmark for a single model on all questions in parallel."""
+    # Initialize model and agent.
+    model_name, agent = get_model_agent(context, model_info)
     print(f"\n--- Testing {model_name} ---")
 
     # Create model-specific cache file in cache folder.
-    cache_file = f"{context.cache_dir}/cached_responses_{model_name.replace('/', '_')}.json"
-    # with CachedAgentProxy(Agent(model), cache_file) as agent:
-    input_cost_per_1m, output_cost_per_1m = get_model_costs(model_info)
+    if context.use_caching:
+        cache_file = f"cache/cached_responses_{model_name.replace('/', '_')}.json"
+        agent = CachedAgentProxy(agent, cache_file, context.verbose)
     
-    # Create tasks for all questions to run in parallel.    
-    question_tasks = []
-    for i, question in enumerate(questions, 1):
-        # Handle both QuestionData objects and string questions.
-        if hasattr(question, 'question') and hasattr(question, 'masked_code'):
-            # QuestionData object
-            question_text = f"{question.question}\n{question.masked_code}"
-            expected_answers = question.answers
-        else:
-            # String question (fallback).
-            question_text = str(question)
-            expected_answers = None
-        
-        task = run_single_question(
-            context,
-            agent_code,
-            question_text,
-            i,
-            input_cost_per_1m,
-            output_cost_per_1m,
-            expected_answers,
-        )
-        question_tasks.append(task)
+    # Create tasks for all questions to run in parallel.
+    question_tasks = [
+        get_question_task(
+            context, model_info, agent, 
+            qi, f"{question.question}\n{question.masked_code}", question.answers)
+        for qi, question in enumerate(questions, 1)
+    ]
     
-    # Apply parallel limit if specified.
-    if context.max_parallel_questions and context.max_parallel_questions < len(question_tasks):
-        # Process in batches
-        model_metrics = []
-        for i in range(0, len(question_tasks), context.max_parallel_questions):
-            batch = question_tasks[i:i + context.max_parallel_questions]
-            batch_results = await asyncio.gather(*batch)
-            model_metrics.extend(batch_results)
-    else:
-        # Run all questions for this model in parallel.
-        model_metrics = await asyncio.gather(*question_tasks)
+    # Process in batches
+    model_metrics = []
+    for i in range(0, len(question_tasks), context.max_parallel_questions):
+        batch = question_tasks[i:i + context.max_parallel_questions]
+        batch_results = await asyncio.gather(*batch)
+        model_metrics.extend(batch_results)
 
-    # END with CachedAgentProxy(Agent(model)).
+    # Close CachedAgentProxy.
+    if context.use_caching:
+        agent.close()
     
     # Print model summary and return data.
     model_data = print_model_summary(model_name, model_metrics)
@@ -343,8 +294,9 @@ async def main():
 
     # Create context.
     context = Context() 
+    # context.use_caching = True
     context.verbose = False
-    context.use_open_router = False
+    # context.use_open_router = False
 
     # Define models to benchmark.
     models = [MODELS['gpt-4o-mini'], MODELS['gemini-2.5-flash-lite']]
@@ -352,7 +304,7 @@ async def main():
     print(f"\nBenchmarking {len(models)} model(s) on {len(questions)} question(s) sequentially.")
     
     # Run models sequentially.
-    performance_data = [await run_model_benchmark(context, model, questions) for model in models]
+    performance_data = [await run_model_benchmark(context, model, questions[:5]) for model in models]
     
     # Print overall summary only if multiple models.
     if len(models) > 1 and context.verbose:
