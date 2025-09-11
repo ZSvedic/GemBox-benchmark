@@ -45,6 +45,7 @@ class Metrics:
     was_cached: bool = False
     accuracy: float = None # None for complete failures.
     error_count: int = 0
+    wall_time: float = 0.0
 
 # Data structure for JSONL questions
 class QuestionData(BaseModel):
@@ -131,6 +132,8 @@ async def get_question_task(context: Context, model: ModelInfo, agent_code: Unio
         # Prepare question and get response
         full_question = f"{PROGRAMMING_PROMPT}\n\n{question}"
         start_time = time.time()
+        if context.delay_ms:
+            await asyncio.sleep(context.delay_ms / 1000)
         result = await asyncio.wait_for(agent_code.run(full_question), timeout=context.timeout_seconds)
         duration = time.time() - start_time
         # Calculate tokens and cost.
@@ -163,7 +166,7 @@ async def get_question_task(context: Context, model: ModelInfo, agent_code: Unio
         print(f"Error: {repr(e)}")
         return Metrics("Error", 0.0, 0, 0, False, 0.0, 1)
 
-def print_model_summary(model_name: str, metrics: list[Metrics]) -> Metrics:
+def print_model_summary(model_name: str, metrics: list[Metrics], wall_time: float | None = None) -> Metrics:
     """Print summary for a single model."""
     assert len(metrics) > 0, "No metrics to print summary for."
     # Calculate totals.
@@ -181,12 +184,23 @@ def print_model_summary(model_name: str, metrics: list[Metrics]) -> Metrics:
     # Print summary.
     print(f"\n  Model Summary: {model_name}{cache_status}")
     print(f"  Total Cost: ${display_cost:.6f}")
-    print(f"  Total Time: {total_time:.2f}s")
+    print(f"  Total Time (sum of tasks): {total_time:.2f}s")
+    if wall_time is not None:
+        print(f"  Wall Time: {wall_time:.2f}s")
     print(f"  Average Speed: {avg_speed:.1f} tokens/sec")
     print(f"  Overall Accuracy: {total_accuracy:.1%}")
     print(f"  Errors: {error_count} out of {total_calls} API calls")
     # Return metrics.
-    return Metrics(model_name, display_cost, total_tokens, total_time, was_cached, total_accuracy, error_count)
+    return Metrics(
+        name=model_name,
+        cost=display_cost,
+        tokens=total_tokens,
+        time=total_time,
+        was_cached=was_cached,
+        accuracy=total_accuracy,
+        error_count=error_count,
+        wall_time=wall_time or 0.0,
+    )
 
 def print_benchmark_summary(metrics: list[Metrics], total_questions: int):
     """Print overall benchmark summary and rankings."""
@@ -194,11 +208,14 @@ def print_benchmark_summary(metrics: list[Metrics], total_questions: int):
     # Calculate totals.
     total_cost = sum(m.cost for m in metrics)
     total_time = sum(m.time for m in metrics)
+    total_wall_time = sum(m.wall_time for m in metrics)
     total_errors = sum(m.error_count for m in metrics)
+    total_api_calls = total_questions * len(metrics)
     # Print totals.
     print(f"Total Cost: ${total_cost:.6f}")
-    print(f"Total Time: {total_time:.2f}s")
-    print(f"Total Errors: {total_errors} out of {total_questions*len(metrics)} API calls")
+    print(f"Total Time (sum of tasks): {total_time:.2f}s")
+    print(f"Total Wall Time: {total_wall_time:.2f}s")
+    print(f"Total Errors: {total_errors} out of {total_api_calls} API calls = {total_errors/total_api_calls:.1%}% error rate")
     # Accuracy Ranking
     print("\nAccuracy Ranking (highest accuracy first):")
     accuracy_data = [(m.name, m.accuracy) for m in metrics if m.accuracy is not None]
@@ -249,6 +266,7 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
     ]
     
     # Process in batches
+    model_start_time = time.time()
     model_metrics = []
     for i in range(0, len(question_tasks), context.max_parallel_questions):
         batch = question_tasks[i:i + context.max_parallel_questions]
@@ -260,13 +278,14 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
                 # Normalize unexpected exceptions so they don't crash the run.
                 print(f"Unexpected task error: {repr(r)}")
                 model_metrics.extend([Metrics("Error", 0.0, 0, 0, False, 0.0, 1)])
+    model_wall_time = time.time() - model_start_time
 
     # Close CachedAgentProxy.
     if context.use_caching:
         agent.close()
     
     # Print model summary and return data.
-    model_data = print_model_summary(model_name, model_metrics)
+    model_data = print_model_summary(model_name, model_metrics, wall_time=model_wall_time)
     return model_data
 
 async def main():
@@ -283,19 +302,19 @@ async def main():
     # Load questions from JSONL file.
     jsonl_path = "../2-bench-filter/test.jsonl"
     questions = load_questions_from_jsonl(jsonl_path)
-    questions = questions[:5]
+    questions = questions[:50]
     
     print(f"\nBenchmarking {len(models)} model(s) on {len(questions)} question(s) sequentially.\n")
 
     # Create context.
     context = Context(
         timeout_seconds=30, 
-        delay_ms=0, 
+        delay_ms=200, 
         verbose=False, 
         truncate_length=150, 
         max_parallel_questions=50, 
         max_retries=0, 
-        use_caching=True, 
+        use_caching=False, 
         use_open_router=True)
     pprint(context)
 
