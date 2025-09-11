@@ -7,7 +7,7 @@ from typing import List, Union
 from dataclasses import dataclass
 from pydantic import BaseModel
 from pydantic_ai import Agent
-from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openrouter import OpenRouterProvider
 
 from cached_agent_proxy import CachedAgentProxy
@@ -20,18 +20,19 @@ class Context:
     delay_ms: int = 0
     # Display:
     verbose: bool = True
-    truncate_length: int = 150  # For display text truncation
+    truncate_length: int = 150          # Display text truncation.
     # Calling:
-    max_parallel_questions: int = 50  # Limit parallel question execution
-    max_retries: int = 0        # Number of retries for failed requests
+    max_parallel_questions: int = 50    # Limit parallel question execution.
+    max_retries: int = 0                # Number of retries for failed requests.
     # Caching:
-    use_caching: bool = False   # Whether to use CachedAgentProxy
+    use_caching: bool = False           # Whether to use CachedAgentProxy.
     # Model:
-    use_open_router: bool = True
+    use_open_router: bool = True        # Whether to use OpenRouter or direct calls.
 
 @dataclass
 class ModelInfo:
     openrouter_name: str
+    direct_name: str
     input_cost: float
     output_cost: float
 
@@ -42,7 +43,7 @@ class Metrics:
     tokens: int
     time: float
     was_cached: bool = False
-    accuracy: float = None # Accuracy is None for complete failures.
+    accuracy: float = None # None for complete failures.
     error_count: int = 0
 
 # Data structure for JSONL questions
@@ -68,35 +69,29 @@ Your response:
 
 Below is the question and masked code. Return only the JSON object with no explanations, comments, or additional text. """
 
-# Models with OpenRouter name, input costs, and output costs.
-MODELS = {
-    'gpt-4o-mini': ModelInfo('openai/gpt-4o-mini', 0.15, 0.60),
-    # 'gpt-5-mini': ModelInfo('openai/gpt-5-mini', 0.25, 2.00),
-    # 'gpt-5-nano': ModelInfo('openai/gpt-5-nano', 0.05, 0.40),
-    # 'claude-3-haiku': ModelInfo('anthropic/claude-3-haiku', 0.25, 1.35),
-    # 'gemini-2.5-flash': ModelInfo('google/gemini-2.5-flash', 0.30, 2.50),
-    'gemini-2.5-flash-lite': ModelInfo('google/gemini-2.5-flash-lite', 0.10, 0.40),
-    # 'codestral-2508': ModelInfo('mistralai/codestral-2508', 0.30, 0.90),
-    # 'deepseek-chat-v3-0324': ModelInfo('deepseek-chat-v3-0324', 0.18, 0.72),
-}
+# Models with OpenRouter name, direct name, input costs, and output costs.
+ModelInfos = [
+    ModelInfo('openai/gpt-4o-mini', 'openai:gpt-4o-mini', 0.15, 0.60),
+    ModelInfo('openai/gpt-5-mini', 'openai:gpt-5-mini', 0.25, 2.00),
+    ModelInfo('openai/gpt-5-nano', 'openai:gpt-5-nano', 0.05, 0.40),
+    ModelInfo('anthropic/claude-3-haiku', 'anthropic:claude-3-5-haiku-latest', 0.25, 1.35),
+    ModelInfo('google/gemini-2.5-flash', 'google-gla:gemini-2.5-flash', 0.30, 2.50),
+    ModelInfo('google/gemini-2.5-flash-lite', 'google-gla:gemini-2.5-flash-lite', 0.10, 0.40),
+    ModelInfo('mistralai/codestral-2508', 'mistral:codestral-latest', 0.30, 0.90),
+    ModelInfo('deepseek/deepseek-chat-v3-0324', 'deepseek-chat-v3-0324', 0.18, 0.72),
+]
+MODELS = {m.openrouter_name.split('/')[-1]: m for m in ModelInfos}
 
-def load_questions_from_jsonl(file_path: str) -> List[QuestionData]:
+def load_questions_from_jsonl(file_path: str) -> list[QuestionData]:
     """Load questions from a JSONL file using Pydantic for automatic parsing and validation."""
-    try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            questions = [
-                QuestionData.model_validate_json(line.strip())
-                for line in file
-                if line.strip()
-            ]
-            print(f"Loaded {len(questions)} questions from {file_path}")
-            return questions
-    except FileNotFoundError:
-        print(f"Error: File {file_path} not found")
-        return []
-    except Exception as e:
-        print(f"Error loading questions: {e}")
-        return []
+    with open(file_path, 'r', encoding='utf-8') as file:
+        questions = [
+            QuestionData.model_validate_json(line.strip())
+            for line in file
+            if line.strip()
+        ]
+        print(f"Loaded {len(questions)} questions from {file_path}")
+        return questions
 
 # Utility functions.
 def calculate_cost(input_tokens: int, output_tokens: int, model: ModelInfo) -> float:
@@ -140,8 +135,8 @@ async def get_question_task(context: Context, model: ModelInfo, agent_code: Unio
         duration = time.time() - start_time
         # Calculate tokens and cost.
         usage = result.usage()
-        total_tokens = usage.request_tokens + usage.response_tokens
-        cost = calculate_cost(usage.request_tokens, usage.response_tokens, model)
+        total_tokens = usage.input_tokens + usage.output_tokens
+        cost = calculate_cost(usage.input_tokens, usage.output_tokens, model)
         # Calculate accuracy.
         accuracy = calculate_accuracy(question_num, result.output.completions, expected_answers)
         # Display results.  
@@ -157,7 +152,13 @@ async def get_question_task(context: Context, model: ModelInfo, agent_code: Unio
         was_cached = getattr(result, '_was_cached', False)
         # Return metrics.
         return Metrics(f"Q{question_num}", cost, total_tokens, duration, was_cached, accuracy, 0)
-        
+
+    except asyncio.CancelledError as e:
+        # Treat cancellations as a handled outcome so they don't bubble to gather/main.
+        if context.verbose:
+            print(f"Q{question_num}: cancelled: {repr(e)}")
+        return Metrics(f"Q{question_num}", 0.0, 0, 0, False, None, 1)
+
     except Exception as e:
         print(f"Error: {repr(e)}")
         return Metrics("Error", 0.0, 0, 0, False, 0.0, 1)
@@ -216,17 +217,22 @@ def get_model_agent(context: Context, model_info: ModelInfo) -> (str, Union[Agen
     """Get a model name and agent."""
     if context.use_open_router:
         model_name = model_info.openrouter_name
-        model = OpenAIModel(model_name, provider=OpenRouterProvider())
+        model = OpenAIChatModel(model_name, provider=OpenRouterProvider())
         agent_code = Agent(model, output_type=CodeCompletion)
     else:
-        model_name = model_info.openrouter_name.split('/')[-1] # Extract model name from OpenRouter name.
+        model_name = model_info.direct_name
         agent_code = Agent(model_name, output_type=CodeCompletion)
     return model_name, agent_code
 
-async def run_model_benchmark(context: Context, model_info: ModelInfo, questions: list) -> dict:
+async def run_model_benchmark(context: Context, model_info: ModelInfo, questions: list) -> Metrics:
     """Run benchmark for a single model on all questions in parallel."""
     # Initialize model and agent.
-    model_name, agent = get_model_agent(context, model_info)
+    try:
+        model_name, agent = get_model_agent(context, model_info)
+    except Exception as e:
+        print(f"\n--- Can't get model agent: {repr(e)}")
+        return Metrics(f"ERROR-{model_info.openrouter_name}", 0.0, 0, 0, False, 0.0, len(questions))
+    
     print(f"\n--- Testing {model_name} ---")
 
     # Create model-specific cache file in cache folder.
@@ -246,8 +252,14 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
     model_metrics = []
     for i in range(0, len(question_tasks), context.max_parallel_questions):
         batch = question_tasks[i:i + context.max_parallel_questions]
-        batch_results = await asyncio.gather(*batch)
-        model_metrics.extend(batch_results)
+        batch_results = await asyncio.gather(*batch, return_exceptions=True)
+        for r in batch_results:
+            if isinstance(r, Metrics):
+                model_metrics.extend([r])
+            else:
+                # Normalize unexpected exceptions so they don't crash the run.
+                print(f"Unexpected task error: {repr(r)}")
+                model_metrics.extend([Metrics("Error", 0.0, 0, 0, False, 0.0, 1)])
 
     # Close CachedAgentProxy.
     if context.use_caching:
@@ -260,27 +272,37 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
 async def main():
     # Load environment variables from parent directory .env.
     dotenv.load_dotenv() 
-    
+
+    # Define models to benchmark.
+    # models = [
+    #     MODELS['gpt-4o-mini'], 
+    #     MODELS['gemini-2.5-flash-lite']
+    #     ]
+    models = MODELS.values()
+
     # Load questions from JSONL file.
     jsonl_path = "../2-bench-filter/test.jsonl"
     questions = load_questions_from_jsonl(jsonl_path)
     questions = questions[:5]
-    assert questions is not None
-
-    # Define models to benchmark.
-    models = [MODELS['gpt-4o-mini'], MODELS['gemini-2.5-flash-lite']]
     
     print(f"\nBenchmarking {len(models)} model(s) on {len(questions)} question(s) sequentially.\n")
 
     # Create context.
-    context = Context() 
-    context.use_caching = True
-    context.verbose = False
-    context.use_open_router = False
+    context = Context(
+        timeout_seconds=30, 
+        delay_ms=0, 
+        verbose=False, 
+        truncate_length=150, 
+        max_parallel_questions=50, 
+        max_retries=0, 
+        use_caching=True, 
+        use_open_router=True)
     pprint(context)
 
     # Run models sequentially.
-    performance_data = [await run_model_benchmark(context, model, questions) for model in models]
+    performance_data = [
+        await run_model_benchmark(context, model, questions) 
+        for model in models]
 
     # Print overall summary only if multiple models.
     if len(models) > 1:

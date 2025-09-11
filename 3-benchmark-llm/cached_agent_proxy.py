@@ -70,8 +70,8 @@ class CachedAgentProxy:
             usage = result.usage() if hasattr(result, 'usage') and callable(result.usage) else None
             if usage:
                 return {
-                    'request_tokens': getattr(usage, 'request_tokens', 0),
-                    'response_tokens': getattr(usage, 'response_tokens', 0)
+                    'input_tokens': getattr(usage, 'input_tokens', 0),
+                    'output_tokens': getattr(usage, 'output_tokens', 0)
                 }
             return None
         except:
@@ -98,8 +98,8 @@ class CachedAgentProxy:
                 if self._cached_usage:
                     class CachedUsage:
                         def __init__(self, usage_data):
-                            self.request_tokens = usage_data.get('request_tokens', 0)
-                            self.response_tokens = usage_data.get('response_tokens', 0)
+                            self.input_tokens = usage_data.get('input_tokens', 0)
+                            self.output_tokens = usage_data.get('output_tokens', 0)
                     return CachedUsage(self._cached_usage)
                 return None
         
