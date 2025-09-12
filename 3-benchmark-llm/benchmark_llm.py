@@ -12,22 +12,18 @@ from pydantic_ai.providers.openrouter import OpenRouterProvider
 
 from cached_agent_proxy import CachedAgentProxy
 
-# Data classes for cleaner structure.
+# Data classes for cleaner structure:
+
 @dataclass
 class Context:
-    # Timing:
-    timeout_seconds: int = 15
-    delay_ms: int = 0
-    # Display:
-    verbose: bool = True
+    timeout_seconds: int = 20           # Timeout for each question.
+    delay_ms: int = 50                  # Delay between question calls.
+    verbose: bool = True                # Verbose or quiet output?
     truncate_length: int = 150          # Display text truncation.
-    # Calling:
-    max_parallel_questions: int = 50    # Limit parallel question execution.
-    retry_failures: bool = True         # Whether to retry failed requests.
-    # Caching:
-    use_caching: bool = False           # Whether to use CachedAgentProxy.
-    # Model:
-    use_open_router: bool = True        # Whether to use OpenRouter or direct calls.
+    max_parallel_questions: int = 30    # Limit parallel question execution.
+    retry_failures: bool = True         # Retry failed requests?
+    use_caching: bool = False           # Use CachedAgentProxy?
+    use_open_router: bool = True        # Use OpenRouter or direct calls?
 
 @dataclass
 class ModelInfo:
@@ -46,7 +42,7 @@ class Metrics:
     accuracy: float = None # None for complete failures.
     error_count: int = 0
 
-# Data structure for JSONL questions
+# Data structure for JSONL questions.
 class QuestionData(BaseModel):
     category: str
     question: str
@@ -74,13 +70,22 @@ ModelInfos = [
     ModelInfo('openai/gpt-4o-mini', 'openai:gpt-4o-mini', 0.15, 0.60),
     ModelInfo('google/gemini-2.5-flash', 'google-gla:gemini-2.5-flash', 0.30, 2.50),
     ModelInfo('mistralai/codestral-2508', 'mistral:codestral-latest', 0.30, 0.90),
-    ModelInfo('openai/gpt-5-mini', 'openai:gpt-5-mini', 0.25, 2.00), # Expensive.
-    # ModelInfo('openai/gpt-5-nano', 'openai:gpt-5-nano', 0.05, 0.40), # High error rate.
-    # ModelInfo('anthropic/claude-3-haiku', 'anthropic:claude-3-5-haiku-latest', 0.25, 1.35), # Low accuracy.
-    # ModelInfo('google/gemini-2.5-flash-lite', 'google-gla:gemini-2.5-flash-lite', 0.10, 0.40), # Low accuracy.
-    # ModelInfo('deepseek/deepseek-chat-v3-0324', 'deepseek-chat-v3-0324', 0.18, 0.72), # High error rate.
+    ModelInfo('openai/gpt-5-mini', 'openai:gpt-5-mini', 0.25, 2.00), 
+    ModelInfo('openai/gpt-5-nano', 'openai:gpt-5-nano', 0.05, 0.40), # High error rate.
+    ModelInfo('anthropic/claude-3-haiku', 'anthropic:claude-3-5-haiku-latest', 0.25, 1.35), # Low accuracy.
+    ModelInfo('google/gemini-2.5-flash-lite', 'google-gla:gemini-2.5-flash-lite', 0.10, 0.40), # Low accuracy.
+    ModelInfo('deepseek/deepseek-chat-v3-0324', 'deepseek-chat-v3-0324', 0.18, 0.72), # High error rate.
 ]
+
 MODELS = {m.openrouter_name.split('/')[-1]: m for m in ModelInfos}
+PRIMARY_MODELS = [
+    MODELS['gpt-4o-mini'], 
+    MODELS['gemini-2.5-flash'], 
+    MODELS['codestral-2508'], 
+    MODELS['gpt-5-mini'], 
+]
+
+# Utility functions:
 
 def load_questions_from_jsonl(file_path: str) -> list[QuestionData]:
     """Load questions from a JSONL file using Pydantic for automatic parsing and validation."""
@@ -93,7 +98,6 @@ def load_questions_from_jsonl(file_path: str) -> list[QuestionData]:
         print(f"Loaded {len(questions)} questions from {file_path}")
         return questions
 
-# Utility functions.
 def calculate_cost(input_tokens: int, output_tokens: int, model: ModelInfo) -> float:
     return (input_tokens / 1_000_000) * model.input_cost + (output_tokens / 1_000_000) * model.output_cost
 
@@ -114,54 +118,14 @@ def calculate_accuracy(question_num: int, results: list[str], expected_answers: 
         print(f"  Warning: Q{question_num} failed with exception: {repr(parse_ex)}")
         return 0.0
 
-def calculate_model_accuracy(metrics: list[Metrics]) -> float:
+def calculate_model_accuracy(metrics: list[Metrics]) -> Union[float, None]:
     """Calculate overall accuracy for a model."""
-    # Exclude questions with errors from accuracy calculation
-    accuracy_scores = [m.accuracy for m in metrics if m.accuracy is not None]
-    return sum(accuracy_scores) / len(accuracy_scores) if accuracy_scores else None
+    accuracy_scores = [m.accuracy for m in metrics if m.accuracy is not None] # Exclude errors.
+    return (
+        sum(accuracy_scores) / len(accuracy_scores) if accuracy_scores 
+        else None)
 
-# Benchmarking functions.
-async def get_question_task(context: Context, model: ModelInfo, agent_code: Union[Agent, CachedAgentProxy],
-    question_num: int, question: str, expected_answers: List[str] = None) -> Metrics:
-    """Run a single question and return performance metrics."""
-    if context.verbose:
-        print(f"Q{question_num}: {display_text(question, context.truncate_length)}")
-    
-    try:
-        # Prepare question and get response
-        full_question = f"{PROGRAMMING_PROMPT}\n\n{question}"
-        if context.delay_ms:
-            await asyncio.sleep(context.delay_ms / 1000)
-        result = await asyncio.wait_for(agent_code.run(full_question), timeout=context.timeout_seconds)
-        # Calculate tokens and cost.
-        usage = result.usage()
-        total_tokens = usage.input_tokens + usage.output_tokens
-        cost = calculate_cost(usage.input_tokens, usage.output_tokens, model)
-        # Calculate accuracy.
-        accuracy = calculate_accuracy(question_num, result.output.completions, expected_answers)
-        # Display results.  
-        if context.verbose:
-            print(f"A{question_num}: {display_text(str(result.output.completions), context.truncate_length)}")
-            if accuracy == 1.0:
-                print("✓ CORRECT")
-            elif accuracy > 0:
-                print(f"✗ PARTIAL ({accuracy:.1%}), expected: {expected_answers}")
-            else:
-                print(f"✗ INCORRECT, expected: {expected_answers}")
-        # Check if the result was cached.
-        was_cached = getattr(result, '_was_cached', False)
-        # Return metrics.
-        return Metrics(f"Q{question_num}", cost, total_tokens, 0, was_cached, accuracy, 0)
-
-    except asyncio.CancelledError as e:
-        # Treat cancellations as a handled outcome so they don't bubble to gather/main.
-        if context.verbose:
-            print(f"Q{question_num}: cancelled: {repr(e)}")
-        return Metrics(f"Q{question_num}", 0.0, 0, 0, False, None, 1)
-
-    except Exception as e:
-        print(f"Error: {repr(e)}")
-        return Metrics("Error", 0.0, 0, 0, False, 0.0, 1)
+# Summary functions:
 
 def print_model_summary(model_name: str, metrics: list[Metrics], total_time: float) -> Metrics:
     """Print summary for a single model."""
@@ -215,10 +179,12 @@ def print_benchmark_summary(metrics: list[Metrics], total_questions: int):
     # Error Rate Ranking
     if total_errors > 0:
         print("\nError Rate Ranking (lowest error rate first):")
-        error_data = [(m.name, float(m.error_count)/total_questions) for m in metrics]
+        error_data = [(m.name, m.error_count/total_questions) for m in metrics]
         error_data.sort(key=lambda x: x[1])
         for i, (model, error_rate) in enumerate(error_data, 1):
             print(f"{i}. {model}: {error_rate:.1%}")
+
+# Benchmarking functions:
 
 def get_model_agent(context: Context, model_info: ModelInfo) -> (str, Union[Agent, CachedAgentProxy]):
     """Get a model name and agent."""
@@ -235,17 +201,66 @@ def get_model_agent(context: Context, model_info: ModelInfo) -> (str, Union[Agen
         agent_code = Agent(model_name, output_type=CodeCompletion)
     return model_name, agent_code
 
+async def get_question_task(context: Context, model: ModelInfo, agent_code: Union[Agent, CachedAgentProxy],
+    question_num: int, question: QuestionData) -> Metrics:
+    """Run a single question and return performance metrics."""
+    # Prepare question and prompt.
+    question_text = f"{question.question}\n{question.masked_code}"
+    full_prompt = f"{PROGRAMMING_PROMPT}\n\n{question_text}"
+
+    if context.verbose:
+        print(f"Q{question_num}: {display_text(question_text, context.truncate_length)}")
+    
+    try:
+        # Run the async call and retry if needed.
+        for attempt in range(1+context.retry_failures):  # First try + one retry.
+            try:
+                if context.delay_ms and not context.use_caching: # Don't delay if caching.
+                    await asyncio.sleep(context.delay_ms / 1000)
+                result = await asyncio.wait_for(agent_code.run(full_prompt), timeout=context.timeout_seconds)
+                break
+            except Exception as e:
+                if attempt == 0:  # First failure.
+                    print(f"Retrying because of exception: {repr(e)}")
+                    continue
+                raise
+        
+        # Calculate tokens, cost, and accuracy.
+        usage = result.usage()
+        total_tokens = usage.input_tokens + usage.output_tokens
+        cost = calculate_cost(usage.input_tokens, usage.output_tokens, model)
+        accuracy = calculate_accuracy(question_num, result.output.completions, question.answers)
+        
+        # Display results.  
+        if context.verbose:
+            print(f"A{question_num}: {display_text(str(result.output.completions), context.truncate_length)}")
+            if accuracy == 1.0:
+                print("✓ CORRECT")
+            elif accuracy > 0:
+                print(f"✗ PARTIAL ({accuracy:.1%}), expected: {question.answers}")
+            else:
+                print(f"✗ INCORRECT, expected: {question.answers}")
+        
+        # Check if the result was cached.
+        was_cached = getattr(result, '_was_cached', False)
+        
+        # Return metrics.
+        return Metrics(f"Q{question_num}", cost, total_tokens, 0, was_cached, accuracy, 0)
+
+    except Exception as e:
+        print(f"Error: {repr(e)}")
+        return Metrics("Error", 0.0, 0, 0, False, 0.0, 1)
+
 async def run_model_benchmark(context: Context, model_info: ModelInfo, questions: list) -> Metrics:
     """Run benchmark for a single model on all questions in parallel."""
     # Initialize model and agent.
     try:
         model_name, agent = get_model_agent(context, model_info)
+        print(f"\n--- Testing {model_name} ---")
     except Exception as e:
         print(f"\n--- Can't get model agent: {repr(e)}")
         return Metrics(f"ERROR-{model_info.openrouter_name}", 0.0, 0, 0, False, 0.0, len(questions))
     
-    print(f"\n--- Testing {model_name} ---")
-
     # Create model-specific cache file in cache folder.
     if context.use_caching:
         cache_file = f"cache/responses_{model_name.replace('/', '_')}.json"
@@ -253,28 +268,24 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
     
     # Create tasks for all questions to run in parallel.
     question_tasks = [
-        get_question_task(
-            context, model_info, agent, 
-            qi, f"{question.question}\n{question.masked_code}", question.answers)
+        get_question_task(context, model_info, agent, qi, question) 
         for qi, question in enumerate(questions, 1)
     ]
-    task_metrics = [None] * len(question_tasks)
     
-    # Process in batches
+    # Process in batches,with timing and error handling.
     model_start_time = time.time()
+    task_metrics = []
     for i in range(0, len(question_tasks), context.max_parallel_questions):
         batch = question_tasks[i:i + context.max_parallel_questions]
-        batch_results = await asyncio.gather(*batch)
-        for j, m in enumerate(batch_results):
-            if m.error_count == 0:
-                task_metrics[i + j] = m
-        if context.retry_failures:
-            retry_batch = [t for t, m in zip(batch,batch_results) if m.error_count > 0]
-            if len(retry_batch) > 0:
-                if context.verbose:
-                    print(f"Retrying {len(retry_batch)} failed tasks...")
-                for j, m in enumerate(await asyncio.gather(*retry_batch)):
-                    task_metrics[i + j] = m
+        batch_results = await asyncio.gather(*batch, return_exceptions=True)
+        for r in batch_results:
+            if isinstance(r, Metrics):
+                task_metrics.append(r)
+            elif isinstance(r, asyncio.CancelledError):
+                raise r   # Let cancellation terminate everything.
+            else:
+                print(f"Unexpected task error: {repr(r)}")
+                task_metrics.append(Metrics("Error", 0.0, 0, 0, False, 0.0, 1))
     model_time = time.time() - model_start_time
 
     # Close CachedAgentProxy.
@@ -285,16 +296,18 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
     model_data = print_model_summary(model_name, task_metrics, model_time)
     return model_data
 
+# Async main.
 async def main():
     # Load environment variables from parent directory .env.
     dotenv.load_dotenv() 
 
     # Define models to benchmark.
     # models = [
-    #     MODELS['gpt-4o-mini'], 
-    #     MODELS['gemini-2.5-flash-lite']
+    #     MODELS['gpt-5-nano'], 
+    #     MODELS['deepseek-chat-v3-0324']
     #     ]
-    models = MODELS.values()
+    models = PRIMARY_MODELS
+    # models = MODELS.values()
 
     # Load questions from JSONL file.
     jsonl_path = "../2-bench-filter/test.jsonl"
@@ -309,13 +322,13 @@ async def main():
         delay_ms=50, 
         verbose=False, 
         truncate_length=150, 
-        max_parallel_questions=50, 
+        max_parallel_questions=30, 
         retry_failures=True, 
-        use_caching=False, 
+        use_caching=True, 
         use_open_router=True)
     pprint(context)
 
-    # Run models sequentially.
+    # Benchmark models sequentially.
     performance_data = [
         await run_model_benchmark(context, model, questions) 
         for model in models]
