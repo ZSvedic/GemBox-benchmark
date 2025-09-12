@@ -23,7 +23,7 @@ class Context:
     truncate_length: int = 150          # Display text truncation.
     # Calling:
     max_parallel_questions: int = 50    # Limit parallel question execution.
-    max_retries: int = 0                # Number of retries for failed requests.
+    retry_failures: bool = True         # Whether to retry failed requests.
     # Caching:
     use_caching: bool = False           # Whether to use CachedAgentProxy.
     # Model:
@@ -258,20 +258,23 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
             qi, f"{question.question}\n{question.masked_code}", question.answers)
         for qi, question in enumerate(questions, 1)
     ]
+    task_metrics = [None] * len(question_tasks)
     
     # Process in batches
     model_start_time = time.time()
-    model_metrics = []
     for i in range(0, len(question_tasks), context.max_parallel_questions):
         batch = question_tasks[i:i + context.max_parallel_questions]
-        batch_results = await asyncio.gather(*batch, return_exceptions=True)
-        for r in batch_results:
-            if isinstance(r, Metrics):
-                model_metrics.extend([r])
-            else:
-                # Normalize unexpected exceptions so they don't crash the run.
-                print(f"Unexpected task error: {repr(r)}")
-                model_metrics.extend([Metrics("Error", 0.0, 0, 0, False, 0.0, 1)])
+        batch_results = await asyncio.gather(*batch)
+        for j, m in enumerate(batch_results):
+            if m.error_count == 0:
+                task_metrics[i + j] = m
+        if context.retry_failures:
+            retry_batch = [t for t, m in zip(batch,batch_results) if m.error_count > 0]
+            if len(retry_batch) > 0:
+                if context.verbose:
+                    print(f"Retrying {len(retry_batch)} failed tasks...")
+                for j, m in enumerate(await asyncio.gather(*retry_batch)):
+                    task_metrics[i + j] = m
     model_time = time.time() - model_start_time
 
     # Close CachedAgentProxy.
@@ -279,7 +282,7 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
         agent.close()
     
     # Print model summary and return data.
-    model_data = print_model_summary(model_name, model_metrics, model_time)
+    model_data = print_model_summary(model_name, task_metrics, model_time)
     return model_data
 
 async def main():
@@ -307,8 +310,8 @@ async def main():
         verbose=False, 
         truncate_length=150, 
         max_parallel_questions=50, 
-        max_retries=0, 
-        use_caching=True, 
+        retry_failures=True, 
+        use_caching=False, 
         use_open_router=True)
     pprint(context)
 

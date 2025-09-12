@@ -100,6 +100,31 @@ Error Rate Ranking (lowest error rate first):
 7. openai/gpt-5-nano: 14.3%
 8. deepseek/deepseek-chat-v3-0324: 25.0%
 
+4th: delay 200ms
+----------------
+Total Wall Time: 111.40s
+Total Errors: 18 out of 224 API calls = 8.0%% error rate
+
+Accuracy Ranking (highest accuracy first):
+1. openai/gpt-5-mini: 58.9%
+2. google/gemini-2.5-flash: 52.7%
+3. deepseek/deepseek-chat-v3-0324: 41.1%
+4. mistralai/codestral-2508: 35.7%
+5. openai/gpt-5-nano: 25.6%
+6. google/gemini-2.5-flash-lite: 25.3%
+7. openai/gpt-4o-mini: 22.6%
+8. anthropic/claude-3-haiku: 16.7%
+
+Error Rate Ranking (lowest error rate first):
+1. openai/gpt-4o-mini: 0.0%
+2. anthropic/claude-3-haiku: 0.0%
+3. mistralai/codestral-2508: 0.0%
+4. deepseek/deepseek-chat-v3-0324: 0.0%
+5. google/gemini-2.5-flash-lite: 3.6%
+6. openai/gpt-5-mini: 10.7%
+7. google/gemini-2.5-flash: 10.7%
+8. openai/gpt-5-nano: 39.3%
+
 
 15 questions:
 -------------
