@@ -6,9 +6,27 @@ This repository contains three *sub-projects* that create a benchmark dataset fo
 - *Project 2: Bench Filter* – Cleans and structures the data into a proper benchmark dataset (JSON format). The final dataset is published on Hugging Face: [GBS-benchmark at HuggingFace](https://huggingface.co/datasets/ZSvedic/GBS-benchmark)
 - *Project 3: Benchmark LLM* – Uses the dataset to evaluate various LLMs, measuring their accuracy and performance in answering the GemBox API questions.
 
-## 1. Inputs: Data Collection
+## Installation & Setup
+
+Git clone and move to folder:
+```bash
+git clone https://github.com/ZSvedic/GemBox-benchmark
+cd GemBox-benchmark
+```
+
+## Sub-project "1-inputs" (optional)
 
 This C# project generates the initial Q&A *prompt data* for the benchmark. It uses the GemBox.Spreadsheet library to enumerate typical tasks a developer can perform and creates *question* and *answer* pairs for each. The output is a raw collection of GemBox-related Q&A items with code snippets containing `???` placeholders, plus the correct answers.
+
+### Running "1-inputs" 
+1. Install C# 13.0 / [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0): The easiest way is via [VS Code C# extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp).
+2. Install GemBox.Spreadsheet and dependencies: [NuGet version 2025.9.10](https://www.nuget.org/packages/GemBox.Spreadsheet/) via CLI:
+```bash
+dotnet add package GemBox.Spreadsheet --version 2025.9.107"
+dotnet add package HarfBuzzSharp.NativeAssets.Linux
+dotnet add package SkiaSharp.NativeAssets.Linux.NoDependencies
+```
+3. Open "Program.csproj" in VS Code and run "Program.cs". Files will be generated in "1-inputs/write" folder.
 
 ## 2. Bench Filter: Dataset Preparation
 
@@ -24,30 +42,7 @@ The dataset is stored in JSONL format (see [GBS-benchmark at HuggingFace](https:
 
 This Python project runs evaluations of different LLMs using the dataset. It supports OpenAI, Google, Anthropic, and many other providers via [OpenRouter](https://openrouter.ai/). Each model is asked to fill in the `???` tokens, and the outputs are validated. The evaluation measures *accuracy*, *speed*, and *cost*.
 
-## Installation & Setup
 
-Git clone and move to folder:
-```bash
-git clone https://github.com/ZSvedic/GemBox-benchmark
-cd GemBox-benchmark
-```
-
-# Running project "1-inputs" (optional)
-Install: 
-1. C# 13.0 / .NET 9.0 SDK: via [manual download](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) or via CLI:
-```bash
-sudo add-apt-repository ppa:dotnet/backports
-sudo apt-get update && \
-  sudo apt-get install -y dotnet-sdk-9.0
-```
-2. GemBox.Spreadsheet: [NuGet version 2025.9.10](https://www.nuget.org/packages/GemBox.Spreadsheet/) via CLI:
-```bash
-dotnet add package GemBox.Spreadsheet --version 2025.9.107"
-```
-3. Run any example .cs file from VSCode, Visual Studio, or directly from CLI:
-```bash
-dotnet run Usage.cs
-```
 
 # Running project "2-bench-filter"
 ToDo
