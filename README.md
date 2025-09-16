@@ -69,6 +69,41 @@ This Python project runs evaluations of different LLMs using the dataset. It sup
 
 ```bash
 ...
+Context(timeout_seconds=30,
+        delay_ms=50,
+        verbose=True,
+        truncate_length=150,
+        max_parallel_questions=30,
+        retry_failures=True,
+        use_caching=True,
+        use_open_router=True,
+        benchmark_n_times=3)
+
+Benchmarking 4 model(s) on 28 question(s) 3 times.
+
+=== Run 1 of 3 ===
+
+...
+Q3: How do you enable printing of row and column headings?
+worksheet.??? = ???;
+Q4: How do you set the worksheet to print in landscape orientation?
+worksheet.??? = ???;
+...
+A3: ['PrintOptions.PrintHeadings', 'true']
+✓ CORRECT
+A4: ['PrintOptions.Orientation', 'Orientation.Landscape']
+✗ INCORRECT, expected: ['PrintOptions.Portrait', 'false']
+...
+=== OVERALL BENCHMARK SUMMARY ===
+
+  Model Summary: openai/gpt-5-mini
+  Total Tokens: 48671
+  Total Cost: $0.067764
+  Total Time: 86.70s
+  Overall Accuracy: 65.4%
+  Errors: 0 out of 84 API calls
+
+...
 
 Total Cost: $0.219338
 Total Time: 341.45s
