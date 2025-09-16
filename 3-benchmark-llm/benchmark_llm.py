@@ -69,22 +69,21 @@ Below is the question and masked code. Return only the JSON object with no expla
 
 # Models with OpenRouter name, direct name, input costs, and output costs.
 ModelInfos = [
-    ModelInfo('openai/gpt-4o-mini', 'openai:gpt-4o-mini', 0.15, 0.60),
+    ModelInfo('openai/gpt-5-mini', 'openai:gpt-5-mini', 0.25, 2.00), 
     ModelInfo('google/gemini-2.5-flash', 'google-gla:gemini-2.5-flash', 0.30, 2.50),
     ModelInfo('mistralai/codestral-2508', 'mistral:codestral-latest', 0.30, 0.90),
-    ModelInfo('openai/gpt-5-mini', 'openai:gpt-5-mini', 0.25, 2.00), 
-    ModelInfo('openai/gpt-5-nano', 'openai:gpt-5-nano', 0.05, 0.40), # High error rate.
+    ModelInfo('google/gemini-2.5-flash-lite', 'google-gla:gemini-2.5-flash-lite', 0.10, 0.40), 
+    ModelInfo('openai/gpt-5-nano', 'openai:gpt-5-nano', 0.05, 0.40), # Low accuracy.
     ModelInfo('anthropic/claude-3-haiku', 'anthropic:claude-3-5-haiku-latest', 0.25, 1.35), # Low accuracy.
-    ModelInfo('google/gemini-2.5-flash-lite', 'google-gla:gemini-2.5-flash-lite', 0.10, 0.40), # Low accuracy.
-    ModelInfo('deepseek/deepseek-chat-v3-0324', 'deepseek-chat-v3-0324', 0.18, 0.72), # High error rate.
+    ModelInfo('openai/gpt-4o-mini', 'openai:gpt-4o-mini', 0.15, 0.60), # Low accuracy.
 ]
 
 MODELS = {m.openrouter_name.split('/')[-1]: m for m in ModelInfos}
 PRIMARY_MODELS = [
-    MODELS['gpt-4o-mini'], 
+    MODELS['gpt-5-mini'], 
     MODELS['gemini-2.5-flash'], 
     MODELS['codestral-2508'], 
-    MODELS['gpt-5-mini'], 
+    MODELS['gemini-2.5-flash-lite'], 
 ]
 
 # Utility functions:
@@ -330,13 +329,13 @@ async def main():
     context = Context(
         timeout_seconds=30, 
         delay_ms=50, 
-        verbose=False, 
+        verbose=True, 
         truncate_length=150, 
         max_parallel_questions=30, 
         retry_failures=True, 
         use_caching=True, 
         use_open_router=True,
-        benchmark_n_times=2)
+        benchmark_n_times=3)
     pprint(context)
 
     print(f"\nBenchmarking {len(models)} model(s) on {len(questions)} question(s) {context.benchmark_n_times} times.\n")
