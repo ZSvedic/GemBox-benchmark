@@ -27,13 +27,13 @@ git clone https://github.com/ZSvedic/GemBox-benchmark
 ```
 2. For the Python project, use [uv](https://github.com/astral-sh/uv) package manager to install dependencies:
 ```bash
-cd GemBox-benchmark/3-benchmark-llm/    # Python project.
+cd GemBox-benchmark/3-benchmark-llm/    # Go to Python project.
 uv venv --python 3.10                   # Or newer.
 source .venv/bin/activate               # Linux/macOS.
 uv sync                                 # Install dependencies.
 cd ..                                   # Go back to root.
 ```
-3. Create an .env file in the project root with your API keys (if only using OpenRouter, then only OPENROUTER_API_KEY is needed):
+3. Create an ".env" file in the project root with your API keys (if only using OpenRouter, then only OPENROUTER_API_KEY is needed):
 ```bash
 OPENROUTER_API_KEY=...
 GOOGLE_API_KEY=...
