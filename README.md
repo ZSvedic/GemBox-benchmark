@@ -32,6 +32,27 @@ git clone https://github.com/ZSvedic/GemBox-benchmark
 cd GemBox-benchmark
 ```
 
+# Running project "1-inputs" (optional)
+Install: 
+1. C# 13.0 / .NET 9.0 SDK: via [manual download](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) or via CLI:
+```bash
+sudo add-apt-repository ppa:dotnet/backports
+sudo apt-get update && \
+  sudo apt-get install -y dotnet-sdk-9.0
+```
+2. GemBox.Spreadsheet: [NuGet version 2025.9.10](https://www.nuget.org/packages/GemBox.Spreadsheet/) via CLI:
+```bash
+dotnet add package GemBox.Spreadsheet --version 2025.9.107"
+```
+3. Run any example .cs file from VSCode, Visual Studio, or directly from CLI:
+```bash
+dotnet run Usage.cs
+```
+
+# Running project "2-bench-filter"
+ToDo
+
+# Project "2-
 Install [uv](https://github.com/astral-sh/uv) and then:
 
 ```bash
