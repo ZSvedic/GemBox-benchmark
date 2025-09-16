@@ -22,7 +22,7 @@ This C# project generates the initial Q&A *prompt data* for the benchmark. It us
 1. Install C# 13.0 / [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0): The easiest way is via [VS Code C# extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp).
 2. Install GemBox.Spreadsheet and dependencies: [NuGet version 2025.9.10](https://www.nuget.org/packages/GemBox.Spreadsheet/) via CLI:
 ```bash
-dotnet add package GemBox.Spreadsheet --version 2025.9.107"
+dotnet add package GemBox.Spreadsheet --version 2025.9.107
 dotnet add package HarfBuzzSharp.NativeAssets.Linux
 dotnet add package SkiaSharp.NativeAssets.Linux.NoDependencies
 ```
