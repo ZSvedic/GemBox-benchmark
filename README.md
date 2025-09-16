@@ -67,7 +67,7 @@ This Python project runs evaluations of different LLMs using the dataset. It sup
 
 ### Example results
 
-```bash
+```text
 ...
 Context(timeout_seconds=30,
         delay_ms=50,
