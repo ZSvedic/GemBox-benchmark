@@ -12,7 +12,7 @@ The benchmark goal is to test LLM accuracy in generating the correct code for co
 
 Requirements:
 + Visual Studio Code - [official download](https://code.visualstudio.com/download)
-+ C# 13.0 / [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) - The easiest way is via [VSCode C# extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp).
++ C# 13.0 / [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) - The easiest install is via [VSCode C# extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp).
 + GemBox.Spreadsheet and dependencies - [v2025.9.10 via NuGet](https://www.nuget.org/packages/GemBox.Spreadsheet/):
 ```bash
 dotnet add package GemBox.Spreadsheet --version 2025.9.107
@@ -27,11 +27,11 @@ git clone https://github.com/ZSvedic/GemBox-benchmark
 ```
 2. For the Python project, use [uv](https://github.com/astral-sh/uv) package manager to install dependencies:
 ```bash
-cd GemBox-benchmark/3-benchmark-llm/
-uv venv --python 3.10       # Or newer.
-source .venv/bin/activate   # Linux/macOS.
-uv sync                     # Install dependencies.
-cd ..
+cd GemBox-benchmark/3-benchmark-llm/    # Python project.
+uv venv --python 3.10                   # Or newer.
+source .venv/bin/activate               # Linux/macOS.
+uv sync                                 # Install dependencies.
+cd ..                                   # Go back to root.
 ```
 3. Create an .env file in the project root with your API keys (if only using OpenRouter, then only OPENROUTER_API_KEY is needed):
 ```bash
