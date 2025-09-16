@@ -13,8 +13,7 @@ env/
 # VS Code workspace/settings.
 .vscode/
 
-# Ignore everything under the write and cache folders.  
-write/
+# Cache.
 cache/
 
 # Misc.
