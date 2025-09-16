@@ -22,7 +22,7 @@ The dataset is stored in JSONL format (see [GBS-benchmark at HuggingFace](https:
 
 ## 3. Benchmark LLM: Model Evaluation
 
-This Python project runs evaluations of different LLMs using the dataset. It supports OpenAI, Google, Anthropic, and many other providers via OpenRouter. Each model is asked to fill in the `???` tokens, and the outputs are validated. The evaluation measures *accuracy*, *latency*, and *cost*.
+This Python project runs evaluations of different LLMs using the dataset. It supports OpenAI, Google, Anthropic, and many other providers via [OpenRouter](https://openrouter.ai/). Each model is asked to fill in the `???` tokens, and the outputs are validated. The evaluation measures *accuracy*, *speed*, and *cost*.
 
 ## Installation & Setup
 
