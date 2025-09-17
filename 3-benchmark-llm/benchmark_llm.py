@@ -82,8 +82,7 @@ MODELS = {m.openrouter_name.split('/')[-1]: m for m in ModelInfos}
 PRIMARY_MODELS = [
     MODELS['gpt-5-mini'], 
     MODELS['gemini-2.5-flash'], 
-    MODELS['codestral-2508'], 
-    MODELS['gemini-2.5-flash-lite'], 
+    MODELS['codestral-2508'],  
 ]
 
 # Utility functions:
@@ -330,7 +329,7 @@ async def main():
     context = Context(
         timeout_seconds=30, 
         delay_ms=50, 
-        verbose=True, 
+        verbose=False, 
         truncate_length=150, 
         max_parallel_questions=30, 
         retry_failures=True, 

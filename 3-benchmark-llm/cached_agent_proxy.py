@@ -1,3 +1,4 @@
+import os
 import json
 from pydantic_ai import Agent
 
@@ -115,6 +116,7 @@ class CachedAgentProxy:
 
     def close(self):
         try:
+            os.makedirs(os.path.dirname(self.cache_file), exist_ok=True)
             with open(self.cache_file, 'w') as f:
                 json.dump(self.cache, f, indent=2)
             print(f"Cache saved to {self.cache_file}")
