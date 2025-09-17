@@ -39,11 +39,12 @@ OPENAI_API_KEY=...
 ANTHROPIC_API_KEY=...
 MISTRAL_API_KEY=...
 ```
-4. Open in VSCode:
+4. Open in VS Code:
 ```bash
 code GB-benchmark.code-workspace
 ```
-VSCode "Run and Debug" tab should now have run configurations for each of the subprojects below.
+VS Code should ask on first open "There are unresolved dependencies. Please execute the restore command to continue.". Select "Restore" to install all .NET dependencies. 
+5. VS Code "Run and Debug" tab should now have run configurations for each of the subprojects below, or you can run each project from CLI.
 
 ## Project "1-inputs" (optional)
 
@@ -70,7 +71,9 @@ This Python project filters .cs files from "1-inputs" to extract Q&A into a benc
 + *category* (from the .cs file name),  
 + *question* (EN language query),  
 + *masked_code* (code snippet with `???` placeholders),  
-+ *answers* (correct text to fill `???` placeholders).  
++ *answers* (correct text to fill `???` placeholders). 
+ 
+The easiest way to run this is to execute [run.sh](2_bench_filter/run.sh) which calls uv package manager with all required arguments.
 
 ### Example [JSONL dataset](https://huggingface.co/datasets/ZSvedic/GBS-benchmark)
 ```json
