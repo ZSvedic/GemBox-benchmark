@@ -74,7 +74,7 @@ This Python project filters .cs files from "1-inputs" to extract Q&A into a benc
 + *masked_code* (code snippet with `???` placeholders),  
 + *answers* (correct text to fill `???` placeholders). 
 
-The easiest way to run this is to execute [run.sh](2_bench_filter/run.sh) which calls uv package manager with all required arguments.
+The easiest way to run this is to execute [run.sh](2-bench-filter/run.sh) which calls uv package manager with all required arguments.
 
 ### Example [JSONL dataset](https://huggingface.co/datasets/ZSvedic/GBS-benchmark)
 ```json
