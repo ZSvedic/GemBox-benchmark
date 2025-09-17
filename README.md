@@ -1,18 +1,16 @@
 # GemBox Benchmark
 
-This repository contains three *sub-projects* that create a benchmark dataset for [GemBox Software](https://www.gemboxsoftware.com/) components and evaluate LLMs on that generated dataset: 
+This repository contains three sub-projects that create a benchmark dataset for [GemBox Software](https://www.gemboxsoftware.com/) components and evaluate LLMs on that generated dataset: 
 
-+ *Project 1: Inputs* - Gathers raw question-answer pairs about common GemBox usage tasks (e.g. printing options, reading Excel files, formatting cells).
-+ *Project 2: Bench Filter* - Cleans and structures the data into a proper benchmark dataset (JSON format). The final dataset is published on Hugging Face: [GBS-benchmark at HuggingFace](https://huggingface.co/datasets/ZSvedic/GBS-benchmark)
-+ *Project 3: Benchmark LLM* - Uses the dataset to evaluate various LLMs, measuring their accuracy and performance in answering the GemBox API questions.
-
-The benchmark goal is to test LLM accuracy in generating the correct code for common tasks using GemBox APIs.
++ *Project 1: Inputs (C#)* - Contains raw question-answer pairs about common GemBox usage tasks (e.g. printing options, reading Excel files, etc.).
++ *Project 2: Bench Filter (Python)* - Filters "1-inputs" into a benchmark dataset (JSON format), see example: [GBS-benchmark at HuggingFace](https://huggingface.co/datasets/ZSvedic/GBS-benchmark)
++ *Project 3: Benchmark LLM (Python)* - Uses the dataset to evaluate LLMs on accuracy, speed and cost when answering GemBox API questions.
 
 ## Installation & Setup
 
 Requirements:
 + Visual Studio Code - [official download](https://code.visualstudio.com/download)
-+ C# 13.0 / [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) - The easiest install is via [VSCode C# extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp).
++ C# 13.0 / [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) - The easiest install is via [VS Code C# extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp).
 + GemBox.Spreadsheet and dependencies - [v2025.9.10 via NuGet](https://www.nuget.org/packages/GemBox.Spreadsheet/):
 ```bash
 dotnet add package GemBox.Spreadsheet --version 2025.9.107
@@ -27,13 +25,13 @@ git clone https://github.com/ZSvedic/GemBox-benchmark
 ```
 2. For the Python project, use [uv](https://github.com/astral-sh/uv) package manager to install dependencies:
 ```bash
-cd GemBox-benchmark/3-benchmark-llm/    # Go to Python project.
-uv venv --python 3.10                   # Or newer.
-source .venv/bin/activate               # Linux/macOS.
+cd GemBox-benchmark/3-benchmark-llm/    # Go to the Python project.
+uv venv --python 3.10                   # Env with py 3.10 or newer.
+source .venv/bin/activate               # For Linux/MacOS.
 uv sync                                 # Install dependencies.
-cd ..                                   # Go back to root.
+cd ..                                   # Go back to the root.
 ```
-3. Create an ".env" file in the project root with your API keys (if only using OpenRouter, then only OPENROUTER_API_KEY is needed):
+3. Create an ".env" file in the root ("GemBox-benchmark" folder) with your API keys. If only using OpenRouter, then only OPENROUTER_API_KEY is needed. Example:
 ```bash
 OPENROUTER_API_KEY=...
 GOOGLE_API_KEY=...
@@ -49,25 +47,46 @@ VSCode "Run and Debug" tab should now have run configurations for each of the su
 
 ## Project "1-inputs" (optional)
 
-This C# project generates the initial Q&A *prompt data* for the benchmark. It uses the GemBox.Spreadsheet library to enumerate typical tasks a developer can perform and creates *question* and *answer* pairs for each. The output is a raw collection of GemBox-related Q&A items with code snippets containing `???` placeholders, plus the correct answers.
+This C# project contains Q&A data for the dataset. It uses the GemBox.Spreadsheet library to enumerate typical tasks. Comments before task contain a single "Question:" and one or more "Mask:" for each code answer. Each mask specifies a regex that will mask certain part of the following code line before asking LLM to fill it. 
+
+### Example input C# code
+```csharp
+...
+    // Question: How do you enable printing of row and column headings?
+    // Mask: \bPrintOptions\.PrintHeadings\b
+    // Mask: \btrue\b
+    worksheet.PrintOptions.PrintHeadings = true;
+
+    // Question: How do you set the worksheet to print in landscape orientation?
+    // Mask: \bPrintOptions\.Portrait\b
+    // Mask: \bfalse\b
+    worksheet.PrintOptions.Portrait = false;
+...
+```
 
 ## Project "2-bench-filter" (optional)
 
-This Python project filters and structures the raw Q&A data into a benchmark dataset. Each item includes:  
-+ *category* (feature area),  
-+ *question* (natural language query),  
-+ *masked_code* (snippet with `???`),  
-+ *answers* (correct tokens).  
+This Python project filters .cs files from "1-inputs" to extract Q&A into a benchmark dataset. Each dataset row contains:  
++ *category* (from the .cs file name),  
++ *question* (EN language query),  
++ *masked_code* (code snippet with `???` placeholders),  
++ *answers* (correct text to fill `???` placeholders).  
 
-The dataset is stored in JSONL format (see [GBS-benchmark at HuggingFace](https://huggingface.co/datasets/ZSvedic/GBS-benchmark)).
+### Example [JSONL dataset](https://huggingface.co/datasets/ZSvedic/GBS-benchmark)
+```json
+...
+{"category": "PrintView", "question": "How do you enable printing of row and column headings?", "masked_code": "worksheet.??? = ???;", "answers": ["PrintOptions.PrintHeadings", "true"]}
+{"category": "PrintView", "question": "How do you set the worksheet to print in landscape orientation?", "masked_code": "worksheet.??? = ???;", "answers": ["PrintOptions.Portrait", "false"]}
+...
+```
 
 ## Project "3-benchmark-llm"
 
-This Python project runs evaluations of different LLMs using the dataset. It supports OpenAI, Google, Anthropic, and many other providers via [OpenRouter](https://openrouter.ai/). Each model is asked to fill in the `???` tokens, and the outputs are validated. The evaluation measures *accuracy*, *speed*, and *cost*.
+This Python project uses the dataset to run LLM evaluations. It supports OpenAI, Google, Anthropic, and many other providers via [OpenRouter](https://openrouter.ai/). Each model is asked to fill in `???` placeholders, and the outputs are validated. The evaluation measures *accuracy*, *speed*, and *cost*.
 
-### Example results
+### Example output and results
 
-```text
+```console
 ...
 Context(timeout_seconds=30,
         delay_ms=50,
