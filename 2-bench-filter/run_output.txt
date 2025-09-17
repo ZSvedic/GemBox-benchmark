@@ -1,56 +1,20 @@
-****** PrintView ******
-Category: PrintView
-Q: How do you access the printing options of the "Sheet1" worksheet?
-M: var printingOpt = workbook.???["Sheet1"].???;
-A: Worksheets PrintOptions
-Category: PrintView
-Q: How do you enable printing of gridlines in the worksheet?
-M: worksheet.??? = ???;
-A: PrintOptions.PrintGridlines true
-Category: PrintView
-Q: How do you enable printing of row and column headings?
-M: worksheet.??? = ???;
-A: PrintOptions.PrintHeadings true
-Category: PrintView
-Q: How do you set the worksheet to print in landscape orientation?
-M: worksheet.??? = ???;
-A: PrintOptions.Portrait false
-Category: PrintView
-Q: How do you set the paper to A3 for printing?
-M: worksheet.??? = ???.A3;
-A: PrintOptions.PaperType PaperType
-Category: PrintView
-Q: How do you set printing of five copies?
-M: worksheet.??? = 5;
-A: PrintOptions.NumberOfCopies
-Category: PrintView
-Q: How do you set the first visible column in a worksheet to column D?
-M: worksheet.??? = ???;
-A: ViewOptions.FirstVisibleColumn 3
-Category: PrintView
-Q: How do you set the worksheet zoom level to 125%?
-M: worksheet.??? = ???;
-A: ViewOptions.Zoom 125
-Category: PrintView
-Q: How do you set the print area to a specific cell range (E1:U7)?
-M: worksheet.???(worksheet.???("E1","U7"));
-A: NamedRanges.SetPrintArea Cells.GetSubrange
-Subtotal for PrintView: 9 rows
+****** Usage ******
+Category: Usage
+Q: How to set GemBox.Spreadsheet to use the free license?
+M: ???.???("FREE-LIMITED-KEY");
+A: SpreadsheetInfo SetLicense
+Subtotal for Usage: 1 rows
 
-****** Reading ******
-Category: Reading
-Q: How do you load an Excel file from a path?
-M: var workbook=???(Path.Combine(Program.ReadPath,"Reading.xlsx"));
-A: ExcelFile.Load
-Category: Reading
-Q: How do you iterate through all cells currently allocated in a row?
-M: foreach (ExcelCell cell in row.???)
-A: AllocatedCells
-Category: Reading
-Q: How do you read an enum type of a cell's value?
-M: Console.Write($"{value} [{cell.???}] ");
-A: ValueType
-Subtotal for Reading: 3 rows
+****** Charts ******
+Category: Charts
+Q: How do you add a column chart to a worksheet between cells D2 and M25?
+M: var chart=worksheet.???(???,???,???);
+A: Charts.Add ChartType.Column "D2" "M25"
+Category: Charts
+Q: How do you set the chart's data range to (0,0,4,1), including headers?
+M: chart.???(worksheet.???(0,0,4,1),???);
+A: SelectData Cells.GetSubrangeAbsolute true
+Subtotal for Charts: 2 rows
 
 ****** Formatting ******
 Category: Formatting
@@ -91,16 +55,20 @@ M: worksheet.???=???;
 A: ViewOptions.Zoom 140
 Subtotal for Formatting: 9 rows
 
-****** Charts ******
-Category: Charts
-Q: How do you add a column chart to a worksheet between cells D2 and M25?
-M: var chart=worksheet.???(???,???,???);
-A: Charts.Add ChartType.Column "D2" "M25"
-Category: Charts
-Q: How do you set the chart's data range to (0,0,4,1), including headers?
-M: chart.???(worksheet.???(0,0,4,1),???);
-A: SelectData Cells.GetSubrangeAbsolute true
-Subtotal for Charts: 2 rows
+****** Reading ******
+Category: Reading
+Q: How do you load an Excel file from a path?
+M: var workbook=???(Path.Combine(Program.ReadPath,"Reading.xlsx"));
+A: ExcelFile.Load
+Category: Reading
+Q: How do you iterate through all cells currently allocated in a row?
+M: foreach (ExcelCell cell in row.???)
+A: AllocatedCells
+Category: Reading
+Q: How do you read an enum type of a cell's value?
+M: Console.Write($"{value} [{cell.???}] ");
+A: ValueType
+Subtotal for Reading: 3 rows
 
 ****** Writing ******
 Category: Writing
@@ -121,14 +89,46 @@ M: worksheet.Cells[???,???].Value="Third row, fourth column";
 A: 2 3
 Subtotal for Writing: 4 rows
 
-****** Usage ******
-Category: Usage
-Q: How to set GemBox.Spreadsheet to use the free license?
-M: ???.???("FREE-LIMITED-KEY");
-A: SpreadsheetInfo SetLicense
-Subtotal for Usage: 1 rows
-
 ****** Program ******
 Subtotal for Program: 0 rows
 
-Wrote 28 lines to /Users/zsvedic/LOCAL/CODE-2025/GemBox-benchmark/2-bench-filter/test.jsonl
+****** PrintView ******
+Category: PrintView
+Q: How do you access the printing options of the "Sheet1" worksheet?
+M: var printingOpt = workbook.???["Sheet1"].???;
+A: Worksheets PrintOptions
+Category: PrintView
+Q: How do you enable printing of gridlines in the worksheet?
+M: worksheet.??? = ???;
+A: PrintOptions.PrintGridlines true
+Category: PrintView
+Q: How do you enable printing of row and column headings?
+M: worksheet.??? = ???;
+A: PrintOptions.PrintHeadings true
+Category: PrintView
+Q: How do you set the worksheet to print in landscape orientation?
+M: worksheet.??? = ???;
+A: PrintOptions.Portrait false
+Category: PrintView
+Q: How do you set the paper to A3 for printing?
+M: worksheet.??? = ???.A3;
+A: PrintOptions.PaperType PaperType
+Category: PrintView
+Q: How do you set printing of five copies?
+M: worksheet.??? = 5;
+A: PrintOptions.NumberOfCopies
+Category: PrintView
+Q: How do you set the first visible column in a worksheet to column D?
+M: worksheet.??? = ???;
+A: ViewOptions.FirstVisibleColumn 3
+Category: PrintView
+Q: How do you set the worksheet zoom level to 125%?
+M: worksheet.??? = ???;
+A: ViewOptions.Zoom 125
+Category: PrintView
+Q: How do you set the print area to a specific cell range (E1:U7)?
+M: worksheet.???(worksheet.???("E1","U7"));
+A: NamedRanges.SetPrintArea Cells.GetSubrange
+Subtotal for PrintView: 9 rows
+
+Wrote 28 lines to /home/zel/ml-projects/CODE-2025/GemBox-benchmark/2-bench-filter/test.jsonl
