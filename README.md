@@ -11,7 +11,7 @@ This repository contains three sub-projects that create a benchmark dataset for 
 Requirements:
 + Visual Studio Code - [official download](https://code.visualstudio.com/download)
 + C# 13.0 / [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) - The easiest install is via [VS Code C# extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp).
-+ GemBox.Spreadsheet and dependencies - [v2025.9.10 via NuGet](https://www.nuget.org/packages/GemBox.Spreadsheet/):
++ GemBox.Spreadsheet and dependencies - If not installed automatically by VS Code when opening the workspace, get [v2025.9.10 via NuGet](https://www.nuget.org/packages/GemBox.Spreadsheet/):
 ```bash
 dotnet add package GemBox.Spreadsheet --version 2025.9.107
 dotnet add package HarfBuzzSharp.NativeAssets.Linux
