@@ -195,7 +195,7 @@ def print_benchmark_summary(model_metrics: dict[str, list[Metrics]], n_questions
 
 # Benchmarking functions:
 
-def get_model_agent(context: Context, model_info: ModelInfo) -> (str, Union[Agent, CachedAgentProxy]):
+def get_model_agent(context: Context, model_info: ModelInfo) -> str | Union[Agent, CachedAgentProxy]:
     """Get a model name and agent."""
     if context.use_open_router:
         model_name = model_info.openrouter_name
@@ -310,7 +310,8 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
 # Async main.
 async def main():
     # Load environment variables from parent directory .env.
-    dotenv.load_dotenv() 
+    dotenv.load_dotenv()
+    assert dotenv.dotenv_values().values(), ".env file not found or empty"
 
     # Define models to benchmark.
     # models = [
@@ -335,7 +336,7 @@ async def main():
         retry_failures=True, 
         use_caching=True, 
         use_open_router=True,
-        benchmark_n_times=3)
+        benchmark_n_times=1)
     pprint(context)
 
     print(f"\nBenchmarking {len(models)} model(s) on {len(questions)} question(s) {context.benchmark_n_times} times.\n")
