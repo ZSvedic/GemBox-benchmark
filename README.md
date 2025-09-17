@@ -44,6 +44,7 @@ MISTRAL_API_KEY=...
 code GB-benchmark.code-workspace
 ```
 VS Code should show "There are unresolved dependencies" popup on first open. Select "Restore" to install all .NET dependencies. 
+
 5. VS Code "Run and Debug" tab should now have run configurations for each of the subprojects below, or you can run each project from CLI.
 
 ## Project "1-inputs" (optional)
