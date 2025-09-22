@@ -361,12 +361,12 @@ async def main():
     # Create contexts.
     default_context = Context(
         timeout_seconds=30, 
-        delay_ms=50, 
+        delay_ms=10, 
         verbose=False, 
         truncate_length=150, 
         max_parallel_questions=30, 
         retry_failures=True, 
-        use_caching=False, 
+        use_caching=True, 
         use_open_router=True,
         benchmark_n_times=1, 
         reasoning_effort="low", 
@@ -374,7 +374,8 @@ async def main():
 
     contexts = [
         default_context.with_changes(reasoning_effort=reason, timeout_seconds=timeout) 
-        for timeout, reason in [(30, "low"), (60, "medium"), (90, "high")]
+        for timeout, reason in [(30, "low"), (60, "medium")]
+        # for timeout, reason in [(30, "low"), (60, "medium"), (90, "high")]
     ]
 
     # Benchmark each context.
@@ -385,6 +386,9 @@ async def main():
     # Then print benchmark summaries again.
     for pd in perf_data:
         pprint(pd)
+
+    perf_dict = {ctx.reasoning_effort: [pd] for ctx, pd in zip(contexts, perf_data)}
+    print_benchmark_summary(perf_dict, len(questions), True)
 
 
 if __name__ == "__main__":
