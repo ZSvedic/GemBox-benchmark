@@ -1,6 +1,7 @@
 import dotenv
 import asyncio
 import time
+import dataclasses
 
 from pprint import pprint
 from typing import List, Union
@@ -14,7 +15,7 @@ from cached_agent_proxy import CachedAgentProxy
 
 # Data classes for cleaner structure:
 
-@dataclass
+@dataclass(frozen=True)
 class Context:
     timeout_seconds: int = 20           # Timeout for each question.
     delay_ms: int = 50                  # Delay between question calls.
@@ -25,8 +26,17 @@ class Context:
     use_caching: bool = False           # Use CachedAgentProxy?
     use_open_router: bool = True        # Use OpenRouter or direct calls?
     benchmark_n_times: int = 1          # Benchmark n times?
+    reasoning_effort: str = "low"       # Reasoning effort.
+    web_search: bool = False            # Use web search?
 
-@dataclass
+    def __post_init__(self):
+        assert self.benchmark_n_times==1 or not self.use_caching, "Caching only makes sense for single-run benchmarks."
+
+    def with_changes(self, **kwargs):
+        """Create a new Context with specified changes"""
+        return dataclasses.replace(self, **kwargs)
+
+@dataclass(frozen=True)
 class ModelInfo:
     openrouter_name: str
     direct_name: str
@@ -39,8 +49,8 @@ class Metrics:
     cost: float
     tokens: int
     time: float
-    was_cached: bool = False
-    accuracy: float = None # None for complete failures.
+    was_cached: bool
+    accuracy: float # None for complete failures.
     error_count: int = 0
     api_calls: int = 0
 
@@ -127,9 +137,9 @@ def calculate_model_accuracy(metrics: list[Metrics]) -> Union[float, None]:
 
 # Summary functions:
 
-def print_model_summary(model_name: str, metrics: list[Metrics]) -> Metrics:
+def get_model_summary(model_name: str, metrics: list[Metrics], verbose: bool) -> Metrics:
     """Print summary for a single model."""
-    assert len(metrics) > 0, "No metrics to print summary for."
+    assert len(metrics) > 0, "No metrics to get summary for."
     # Calculate totals.
     total_tokens = sum(m.tokens for m in metrics)
     total_cost = sum(m.cost for m in metrics)
@@ -142,12 +152,13 @@ def print_model_summary(model_name: str, metrics: list[Metrics]) -> Metrics:
     cache_status = " (CACHED)" if was_cached else ""
     display_cost = 0.0 if was_cached else total_cost
     # Print summary.
-    print(f"\n  Model Summary: {model_name}{cache_status}")
-    print(f"  Total Tokens: {total_tokens}")
-    print(f"  Total Cost: ${display_cost:.6f}")
-    print(f"  Total Time: {total_time:.2f}s")
-    print(f"  Overall Accuracy: {total_accuracy:.1%}")
-    print(f"  Errors: {total_errors} out of {total_calls} API calls")
+    if verbose:
+        print(f"\n  Model Summary: {model_name}{cache_status}")
+        print(f"  Total Tokens: {total_tokens}")
+        print(f"  Total Cost: ${display_cost:.6f}")
+        print(f"  Total Time: {total_time:.2f}s")
+        print(f"  Overall Accuracy: {total_accuracy:.1%}")
+        print(f"  Errors: {total_errors} out of {total_calls} API calls")
     # Return metrics.
     return Metrics(
         name=model_name,
@@ -160,12 +171,12 @@ def print_model_summary(model_name: str, metrics: list[Metrics]) -> Metrics:
         api_calls=total_calls
     )
 
-def print_benchmark_summary(model_metrics: dict[str, list[Metrics]], n_questions: int) -> list[Metrics]:
+def print_benchmark_summary(model_metrics: dict[str, list[Metrics]], n_questions: int, verbose: bool) -> list[Metrics]:
     """Print overall benchmark summary and rankings."""
-    print("\n=== OVERALL BENCHMARK SUMMARY ===")
+    print("\n=== OVERALL SUMMARY ===")
     # Flatten and average metrics per model.
     total_metrics = [
-        print_model_summary(model, metrics) 
+        get_model_summary(model, metrics, verbose) 
         for model, metrics in model_metrics.items()]
     # Calculate totals.
     total_cost = sum(m.cost for m in total_metrics)
@@ -176,32 +187,34 @@ def print_benchmark_summary(model_metrics: dict[str, list[Metrics]], n_questions
     print(f"\nTotal Cost: ${total_cost:.6f}")
     print(f"Total Time: {total_time:.2f}s")
     print(f"Total Errors: {total_errors} out of {total_calls} API calls = {total_errors/total_calls:.1%} error rate")
+    # Error Rate Ranking
+    if verbose and total_errors > 0:
+        print("\nError Rate Ranking (lowest error rate first):")
+        error_data = [(m.name, m.error_count/n_questions) for m in total_metrics]
+        error_data.sort(key=lambda x: x[1])
+        for i, (model, error_rate) in enumerate(error_data, 1):
+            print(f"{i}. {model}: {error_rate:.1%}")
     # Accuracy Ranking
     print("\nAccuracy Ranking (highest accuracy first):")
     accuracy_data = [(m.name, m.accuracy) for m in total_metrics if m.accuracy is not None]
     accuracy_data.sort(key=lambda x: x[1], reverse=True)
     for i, (model, accuracy) in enumerate(accuracy_data, 1):
         print(f"{i}. {model}: {accuracy:.1%}")
-    # Error Rate Ranking
-    if total_errors > 0:
-        print("\nError Rate Ranking (lowest error rate first):")
-        error_data = [(m.name, m.error_count/n_questions) for m in total_metrics]
-        error_data.sort(key=lambda x: x[1])
-        for i, (model, error_rate) in enumerate(error_data, 1):
-            print(f"{i}. {model}: {error_rate:.1%}")
+
     # Return total metrics.
     return total_metrics
 
 # Benchmarking functions:
 
-def get_model_agent(context: Context, model_info: ModelInfo) -> str | Union[Agent, CachedAgentProxy]:
+def get_model_agent(ctx: Context, model_info: ModelInfo) -> str | Union[Agent, CachedAgentProxy]:
     """Get a model name and agent."""
-    if context.use_open_router:
-        model_name = model_info.openrouter_name
+    if ctx.use_open_router:
+        model_name = model_info.openrouter_name + (":online" if ctx.web_search else "")
         model = OpenAIChatModel(
             model_name, 
             provider=OpenRouterProvider(),
-            settings=OpenAIChatModelSettings(openai_reasoning_effort="low") # We want to test base model knowledge, not reasoning.
+            settings=OpenAIChatModelSettings(
+                openai_reasoning_effort=ctx.reasoning_effort)
             )
         agent_code = Agent(model, output_type=CodeCompletion)
     else:
@@ -209,23 +222,23 @@ def get_model_agent(context: Context, model_info: ModelInfo) -> str | Union[Agen
         agent_code = Agent(model_name, output_type=CodeCompletion)
     return model_name, agent_code
 
-async def get_question_task(context: Context, model: ModelInfo, agent_code: Union[Agent, CachedAgentProxy],
+async def get_question_task(ctx: Context, model: ModelInfo, agent_code: Union[Agent, CachedAgentProxy],
     question_num: int, question: QuestionData) -> Metrics:
     """Run a single question and return performance metrics."""
     # Prepare question and prompt.
     question_text = f"{question.question}\n{question.masked_code}"
     full_prompt = f"{PROGRAMMING_PROMPT}\n\n{question_text}"
 
-    if context.verbose:
-        print(f"Q{question_num}: {display_text(question_text, context.truncate_length)}")
+    if ctx.verbose:
+        print(f"Q{question_num}: {display_text(question_text, ctx.truncate_length)}")
     
     try:
         # Run the async call and retry if needed.
-        for attempt in range(1+context.retry_failures):  # First try + one retry.
+        for attempt in range(1+ctx.retry_failures):  # First try + one retry.
             try:
-                if context.delay_ms and not context.use_caching: # Don't delay if caching.
-                    await asyncio.sleep(context.delay_ms / 1000)
-                result = await asyncio.wait_for(agent_code.run(full_prompt), timeout=context.timeout_seconds)
+                if ctx.delay_ms and not ctx.use_caching: # Don't delay if caching.
+                    await asyncio.sleep(ctx.delay_ms / 1000)
+                result = await asyncio.wait_for(agent_code.run(full_prompt), timeout=ctx.timeout_seconds)
                 break
             except Exception as e:
                 if attempt == 0:  # First failure.
@@ -240,8 +253,8 @@ async def get_question_task(context: Context, model: ModelInfo, agent_code: Unio
         accuracy = calculate_accuracy(question_num, result.output.completions, question.answers)
         
         # Display results.  
-        if context.verbose:
-            print(f"A{question_num}: {display_text(str(result.output.completions), context.truncate_length)}")
+        if ctx.verbose:
+            print(f"A{question_num}: {display_text(str(result.output.completions), ctx.truncate_length)}")
             if accuracy == 1.0:
                 print("✓ CORRECT")
             elif accuracy > 0:
@@ -259,32 +272,32 @@ async def get_question_task(context: Context, model: ModelInfo, agent_code: Unio
         print(f"Error: {repr(e)}")
         return Metrics("Error", 0.0, 0, 0, False, 0.0, 1, 1)
 
-async def run_model_benchmark(context: Context, model_info: ModelInfo, questions: list) -> Metrics:
+async def run_model_benchmark(ctx: Context, model_info: ModelInfo, questions: list) -> Metrics:
     """Run benchmark for a single model on all questions in parallel."""
     # Initialize model and agent.
     try:
-        model_name, agent = get_model_agent(context, model_info)
+        model_name, agent = get_model_agent(ctx, model_info)
         print(f"\n--- Testing {model_name} ---")
     except Exception as e:
         print(f"\n--- Can't get model agent: {repr(e)}")
         return Metrics(f"ERROR-{model_info.openrouter_name}", 0.0, 0, 0, False, 0.0, len(questions))
     
     # Create model-specific cache file in cache folder.
-    if context.use_caching:
+    if ctx.use_caching:
         cache_file = f"cache/responses_{model_name.replace('/', '_')}.json"
-        agent = CachedAgentProxy(agent, cache_file, context.verbose)
+        agent = CachedAgentProxy(agent, cache_file, ctx.verbose)
     
     # Create tasks for all questions to run in parallel.
     question_tasks = [
-        get_question_task(context, model_info, agent, qi, question) 
+        get_question_task(ctx, model_info, agent, qi, question) 
         for qi, question in enumerate(questions, 1)
     ]
     
-    # Process in batches,with timing and error handling.
+    # Process in batches, with timing and error handling.
     model_start_time = time.time()
     task_metrics = []
-    for i in range(0, len(question_tasks), context.max_parallel_questions):
-        batch = question_tasks[i:i + context.max_parallel_questions]
+    for i in range(0, len(question_tasks), ctx.max_parallel_questions):
+        batch = question_tasks[i:i + ctx.max_parallel_questions]
         batch_results = await asyncio.gather(*batch, return_exceptions=True)
         for r in batch_results:
             if isinstance(r, Metrics):
@@ -299,12 +312,35 @@ async def run_model_benchmark(context: Context, model_info: ModelInfo, questions
     task_metrics[-1].time = model_time
 
     # Close CachedAgentProxy.
-    if context.use_caching:
+    if ctx.use_caching:
         agent.close()
     
     # Print model summary and return data.
-    model_data = print_model_summary(model_name, task_metrics)
+    model_data = get_model_summary(model_name, task_metrics, True)
     return model_data
+
+async def benchmark_models_n_times(ctx: Context, models: list[ModelInfo], questions: list[QuestionData]) -> Metrics:
+    """Benchmark models N times."""
+    print(f"\n===== Benchmarking {len(models)} model(s) on {len(questions)} question(s) {ctx.benchmark_n_times} times. =====\n")
+    pprint(ctx)
+
+    perf_data = {model.openrouter_name: [] for model in models}
+    for run_idx in range(ctx.benchmark_n_times):
+        print(f"\n=== Run {run_idx + 1} of {ctx.benchmark_n_times} ===")
+        for model in models:
+            perf_data[model.openrouter_name].append(
+                await run_model_benchmark(ctx, model, questions))
+
+    all_metrics = [
+        m for model_metrics in perf_data.values() 
+        for m in model_metrics ]
+    if len(all_metrics) > 1: # If more than one measure, calculate averages.
+        return get_model_summary(str(ctx), all_metrics, True)
+        # return print_benchmark_summary(perf_data, len(questions), True)
+    elif len(all_metrics) == 1: # If only one measure, return it.
+        return all_metrics[0]
+    else: # Should never happen.
+        raise ValueError(f"Invalid number of measurements: {len(all_metrics)}")
 
 # Async main.
 async def main():
@@ -313,47 +349,43 @@ async def main():
     assert dotenv.dotenv_values().values(), ".env file not found or empty"
 
     # Define models to benchmark.
-    # models = [
-    #     MODELS['gpt-5-nano'], 
-    #     MODELS['deepseek-chat-v3-0324']
-    #     ]
-    models = PRIMARY_MODELS
+    models = [ MODELS['gpt-5-mini'], MODELS['gemini-2.5-flash'] ]
+    # models = PRIMARY_MODELS
     # models = MODELS.values()
 
     # Load questions from JSONL file.
     jsonl_path = "../2-bench-filter/test.jsonl"
     questions = load_questions_from_jsonl(jsonl_path)
-    questions = questions[:50]
+    questions = questions[:5]
     
-    # Create context.
-    context = Context(
+    # Create contexts.
+    default_context = Context(
         timeout_seconds=30, 
         delay_ms=50, 
         verbose=False, 
         truncate_length=150, 
         max_parallel_questions=30, 
         retry_failures=True, 
-        use_caching=True, 
+        use_caching=False, 
         use_open_router=True,
-        benchmark_n_times=1)
-    pprint(context)
+        benchmark_n_times=1, 
+        reasoning_effort="low", 
+        web_search=False)
 
-    print(f"\nBenchmarking {len(models)} model(s) on {len(questions)} question(s) {context.benchmark_n_times} times.\n")
+    contexts = [
+        default_context.with_changes(reasoning_effort=reason, timeout_seconds=timeout) 
+        for timeout, reason in [(30, "low"), (60, "medium"), (90, "high")]
+    ]
 
-    # Disable caching if multiple runs.
-    if context.benchmark_n_times > 1:
-        context.use_caching = False
+    # Benchmark each context.
+    perf_data = [
+        await benchmark_models_n_times(ctx, models, questions)
+        for ctx in contexts
+    ]
+    # Then print benchmark summaries again.
+    for pd in perf_data:
+        pprint(pd)
 
-    # Benchmark models sequentially, potentially multiple times.
-    performance_data = {model.openrouter_name: [] for model in models}
-    for run_idx in range(context.benchmark_n_times):
-        print(f"\n=== Run {run_idx + 1} of {context.benchmark_n_times} ===")
-        for model in models:
-            performance_data[model.openrouter_name].append(
-                await run_model_benchmark(context, model, questions))
-
-    if len(models)*context.benchmark_n_times > 1:
-        print_benchmark_summary(performance_data, len(questions))
 
 if __name__ == "__main__":
     asyncio.run(main())
