@@ -3,7 +3,6 @@ import asyncio
 import time
 import dataclasses
 
-from pprint import pprint
 from typing import List, Union
 from dataclasses import dataclass
 from pydantic import BaseModel
@@ -11,9 +10,11 @@ from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIChatModel, OpenAIChatModelSettings
 from pydantic_ai.providers.openrouter import OpenRouterProvider
 
+from questions import QuestionData, load_questions_from_jsonl
+from metrics import Metrics, get_accuracy, summarize_metrics, print_metrics
 from cached_agent_proxy import CachedAgentProxy
 
-# Data classes for cleaner structure:
+# Data classes:
 
 @dataclass(frozen=True)
 class Context:
@@ -42,24 +43,6 @@ class ModelInfo:
     direct_name: str
     input_cost: float
     output_cost: float
-
-@dataclass
-class Metrics:
-    name: str
-    cost: float
-    tokens: int
-    time: float
-    was_cached: bool
-    accuracy: float # None for complete failures.
-    error_count: int = 0
-    api_calls: int = 0
-
-# Data structure for JSONL questions.
-class QuestionData(BaseModel):
-    category: str
-    question: str
-    masked_code: str
-    answers: List[str]
 
 # Pydantic model for structured output.
 class CodeCompletion(BaseModel):
@@ -97,112 +80,11 @@ PRIMARY_MODELS = [
 
 # Utility functions:
 
-def load_questions_from_jsonl(file_path: str) -> list[QuestionData]:
-    """Load questions from a JSONL file using Pydantic for automatic parsing and validation."""
-    with open(file_path, 'r', encoding='utf-8') as file:
-        questions = [
-            QuestionData.model_validate_json(line.strip())
-            for line in file
-            if line.strip()
-        ]
-        print(f"Loaded {len(questions)} questions from {file_path}")
-        return questions
-
 def calculate_cost(input_tokens: int, output_tokens: int, model: ModelInfo) -> float:
     return (input_tokens / 1_000_000) * model.input_cost + (output_tokens / 1_000_000) * model.output_cost
 
-def calculate_speed(total_tokens: int, duration: float) -> float:
-    return total_tokens / duration if duration > 0 else 0
-
 def display_text(text: str, max_length: int) -> str:
     return text[:max_length] + "..." if len(text) > max_length else text
-
-def calculate_accuracy(question_num: int, results: list[str], expected_answers: List[str] = None) -> float:
-    """Validate model response against expected answers and return accuracy."""
-    max_length = max(len(results), len(expected_answers))
-    try:
-        correct_completions = sum(1 for res, exp in zip(results, expected_answers) 
-                                if str(res).strip() == exp.strip())
-        return correct_completions / max_length
-    except Exception as parse_ex:
-        print(f"  Warning: Q{question_num} failed with exception: {repr(parse_ex)}")
-        return 0.0
-
-def calculate_model_accuracy(metrics: list[Metrics]) -> Union[float, None]:
-    """Calculate overall accuracy for a model."""
-    accuracy_scores = [m.accuracy for m in metrics if m.accuracy is not None] # Exclude errors.
-    return (
-        sum(accuracy_scores) / len(accuracy_scores) if accuracy_scores 
-        else None)
-
-# Summary functions:
-
-def get_model_summary(model_name: str, metrics: list[Metrics], verbose: bool) -> Metrics:
-    """Print summary for a single model."""
-    assert len(metrics) > 0, "No metrics to get summary for."
-    # Calculate totals.
-    total_tokens = sum(m.tokens for m in metrics)
-    total_cost = sum(m.cost for m in metrics)
-    total_time = sum(m.time for m in metrics)
-    total_errors = sum(m.error_count for m in metrics)
-    total_calls = sum(m.api_calls for m in metrics)
-    total_accuracy = calculate_model_accuracy(metrics)
-    # Check if any responses were cached
-    was_cached = any(m.was_cached for m in metrics)
-    cache_status = " (CACHED)" if was_cached else ""
-    display_cost = 0.0 if was_cached else total_cost
-    # Print summary.
-    if verbose:
-        print(f"\n  Model Summary: {model_name}{cache_status}")
-        print(f"  Total Tokens: {total_tokens}")
-        print(f"  Total Cost: ${display_cost:.6f}")
-        print(f"  Total Time: {total_time:.2f}s")
-        print(f"  Overall Accuracy: {total_accuracy:.1%}")
-        print(f"  Errors: {total_errors} out of {total_calls} API calls")
-    # Return metrics.
-    return Metrics(
-        name=model_name,
-        cost=display_cost,
-        tokens=total_tokens,
-        time=total_time,
-        was_cached=was_cached,
-        accuracy=total_accuracy,
-        error_count=total_errors,
-        api_calls=total_calls
-    )
-
-def print_benchmark_summary(model_metrics: dict[str, list[Metrics]], n_questions: int, verbose: bool) -> list[Metrics]:
-    """Print overall benchmark summary and rankings."""
-    print("\n=== OVERALL SUMMARY ===")
-    # Flatten and average metrics per model.
-    total_metrics = [
-        get_model_summary(model, metrics, verbose) 
-        for model, metrics in model_metrics.items()]
-    # Calculate totals.
-    total_cost = sum(m.cost for m in total_metrics)
-    total_time = sum(m.time for m in total_metrics)
-    total_errors = sum(m.error_count for m in total_metrics)
-    total_calls = sum(m.api_calls for m in total_metrics)
-    # Print totals.
-    print(f"\nTotal Cost: ${total_cost:.6f}")
-    print(f"Total Time: {total_time:.2f}s")
-    print(f"Total Errors: {total_errors} out of {total_calls} API calls = {total_errors/total_calls:.1%} error rate")
-    # Error Rate Ranking
-    if verbose and total_errors > 0:
-        print("\nError Rate Ranking (lowest error rate first):")
-        error_data = [(m.name, m.error_count/n_questions) for m in total_metrics]
-        error_data.sort(key=lambda x: x[1])
-        for i, (model, error_rate) in enumerate(error_data, 1):
-            print(f"{i}. {model}: {error_rate:.1%}")
-    # Accuracy Ranking
-    print("\nAccuracy Ranking (highest accuracy first):")
-    accuracy_data = [(m.name, m.accuracy) for m in total_metrics if m.accuracy is not None]
-    accuracy_data.sort(key=lambda x: x[1], reverse=True)
-    for i, (model, accuracy) in enumerate(accuracy_data, 1):
-        print(f"{i}. {model}: {accuracy:.1%}")
-
-    # Return total metrics.
-    return total_metrics
 
 # Benchmarking functions:
 
@@ -250,7 +132,7 @@ async def get_question_task(ctx: Context, model: ModelInfo, agent_code: Union[Ag
         usage = result.usage()
         total_tokens = usage.input_tokens + usage.output_tokens
         cost = calculate_cost(usage.input_tokens, usage.output_tokens, model)
-        accuracy = calculate_accuracy(question_num, result.output.completions, question.answers)
+        accuracy = get_accuracy(f"Q{question_num}", result.output.completions, question.answers)
         
         # Display results.  
         if ctx.verbose:
@@ -308,21 +190,22 @@ async def run_model_benchmark(ctx: Context, model_info: ModelInfo, questions: li
                 print(f"Unexpected task error: {repr(r)}")
                 task_metrics.append(Metrics("Error", 0.0, 0, 0, False, 0.0, 1))
     model_time = time.time() - model_start_time
-    # Hack: last task metric has the model time, others have 0. That way summation works in print_model_summary().
+    # Hack: last task metric has the model time, others have 0. That way summation works in summarize_metrics().
     task_metrics[-1].time = model_time
 
     # Close CachedAgentProxy.
     if ctx.use_caching:
         agent.close()
     
-    # Print model summary and return data.
-    model_data = get_model_summary(model_name, task_metrics, True)
-    return model_data
+    # Summarize model metrics and return data.
+    if ctx.verbose:
+        print_metrics(model_name, task_metrics)
+    return summarize_metrics(model_name, task_metrics)
 
-async def benchmark_models_n_times(ctx: Context, models: list[ModelInfo], questions: list[QuestionData]) -> Metrics:
+async def benchmark_models_n_times(name: str, ctx: Context, models: list[ModelInfo], questions: list[QuestionData]) -> Metrics:
     """Benchmark models N times."""
     print(f"\n===== Benchmarking {len(models)} model(s) on {len(questions)} question(s) {ctx.benchmark_n_times} times. =====\n")
-    pprint(ctx)
+    print(ctx)
 
     perf_data = {model.openrouter_name: [] for model in models}
     for run_idx in range(ctx.benchmark_n_times):
@@ -331,16 +214,16 @@ async def benchmark_models_n_times(ctx: Context, models: list[ModelInfo], questi
             perf_data[model.openrouter_name].append(
                 await run_model_benchmark(ctx, model, questions))
 
-    all_metrics = [
-        m for model_metrics in perf_data.values() 
-        for m in model_metrics ]
+    # Flatten list of lists.
+    all_metrics = [ 
+        summarize_metrics(model_name, model_metrics) 
+        for model_name, model_metrics in perf_data.items()]
+
     if len(all_metrics) > 1: # If more than one measure, calculate averages.
-        return get_model_summary(str(ctx), all_metrics, True)
-        # return print_benchmark_summary(perf_data, len(questions), True)
-    elif len(all_metrics) == 1: # If only one measure, return it.
+        print_metrics(f" SUMMARY OF: {name} ", all_metrics)
+        return summarize_metrics(name, all_metrics)
+    else: # If only one measure, return it.
         return all_metrics[0]
-    else: # Should never happen.
-        raise ValueError(f"Invalid number of measurements: {len(all_metrics)}")
 
 # Async main.
 async def main():
@@ -358,7 +241,7 @@ async def main():
     questions = load_questions_from_jsonl(jsonl_path)
     questions = questions[:5]
     
-    # Create contexts.
+    # Default context.
     default_context = Context(
         timeout_seconds=30, 
         delay_ms=10, 
@@ -366,30 +249,26 @@ async def main():
         truncate_length=150, 
         max_parallel_questions=30, 
         retry_failures=True, 
-        use_caching=True, 
+        use_caching=False, 
         use_open_router=True,
-        benchmark_n_times=1, 
+        benchmark_n_times=2, 
         reasoning_effort="low", 
         web_search=False)
 
-    contexts = [
-        default_context.with_changes(reasoning_effort=reason, timeout_seconds=timeout) 
-        for timeout, reason in [(30, "low"), (60, "medium")]
-        # for timeout, reason in [(30, "low"), (60, "medium"), (90, "high")]
-    ]
-
-    # Benchmark each context.
+    # Benchmark.
     perf_data = [
-        await benchmark_models_n_times(ctx, models, questions)
-        for ctx in contexts
+        await benchmark_models_n_times(
+            f"{timeout}s, {reason} REASONING", 
+            default_context.with_changes(reasoning_effort=reason, timeout_seconds=timeout), 
+            models, 
+            questions)
+        # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
+        for timeout, reason in [(30, "low"), (60, "medium")]
     ]
-    # Then print benchmark summaries again.
-    for pd in perf_data:
-        pprint(pd)
 
-    perf_dict = {ctx.reasoning_effort: [pd] for ctx, pd in zip(contexts, perf_data)}
-    print_benchmark_summary(perf_dict, len(questions), True)
-
+    # Print summary.
+    print_metrics("=== SUMMARY OF: REASONING ===", perf_data)
+    print_metrics("=== SUMMARY OF: TOTAL ===", [summarize_metrics("TOTAL", perf_data)])
 
 if __name__ == "__main__":
     asyncio.run(main())

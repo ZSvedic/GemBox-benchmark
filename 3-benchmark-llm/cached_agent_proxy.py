@@ -2,7 +2,6 @@ import os
 import json
 from pydantic_ai import Agent
 
-# Cached agent proxy.
 class CachedAgentProxy:
     ''' A proxy agent that caches responses from a real agent to a specified file. 
     Once cached, the agent will return the cached response from dict instead of making a real API call. 
