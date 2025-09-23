@@ -19,7 +19,7 @@ from cached_agent_proxy import CachedAgentProxy
 @dataclass(frozen=True)
 class Context:
     timeout_seconds: int = 20           # Timeout for each question.
-    delay_ms: int = 50                  # Delay between question calls.
+    delay_ms: int = 10                  # Delay between question calls.
     verbose: bool = True                # Verbose or quiet output?
     truncate_length: int = 150          # Display text truncation.
     max_parallel_questions: int = 30    # Limit parallel question execution.
@@ -232,18 +232,18 @@ async def main():
     assert dotenv.dotenv_values().values(), ".env file not found or empty"
 
     # Define models to benchmark.
-    models = [ MODELS['gpt-5-mini'], MODELS['gemini-2.5-flash'] ]
-    # models = PRIMARY_MODELS
+    # models = [ MODELS['gpt-5-mini'], MODELS['gemini-2.5-flash'] ]
+    models = PRIMARY_MODELS
     # models = MODELS.values()
 
     # Load questions from JSONL file.
     jsonl_path = "../2-bench-filter/test.jsonl"
     questions = load_questions_from_jsonl(jsonl_path)
-    questions = questions[:5]
+    # questions = questions[:5]
     
     # Default context.
     default_context = Context(
-        timeout_seconds=30, 
+        timeout_seconds=60, 
         delay_ms=10, 
         verbose=False, 
         truncate_length=150, 
@@ -251,23 +251,33 @@ async def main():
         retry_failures=True, 
         use_caching=False, 
         use_open_router=True,
-        benchmark_n_times=2, 
-        reasoning_effort="low", 
+        benchmark_n_times=3, 
+        reasoning_effort="medium", 
         web_search=False)
 
-    # Benchmark.
+    # Benchmark reasoning effort.
+    # perf_data = [
+    #     await benchmark_models_n_times(
+    #         f"{timeout}s, {reason} REASONING", 
+    #         default_context.with_changes(reasoning_effort=reason, timeout_seconds=timeout), 
+    #         models, 
+    #         questions)
+    #     # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
+    #     for timeout, reason in [(30, "low"), (60, "medium")]
+    # ]
+
+    # Benchmark web search.
     perf_data = [
         await benchmark_models_n_times(
-            f"{timeout}s, {reason} REASONING", 
-            default_context.with_changes(reasoning_effort=reason, timeout_seconds=timeout), 
-            models, 
+            f"WEB SEARCH: {web}",
+            default_context.with_changes(web_search=web),
+            models,
             questions)
-        # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
-        for timeout, reason in [(30, "low"), (60, "medium")]
+        for web in [False, True]
     ]
 
     # Print summary.
-    print_metrics("=== SUMMARY OF: REASONING ===", perf_data)
+    print_metrics("=== SUMMARY OF ALL TESTS ===", perf_data)
     print_metrics("=== SUMMARY OF: TOTAL ===", [summarize_metrics("TOTAL", perf_data)])
 
 if __name__ == "__main__":
