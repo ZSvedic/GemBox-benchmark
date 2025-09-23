@@ -88,7 +88,7 @@ def display_text(text: str, max_length: int) -> str:
 
 # Benchmarking functions:
 
-def get_model_agent(ctx: Context, model_info: ModelInfo) -> str | Union[Agent, CachedAgentProxy]:
+def get_model_agent(ctx: Context, model_info: ModelInfo) -> str | Agent:
     """Get a model name and agent."""
     if ctx.use_open_router:
         model_name = model_info.openrouter_name + (":online" if ctx.web_search else "")
@@ -98,13 +98,19 @@ def get_model_agent(ctx: Context, model_info: ModelInfo) -> str | Union[Agent, C
             settings=OpenAIChatModelSettings(
                 openai_reasoning_effort=ctx.reasoning_effort)
             )
-        agent_code = Agent(model, output_type=CodeCompletion)
     else:
         model_name = model_info.direct_name
+        model = model_name
+
+    if ctx.use_caching:
+        agent_code = CachedAgentProxy(
+            model, CodeCompletion, f"cache/responses_{model_name.replace('/', '_')}.json", ctx.verbose)
+    else:
         agent_code = Agent(model_name, output_type=CodeCompletion)
+
     return model_name, agent_code
 
-async def get_question_task(ctx: Context, model: ModelInfo, agent_code: Union[Agent, CachedAgentProxy],
+async def get_question_task(ctx: Context, model: ModelInfo, agent_code: Agent,
     question_num: int, question: QuestionData) -> Metrics:
     """Run a single question and return performance metrics."""
     # Prepare question and prompt.
@@ -163,11 +169,6 @@ async def run_model_benchmark(ctx: Context, model_info: ModelInfo, questions: li
     except Exception as e:
         print(f"\n--- Can't get model agent: {repr(e)}")
         return Metrics(f"ERROR-{model_info.openrouter_name}", 0.0, 0, 0, False, 0.0, len(questions))
-    
-    # Create model-specific cache file in cache folder.
-    if ctx.use_caching:
-        cache_file = f"cache/responses_{model_name.replace('/', '_')}.json"
-        agent = CachedAgentProxy(agent, cache_file, ctx.verbose)
     
     # Create tasks for all questions to run in parallel.
     question_tasks = [
@@ -232,49 +233,49 @@ async def main():
     assert dotenv.dotenv_values().values(), ".env file not found or empty"
 
     # Define models to benchmark.
-    # models = [ MODELS['gpt-5-mini'], MODELS['gemini-2.5-flash'] ]
-    models = PRIMARY_MODELS
+    models = [ MODELS['gpt-5-mini'], MODELS['gemini-2.5-flash'] ]
+    # models = PRIMARY_MODELS
     # models = MODELS.values()
 
     # Load questions from JSONL file.
     jsonl_path = "../2-bench-filter/test.jsonl"
     questions = load_questions_from_jsonl(jsonl_path)
-    # questions = questions[:5]
+    questions = questions[:5]
     
     # Default context.
     default_context = Context(
-        timeout_seconds=60, 
+        timeout_seconds=30, 
         delay_ms=10, 
         verbose=False, 
         truncate_length=150, 
         max_parallel_questions=30, 
         retry_failures=True, 
-        use_caching=False, 
+        use_caching=True, 
         use_open_router=True,
-        benchmark_n_times=3, 
-        reasoning_effort="medium", 
+        benchmark_n_times=1, 
+        reasoning_effort="low", 
         web_search=False)
 
     # Benchmark reasoning effort.
-    # perf_data = [
-    #     await benchmark_models_n_times(
-    #         f"{timeout}s, {reason} REASONING", 
-    #         default_context.with_changes(reasoning_effort=reason, timeout_seconds=timeout), 
-    #         models, 
-    #         questions)
-    #     # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
-    #     for timeout, reason in [(30, "low"), (60, "medium")]
-    # ]
-
-    # Benchmark web search.
     perf_data = [
         await benchmark_models_n_times(
-            f"WEB SEARCH: {web}",
-            default_context.with_changes(web_search=web),
-            models,
+            f"{timeout}s, {reason} REASONING", 
+            default_context.with_changes(reasoning_effort=reason, timeout_seconds=timeout), 
+            models, 
             questions)
-        for web in [False, True]
+        # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
+        for timeout, reason in [(30, "low")]
     ]
+
+    # # Benchmark web search.
+    # perf_data = [
+    #     await benchmark_models_n_times(
+    #         f"WEB SEARCH: {web}",
+    #         default_context.with_changes(web_search=web),
+    #         models,
+    #         questions)
+    #     for web in [False, True]
+    # ]
 
     # Print summary.
     print_metrics("=== SUMMARY OF ALL TESTS ===", perf_data)

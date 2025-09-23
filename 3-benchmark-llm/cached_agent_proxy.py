@@ -1,14 +1,17 @@
 import os
 import json
+from typing import Type
+from pydantic import BaseModel
 from pydantic_ai import Agent
+from pydantic_ai.models import Model
 
-class CachedAgentProxy:
+class CachedAgentProxy(Agent):
     ''' A proxy agent that caches responses from a real agent to a specified file. 
     Once cached, the agent will return the cached response from dict instead of making a real API call. 
     This proxy only implements the methods it can accurately simulate. '''
     
-    def __init__(self, agent: Agent, cache_file: str, verbose: bool = False):
-        self.agent = agent
+    def __init__(self, model: Model | str, output_type: Type[BaseModel], cache_file: str, verbose: bool = False):
+        super().__init__(model, output_type=output_type)
         self.cache_file = cache_file
         self.cache = {}
         self.verbose = verbose
@@ -32,7 +35,7 @@ class CachedAgentProxy:
             cached_result._was_cached = True
             return cached_result
         else:
-            result = await self.agent.run(*args, **kwargs)
+            result = await super().run(*args, **kwargs)
             # Cache only the serializable parts of the result
             cacheable_result = self._make_cacheable(result)
             self.cache[args[0]] = cacheable_result
@@ -104,10 +107,6 @@ class CachedAgentProxy:
                 return None
         
         return CachedResult(cached_data)
-    
-    def usage(self):
-        """Return usage statistics from the underlying agent."""
-        return self.agent.usage()
     
     def __enter__(self):
         """Context manager entry."""
