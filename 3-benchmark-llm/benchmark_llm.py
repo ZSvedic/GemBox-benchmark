@@ -274,7 +274,7 @@ async def main():
         truncate_length=150, 
         max_parallel_questions=30, 
         retry_failures=True, 
-        use_caching=False, 
+        use_caching=True, 
         use_open_router=True,
         benchmark_n_times=1, 
         reasoning_effort="low", 
@@ -290,7 +290,7 @@ async def main():
             models, 
             questions)
         # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
-        for timeout, reason in [(30, "low"), (60, "medium")]
+        for timeout, reason in [(50, "low")]
         # for web in [False, True]
     ]
 

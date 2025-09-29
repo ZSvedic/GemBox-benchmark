@@ -5,8 +5,7 @@
         "name": "3-debugpy",
         "type": "debugpy",
         "request": "launch",
-        "console": "externalTerminal",
-        // "console": "integratedTerminal",
+        "console": "integratedTerminal",
         "program": "${file}",
         "args": []
       }

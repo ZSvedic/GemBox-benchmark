@@ -1,0 +1,21 @@
+2025-9-29, Prompt RAG with gpt-5-mini:
+===== 3 runs:
+=== SUMMARY OF: 60s, medium REASONING ===
+	openaiprompt/GemBoxGPT-GBS-examp	tokens=2369010,	cost=$0.710496,	time=152.82s,	accuracy=88%,	errors=0/84
+	openai/gpt-5-mini               	tokens=98585,	cost=$0.167592,	time=114.81s,	accuracy=70%,	errors=0/84
+	google/gemini-2.5-flash         	tokens=53150,	cost=$0.099457,	time=72.11s,	accuracy=64%,	errors=0/84
+	mistralai/codestral-2508        	tokens=22452,	cost=$0.007740,	time=9.67s,	accuracy=43%,	errors=0/84
+
+===== 1 run:
+=== SUMMARY OF: 30s, low REASONING ===
+	openaiprompt/GemBoxGPT-GBS-examp	tokens=414335,	cost=$0.131379,	time=60.38s,	accuracy=84%,	errors=2/28
+	openai/gpt-5-mini               	tokens=15812,	cost=$0.021764,	time=18.86s,	accuracy=64%,	errors=0/28
+	google/gemini-2.5-flash         	tokens=14819,	cost=$0.025933,	time=13.93s,	accuracy=63%,	errors=0/28
+	mistralai/codestral-2508        	tokens=7484,	cost=$0.002580,	time=2.68s,	accuracy=38%,	errors=0/28
+
+=== SUMMARY OF: 60s, medium REASONING ===
+	openaiprompt/GemBoxGPT-GBS-examp	tokens=512752,	cost=$0.164348,	time=77.44s,	accuracy=88%,	errors=0/28
+	openai/gpt-5-mini               	tokens=33791,	cost=$0.057722,	time=36.73s,	accuracy=64%,	errors=0/28
+	google/gemini-2.5-flash         	tokens=25066,	cost=$0.051551,	time=37.32s,	accuracy=62%,	errors=0/28
+	mistralai/codestral-2508        	tokens=7485,	cost=$0.002581,	time=1.49s,	accuracy=42%,	errors=0/28
+
