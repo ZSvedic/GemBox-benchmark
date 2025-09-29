@@ -1,12 +1,11 @@
 from pydantic import BaseModel
-from typing import List
 
 # Data structure for JSONL questions.
 class QuestionData(BaseModel):
     category: str
     question: str
     masked_code: str
-    answers: List[str]
+    answers: list[str]
 
 def load_questions_from_jsonl(file_path: str) -> list[QuestionData]:
     """Load questions from a JSONL file using Pydantic for automatic parsing and validation."""

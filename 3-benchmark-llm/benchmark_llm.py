@@ -2,8 +2,10 @@ import dotenv
 import asyncio
 import time
 import dataclasses
+import httpx
+import re
 
-from typing import List, Union
+from typing import Protocol, Type
 from dataclasses import dataclass
 from pydantic import BaseModel
 from pydantic_ai import Agent
@@ -13,6 +15,7 @@ from pydantic_ai.providers.openrouter import OpenRouterProvider
 from questions import QuestionData, load_questions_from_jsonl
 from metrics import Metrics, get_accuracy, summarize_metrics, print_metrics
 from cached_agent_proxy import CachedAgentProxy
+from async_openai_prompts import OpenAIPromptAgent
 
 # Data classes:
 
@@ -46,7 +49,17 @@ class ModelInfo:
 
 # Pydantic model for structured output.
 class CodeCompletion(BaseModel):
-    completions: List[str]
+    completions: list[str]
+
+# Protocol for agents.
+class AgentProtocol(Protocol):
+    async def run(self, input: str) -> httpx.Response: ...
+    def response_2_usage_results(self, response: httpx.Response) -> tuple[dict, list[str]]: ...
+
+# Methods run() and __init__() are inherited from Agent, but response_2_usage_results() is implemented.
+class OpenRouterAgent(Agent, AgentProtocol):
+    def response_2_usage_results(self, response: httpx.Response) -> tuple[dict, list[str]]:
+        return response.usage(), response.output.completions
 
 PROGRAMMING_PROMPT = """Answer a coding question related to GemBox Software .NET components.
 Return a JSON object with a 'completions' array containing only the code strings that should replace the ??? marks, in order. 
@@ -60,9 +73,10 @@ Your response:
 
 Below is the question and masked code. Return only the JSON object with no explanations, comments, or additional text. """
 
-# Models with OpenRouter name, direct name, input costs, and output costs.
+# Models with OpenRouter name, direct name, input costs, and output costs. "openaiprompt" models are handled differently.
 ModelInfos = [
     ModelInfo('openai/gpt-5-mini', 'openai:gpt-5-mini', 0.25, 2.00), 
+    ModelInfo('openaiprompt/GemBoxGPT-GBS-examples', 'pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2', 0.25, 2.00),
     ModelInfo('google/gemini-2.5-flash', 'google-gla:gemini-2.5-flash', 0.30, 2.50),
     ModelInfo('mistralai/codestral-2508', 'mistral:codestral-latest', 0.30, 0.90),
     ModelInfo('google/gemini-2.5-flash-lite', 'google-gla:gemini-2.5-flash-lite', 0.10, 0.40), 
@@ -88,29 +102,37 @@ def display_text(text: str, max_length: int) -> str:
 
 # Benchmarking functions:
 
-def get_model_agent(ctx: Context, model_info: ModelInfo) -> str | Agent:
+def get_model_agent(ctx: Context, model_info: ModelInfo) -> tuple[str, AgentProtocol]:
     """Get a model name and agent."""
-    if ctx.use_open_router:
-        model_name = model_info.openrouter_name + (":online" if ctx.web_search else "")
-        model = OpenAIChatModel(
-            model_name, 
-            provider=OpenRouterProvider(),
-            settings=OpenAIChatModelSettings(
-                openai_reasoning_effort=ctx.reasoning_effort)
-            )
-    else:
+    if model_info.openrouter_name.startswith("openaiprompt"): # OpenAIPromptAgent.
         model_name = model_info.direct_name
-        model = model_name
-
-    if ctx.use_caching:
-        agent_code = CachedAgentProxy(
-            model, CodeCompletion, f"cache/responses_{model_name.replace('/', '_')}.json", ctx.verbose)
+        print(f"\n--- Creating OpenAIPromptAgent for {model_name} ---")
+        agent_code = OpenAIPromptAgent(model_name, CodeCompletion)
     else:
-        agent_code = Agent(model_name, output_type=CodeCompletion)
+        if ctx.use_open_router: # OpenRouterAgent.
+            model_name = model_info.openrouter_name + (":online" if ctx.web_search else "")
+            model = OpenAIChatModel(
+                model_name, 
+                provider=OpenRouterProvider(),
+                settings=OpenAIChatModelSettings(
+                    openai_reasoning_effort=ctx.reasoning_effort)
+                )
+        else: # OpenRouterAgent but with direct name.
+            model_name = model_info.direct_name
+            model = model_name
+
+        if ctx.use_caching:
+            cache_name = f"cache/responses_{re.sub(r'[^A-Za-z0-9._-]', '_', model_name)}.json"
+            print(f"\n--- Creating CachedAgentProxy for {model_name} ---")
+            agent_code = CachedAgentProxy(
+                model, CodeCompletion, cache_name, ctx.verbose)
+        else:
+            print(f"\n--- Creating Agent for {model_name} ---")
+            agent_code = OpenRouterAgent(model, output_type=CodeCompletion)
 
     return model_name, agent_code
 
-async def get_question_task(ctx: Context, model: ModelInfo, agent_code: Agent,
+async def get_question_task(ctx: Context, model: ModelInfo, agent: AgentProtocol,
     question_num: int, question: QuestionData) -> Metrics:
     """Run a single question and return performance metrics."""
     # Prepare question and prompt.
@@ -126,7 +148,7 @@ async def get_question_task(ctx: Context, model: ModelInfo, agent_code: Agent,
             try:
                 if ctx.delay_ms and not ctx.use_caching: # Don't delay if caching.
                     await asyncio.sleep(ctx.delay_ms / 1000)
-                result = await asyncio.wait_for(agent_code.run(full_prompt), timeout=ctx.timeout_seconds)
+                response = await asyncio.wait_for(agent.run(full_prompt), timeout=ctx.timeout_seconds)
                 break
             except Exception as e:
                 if attempt == 0:  # First failure.
@@ -134,15 +156,17 @@ async def get_question_task(ctx: Context, model: ModelInfo, agent_code: Agent,
                     continue
                 raise
         
+        # Convert specific response to usage and results.
+        usage, results = agent.response_2_usage_results(response)
+        
         # Calculate tokens, cost, and accuracy.
-        usage = result.usage()
         total_tokens = usage.input_tokens + usage.output_tokens
         cost = calculate_cost(usage.input_tokens, usage.output_tokens, model)
-        accuracy = get_accuracy(f"Q{question_num}", result.output.completions, question.answers)
+        accuracy = get_accuracy(f"Q{question_num}", results, question.answers)
         
         # Display results.  
         if ctx.verbose:
-            print(f"A{question_num}: {display_text(str(result.output.completions), ctx.truncate_length)}")
+            print(f"A{question_num}: {display_text(str(results), ctx.truncate_length)}")
             if accuracy == 1.0:
                 print("✓ CORRECT")
             elif accuracy > 0:
@@ -151,7 +175,7 @@ async def get_question_task(ctx: Context, model: ModelInfo, agent_code: Agent,
                 print(f"✗ INCORRECT, expected: {question.answers}")
         
         # Check if the result was cached.
-        was_cached = getattr(result, '_was_cached', False)
+        was_cached = getattr(response, '_was_cached', False)
         
         # Return metrics.
         return Metrics(f"Q{question_num}", cost, total_tokens, 0, was_cached, accuracy, 0, 1)
@@ -165,7 +189,6 @@ async def run_model_benchmark(ctx: Context, model_info: ModelInfo, questions: li
     # Initialize model and agent.
     try:
         model_name, agent = get_model_agent(ctx, model_info)
-        print(f"\n--- Testing {model_name} ---")
     except Exception as e:
         print(f"\n--- Can't get model agent: {repr(e)}")
         return Metrics(f"ERROR-{model_info.openrouter_name}", 0.0, 0, 0, False, 0.0, len(questions))
@@ -194,8 +217,8 @@ async def run_model_benchmark(ctx: Context, model_info: ModelInfo, questions: li
     # Hack: last task metric has the model time, others have 0. That way summation works in summarize_metrics().
     task_metrics[-1].time = model_time
 
-    # Close CachedAgentProxy.
-    if ctx.use_caching:
+    # If CachedAgentProxy, close it.
+    if isinstance(agent, CachedAgentProxy):
         agent.close()
     
     # Summarize model metrics and return data.
@@ -232,15 +255,16 @@ async def main():
     dotenv.load_dotenv()
     assert dotenv.dotenv_values().values(), ".env file not found or empty"
 
-    # Define models to benchmark.
-    models = [ MODELS['gpt-5-mini'], MODELS['gemini-2.5-flash'] ]
-    # models = PRIMARY_MODELS
-    # models = MODELS.values()
-
     # Load questions from JSONL file.
     jsonl_path = "../2-bench-filter/test.jsonl"
     questions = load_questions_from_jsonl(jsonl_path)
-    questions = questions[:5]
+    # questions = questions[:5]
+
+    # Define models to benchmark.
+    # models = [ MODELS['GemBoxGPT-GBS-examples'] ]
+    # models = [ MODELS['gpt-5-mini'], MODELS['gemini-2.5-flash'], MODELS['GemBoxGPT-GBS-examples'] ]
+    models = [ MODELS['GemBoxGPT-GBS-examples'] ] + PRIMARY_MODELS
+    # models = MODELS.values()
     
     # Default context.
     default_context = Context(
@@ -250,7 +274,7 @@ async def main():
         truncate_length=150, 
         max_parallel_questions=30, 
         retry_failures=True, 
-        use_caching=True, 
+        use_caching=False, 
         use_open_router=True,
         benchmark_n_times=1, 
         reasoning_effort="low", 
@@ -259,27 +283,20 @@ async def main():
     # Benchmark reasoning effort.
     perf_data = [
         await benchmark_models_n_times(
+            # f"WEB SEARCH: {web}",
+            # default_context.with_changes(web_search=web),
             f"{timeout}s, {reason} REASONING", 
             default_context.with_changes(reasoning_effort=reason, timeout_seconds=timeout), 
             models, 
             questions)
         # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
-        for timeout, reason in [(30, "low")]
+        for timeout, reason in [(30, "low"), (60, "medium")]
+        # for web in [False, True]
     ]
 
-    # # Benchmark web search.
-    # perf_data = [
-    #     await benchmark_models_n_times(
-    #         f"WEB SEARCH: {web}",
-    #         default_context.with_changes(web_search=web),
-    #         models,
-    #         questions)
-    #     for web in [False, True]
-    # ]
-
     # Print summary.
-    print_metrics("=== SUMMARY OF ALL TESTS ===", perf_data)
-    print_metrics("=== SUMMARY OF: TOTAL ===", [summarize_metrics("TOTAL", perf_data)])
+    # print_metrics("=== SUMMARY OF ALL TESTS ===", perf_data)
+    # print_metrics("=== SUMMARY OF: TOTAL ===", [summarize_metrics("TOTAL", perf_data)])
 
 if __name__ == "__main__":
     asyncio.run(main())

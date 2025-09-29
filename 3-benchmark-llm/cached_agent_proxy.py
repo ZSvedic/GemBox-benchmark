@@ -1,12 +1,14 @@
 import os
 import json
+import httpx
+
 from typing import Type
 from pydantic import BaseModel
 from pydantic_ai import Agent
 from pydantic_ai.models import Model
 
 class CachedAgentProxy(Agent):
-    ''' A proxy agent that caches responses from a real agent to a specified file. 
+    ''' A proxy agent that caches responses from a real OpenRouter Agent to a specified file. 
     Once cached, the agent will return the cached response from dict instead of making a real API call. 
     This proxy only implements the methods it can accurately simulate. '''
     
@@ -22,10 +24,10 @@ class CachedAgentProxy(Agent):
         try:
             with open(self.cache_file, 'r') as f:
                 self.cache = json.load(f)
-                print(f"Loaded {len(self.cache)} cached responses from {self.cache_file}")
+                print(f"Loaded {len(self.cache)} cached responses from: {self.cache_file}")
         except (FileNotFoundError, json.JSONDecodeError):
             self.cache = {}
-            print(f"No existing cache found, starting with empty cache")
+            print(f"No existing cache found, starting with empty cache.")
         
     async def run(self, *args, **kwargs):
         if args[0] in self.cache:
@@ -41,6 +43,9 @@ class CachedAgentProxy(Agent):
             self.cache[args[0]] = cacheable_result
             result._was_cached = False
             return result
+
+    def response_2_usage_results(self, response: httpx.Response) -> tuple[dict, list[str]]:
+        return response.usage(), response.output.completions
     
     def _make_cacheable(self, result):
         """Extract serializable data from the agent result."""
@@ -117,9 +122,9 @@ class CachedAgentProxy(Agent):
             os.makedirs(os.path.dirname(self.cache_file), exist_ok=True)
             with open(self.cache_file, 'w') as f:
                 json.dump(self.cache, f, indent=2)
-            print(f"Cache saved to {self.cache_file}")
+            print(f"Cache saved to: {self.cache_file}")
         except Exception as e:
-            print(f"Warning: Could not save cache to {self.cache_file}: {e}")
+            print(f"Warning: Could not save cache to: {self.cache_file}: {e}")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
