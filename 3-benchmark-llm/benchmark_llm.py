@@ -5,7 +5,7 @@ import dataclasses
 import httpx
 import re
 
-from typing import Protocol, Type
+from typing import Protocol
 from dataclasses import dataclass
 from pydantic import BaseModel
 from pydantic_ai import Agent
@@ -13,6 +13,7 @@ from pydantic_ai.models.openai import OpenAIChatModel, OpenAIChatModelSettings
 from pydantic_ai.providers.openrouter import OpenRouterProvider
 
 from questions import QuestionData, load_questions_from_jsonl
+from models import ModelInfo, Models
 from metrics import Metrics, get_accuracy, summarize_metrics, print_metrics
 from cached_agent_proxy import CachedAgentProxy
 from async_openai_prompts import OpenAIPromptAgent
@@ -40,13 +41,6 @@ class Context:
         """Create a new Context with specified changes"""
         return dataclasses.replace(self, **kwargs)
 
-@dataclass(frozen=True)
-class ModelInfo:
-    openrouter_name: str
-    direct_name: str
-    input_cost: float
-    output_cost: float
-
 # Pydantic model for structured output.
 class CodeCompletion(BaseModel):
     completions: list[str]
@@ -72,25 +66,6 @@ Your response:
 {"completions": ["A1", "Value", "Hello"]}
 
 Below is the question and masked code. Return only the JSON object with no explanations, comments, or additional text. """
-
-# Models with OpenRouter name, direct name, input costs, and output costs. "openaiprompt" models are handled differently.
-ModelInfos = [
-    ModelInfo('openai/gpt-5-mini', 'openai:gpt-5-mini', 0.25, 2.00), 
-    ModelInfo('openaiprompt/GemBoxGPT-GBS-examples', 'pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2', 0.25, 2.00),
-    ModelInfo('google/gemini-2.5-flash', 'google-gla:gemini-2.5-flash', 0.30, 2.50),
-    ModelInfo('mistralai/codestral-2508', 'mistral:codestral-latest', 0.30, 0.90),
-    ModelInfo('google/gemini-2.5-flash-lite', 'google-gla:gemini-2.5-flash-lite', 0.10, 0.40), 
-    ModelInfo('openai/gpt-5-nano', 'openai:gpt-5-nano', 0.05, 0.40), # Low accuracy.
-    ModelInfo('anthropic/claude-3-haiku', 'anthropic:claude-3-5-haiku-latest', 0.25, 1.35), # Low accuracy.
-    ModelInfo('openai/gpt-4o-mini', 'openai:gpt-4o-mini', 0.15, 0.60), # Low accuracy.
-]
-
-MODELS = {m.openrouter_name.split('/')[-1]: m for m in ModelInfos}
-PRIMARY_MODELS = [
-    MODELS['gpt-5-mini'], 
-    MODELS['gemini-2.5-flash'], 
-    MODELS['codestral-2508'],  
-]
 
 # Utility functions:
 
@@ -258,13 +233,10 @@ async def main():
     # Load questions from JSONL file.
     jsonl_path = "../2-bench-filter/test.jsonl"
     questions = load_questions_from_jsonl(jsonl_path)
-    # questions = questions[:5]
+    questions = questions[:5]
 
-    # Define models to benchmark.
-    # models = [ MODELS['GemBoxGPT-GBS-examples'] ]
-    # models = [ MODELS['gpt-5-mini'], MODELS['gemini-2.5-flash'], MODELS['GemBoxGPT-GBS-examples'] ]
-    models = [ MODELS['GemBoxGPT-GBS-examples'] ] + PRIMARY_MODELS
-    # models = MODELS.values()
+    models = Models().by_tags(include={'openai'}, exclude={'prompt'}).by_max_price(input_cost=0.3, output_cost=0.9)
+    print(f"Filtered models ({len(models)}): {models}")
     
     # Default context.
     default_context = Context(
