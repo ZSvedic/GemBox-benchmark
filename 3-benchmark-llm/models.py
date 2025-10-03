@@ -14,7 +14,8 @@ class ModelInfo:
     def __str__(self) -> str:
         return self.openrouter_name.split('/')[-1]
 
-TagToModels = dict[str, list[ModelInfo]]
+    def calculate_cost(self, input_tokens: int, output_tokens: int) -> float:
+        return (input_tokens / 1_000_000) * self.input_cost + (output_tokens / 1_000_000) * self.output_cost
 
 _ALL_MODELS = [
     # ModelInfo('provider/model', 'direct_name', input_cost, output_cost, tags),
@@ -48,35 +49,27 @@ _ALL_MODELS = [
     ModelInfo('anthropic/claude-3-haiku', 'anthropic:claude-3-5-haiku-latest', 0.25, 1.35, {'anthropic'}), # Low accuracy.
     ModelInfo('anthropic/claude-sonnet-4.5', 'anthropic:claude-sonnet-4.5-latest', 3.0, 15.00, {'anthropic'}),
     ModelInfo('anthropic/claude-opus-4.1', 'anthropic:claude-sonnet-4.5-haiku-latest', 15.00, 75.00, {'anthropic'}),
-    ModelInfo('', '', 0.0, 0.0, {''}),
 ]
 
-_BY_NAME = {str(m): m for m in _ALL_MODELS}
-
-
 class Models:
-    """Fluent query object for model filtering."""
+    '''Fluent query object for model filtering.'''
 
     def __init__(self, models: list[ModelInfo] = None):
         self.models = models or _ALL_MODELS
 
-    def by_tags(self, include: set[str] = set(), exclude: set[str] = set()) -> Models:
-        self.models = [
-            m for m in self.models
-            if include.issubset(m.tags) and not (exclude & m.tags)
-        ]
+    def filter(self, condition: callable) -> Models:
+        """Filter models using a condition function."""
+        self.models = [m for m in self.models if condition(m)]
         return self
+
+    def by_tags(self, include: set[str] = set(), exclude: set[str] = set()) -> Models:
+        return self.filter(lambda m: include.issubset(m.tags) and not (exclude & m.tags))
 
     def by_max_price(self, input_cost: float, output_cost: float) -> Models:
-        self.models = [
-            m for m in self.models
-            if m.input_cost <= input_cost and m.output_cost <= output_cost
-        ]
-        return self
+        return self.filter(lambda m: m.input_cost <= input_cost and m.output_cost <= output_cost)
 
     def by_names(self, names: list[str]) -> Models:
-        self.models = [m for m in self.models if str(m) in names]
-        return self
+        return self.filter(lambda m: str(m) in names)
 
     def __str__(self):
         return ", ".join([str(m) for m in self.models])

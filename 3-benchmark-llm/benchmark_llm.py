@@ -4,6 +4,7 @@ import time
 import dataclasses
 import httpx
 import re
+import textwrap
 
 from typing import Protocol
 from dataclasses import dataclass
@@ -69,8 +70,6 @@ Below is the question and masked code. Return only the JSON object with no expla
 
 # Utility functions:
 
-def calculate_cost(input_tokens: int, output_tokens: int, model: ModelInfo) -> float:
-    return (input_tokens / 1_000_000) * model.input_cost + (output_tokens / 1_000_000) * model.output_cost
 
 def display_text(text: str, max_length: int) -> str:
     return text[:max_length] + "..." if len(text) > max_length else text
@@ -115,7 +114,7 @@ async def get_question_task(ctx: Context, model: ModelInfo, agent: AgentProtocol
     full_prompt = f"{PROGRAMMING_PROMPT}\n\n{question_text}"
 
     if ctx.verbose:
-        print(f"Q{question_num}: {display_text(question_text, ctx.truncate_length)}")
+        print(f"Q{question_num}: {textwrap.shorten(question_text, ctx.truncate_length)}")
     
     try:
         # Run the async call and retry if needed.
@@ -136,12 +135,12 @@ async def get_question_task(ctx: Context, model: ModelInfo, agent: AgentProtocol
         
         # Calculate tokens, cost, and accuracy.
         total_tokens = usage.input_tokens + usage.output_tokens
-        cost = calculate_cost(usage.input_tokens, usage.output_tokens, model)
+        cost = model.calculate_cost(usage.input_tokens, usage.output_tokens)
         accuracy = get_accuracy(f"Q{question_num}", results, question.answers)
         
         # Display results.  
         if ctx.verbose:
-            print(f"A{question_num}: {display_text(str(results), ctx.truncate_length)}")
+            print(f"A{question_num}: {textwrap.shorten(str(results), ctx.truncate_length)}")
             if accuracy == 1.0:
                 print("✓ CORRECT")
             elif accuracy > 0:
