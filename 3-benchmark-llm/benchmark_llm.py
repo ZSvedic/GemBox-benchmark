@@ -35,11 +35,8 @@ class Context:
     reasoning_effort: str = "low"       # Reasoning effort.
     web_search: bool = False            # Use web search?
 
-    def __post_init__(self):
-        assert self.benchmark_n_times==1 or not self.use_caching, "Caching only makes sense for single-run benchmarks."
-
     def with_changes(self, **kwargs):
-        """Create a new Context with specified changes"""
+        """Creates a new Context with specified changes"""
         return dataclasses.replace(self, **kwargs)
 
 # Pydantic model for structured output.
@@ -76,7 +73,7 @@ def display_text(text: str, max_length: int) -> str:
 
 # Benchmarking functions:
 
-def get_model_agent(ctx: Context, model_info: ModelInfo) -> tuple[str, AgentProtocol]:
+def get_model_agent(ctx: Context, model_info: ModelInfo, run_index: int = 0) -> tuple[str, AgentProtocol]:
     """Get a model name and agent."""
     if model_info.openrouter_name.startswith("openaiprompt"): # OpenAIPromptAgent.
         model_name = model_info.direct_name
@@ -96,8 +93,8 @@ def get_model_agent(ctx: Context, model_info: ModelInfo) -> tuple[str, AgentProt
             model = model_name
 
         if ctx.use_caching:
-            cache_name = f"cache/responses_{re.sub(r'[^A-Za-z0-9._-]', '_', model_name)}.json"
-            print(f"\n--- Creating CachedAgentProxy for {model_name} ---")
+            cache_name = f"cache/responses_{re.sub(r'[^A-Za-z0-9._-]', '_', model_name)}_run{run_index + 1}.json"
+            print(f"\n--- Creating CachedAgentProxy for {model_name} (run {run_index + 1}) ---")
             agent_code = CachedAgentProxy(
                 model, CodeCompletion, cache_name, ctx.verbose)
         else:
@@ -158,11 +155,11 @@ async def get_question_task(ctx: Context, model: ModelInfo, agent: AgentProtocol
         print(f"Error: {repr(e)}")
         return Metrics("Error", 0.0, 0, 0, False, 0.0, 1, 1)
 
-async def run_model_benchmark(ctx: Context, model_info: ModelInfo, questions: list) -> Metrics:
+async def run_model_benchmark(ctx: Context, model_info: ModelInfo, questions: list, run_index: int = 0) -> Metrics:
     """Run benchmark for a single model on all questions in parallel."""
     # Initialize model and agent.
     try:
-        model_name, agent = get_model_agent(ctx, model_info)
+        model_name, agent = get_model_agent(ctx, model_info, run_index)
     except Exception as e:
         print(f"\n--- Can't get model agent: {repr(e)}")
         return Metrics(f"ERROR-{model_info.openrouter_name}", 0.0, 0, 0, False, 0.0, len(questions))
@@ -196,8 +193,7 @@ async def run_model_benchmark(ctx: Context, model_info: ModelInfo, questions: li
         agent.close()
     
     # Summarize model metrics and return data.
-    if ctx.verbose:
-        print_metrics(model_name, task_metrics)
+    print_metrics(model_name, task_metrics)
     return summarize_metrics(model_name, task_metrics)
 
 async def benchmark_models_n_times(name: str, ctx: Context, models: list[ModelInfo], questions: list[QuestionData]) -> Metrics:
@@ -210,7 +206,7 @@ async def benchmark_models_n_times(name: str, ctx: Context, models: list[ModelIn
         print(f"\n=== Run {run_idx + 1} of {ctx.benchmark_n_times} ===")
         for model in models:
             perf_data[model.openrouter_name].append(
-                await run_model_benchmark(ctx, model, questions))
+                await run_model_benchmark(ctx, model, questions, run_idx))
 
     # Flatten list of lists.
     all_metrics = [ 
@@ -232,7 +228,7 @@ async def main():
     # Load questions from JSONL file.
     jsonl_path = "../2-bench-filter/test.jsonl"
     questions = load_questions_from_jsonl(jsonl_path)
-    questions = questions[:5]
+    questions = questions[:10]
 
     models = Models().by_tags(include={'openai'}, exclude={'prompt'}).by_max_price(input_cost=0.3, output_cost=0.9)
     print(f"Filtered models ({len(models)}): {models}")
@@ -247,7 +243,7 @@ async def main():
         retry_failures=True, 
         use_caching=True, 
         use_open_router=True,
-        benchmark_n_times=1, 
+        benchmark_n_times=2, 
         reasoning_effort="low", 
         web_search=False)
 
