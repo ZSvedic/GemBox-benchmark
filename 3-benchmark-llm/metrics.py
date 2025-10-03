@@ -27,13 +27,13 @@ def summarize_metrics(name: str, metrics: list[Metrics]) -> Metrics:
     """Calculate a single summary metric from a list of Metrics."""
     assert len(metrics) > 0, "No metrics to summarize."
 
-    was_cached = any(m.was_cached for m in metrics)
+    was_cached = all(m.was_cached for m in metrics)
     accuracy_scores = [m.accuracy for m in metrics if m.accuracy is not None] # Exclude errors.
     accuracy = sum(accuracy_scores) / len(accuracy_scores) if accuracy_scores else None
     
     return Metrics(
         name=name,
-        cost=0.0 if was_cached else sum(m.cost for m in metrics),
+        cost=sum(m.cost for m in metrics if not m.was_cached),
         tokens=sum(m.tokens for m in metrics),
         time=sum(m.time for m in metrics),
         was_cached=was_cached,
@@ -46,6 +46,13 @@ def print_metrics(name: str, metrics: list[Metrics]) -> None:
     """Print a list of Metrics entries."""
     print(f"\n==={name}===")
     for m in metrics:
-        m_name = m.name + (" (CACHED)" if m.was_cached else "")
+        # For individual questions, show their own cache status
+        if m.name.startswith('Q'):
+            cache_status = " (CACHED)" if m.was_cached else ""
+        else:
+            # For summaries, show the summary cache status
+            cached_count = sum(1 for metric in metrics if metric.was_cached)
+            cache_status = " (CACHED)" if cached_count == len(metrics) else " (PART CACHED)" if cached_count > 0 else ""
+        m_name = m.name + cache_status
         acc_str = f"{m.accuracy:.0%}" if m.accuracy is not None else "N/A"
         print(f"\t{m_name:32.32}\ttokens={m.tokens},\tcost=${m.cost:.6f},\ttime={m.time:.2f}s,\taccuracy={acc_str},\terrors={m.error_count}/{m.api_calls}")

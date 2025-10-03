@@ -36,7 +36,6 @@ _ALL_MODELS = [
     # Prompt version 4 uses gpt-5-mini.
     ModelInfo('openaiprompt/GemBoxGPT-GBS-examples', 'pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2', 0.25, 2.00, {'openai', 'prompt', 'accurate'}),
     # Google models: https://openrouter.ai/provider/google-ai-studio
-    ModelInfo('google/gemma-3-12b-it:free', 'google-gla:gemma-3-12b-it:free', 0.0, 0.0, {'google', 'fast'}),
     ModelInfo('google/gemini-2.0-flash-001', 'google-gla:gemini-2.0-flash-001', 0.10, 0.40, {'google', 'fast'}),
     ModelInfo('google/gemini-2.5-flash-lite', 'google-gla:gemini-2.5-flash-lite', 0.10, 0.40, {'google', 'fast', 'accurate'}), 
     ModelInfo('google/gemini-2.5-flash', 'google-gla:gemini-2.5-flash', 0.30, 2.50, {'google', 'fast', 'accurate'}),
@@ -82,6 +81,9 @@ class Models:
 
     def __len__(self):
         return len(self.models)
+
+    def __add__(self, other: Models) -> Models:
+        return Models(self.models + other.models)
 
     def print_by_tags(self): 
         # Group models by tags.

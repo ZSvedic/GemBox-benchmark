@@ -192,9 +192,13 @@ async def run_model_benchmark(ctx: Context, model_info: ModelInfo, questions: li
     if isinstance(agent, CachedAgentProxy):
         agent.close()
     
-    # Summarize model metrics and return data.
-    print_metrics(model_name, task_metrics)
-    return summarize_metrics(model_name, task_metrics)
+    # Summarize model metrics, print, and return data.
+    sum_metrics = summarize_metrics(model_name, task_metrics)
+    if ctx.verbose:
+        print_metrics(model_name, task_metrics)
+    else:
+        print_metrics(model_name, [sum_metrics])
+    return sum_metrics
 
 async def benchmark_models_n_times(name: str, ctx: Context, models: list[ModelInfo], questions: list[QuestionData]) -> Metrics:
     """Benchmark models N times."""
@@ -226,15 +230,14 @@ async def main():
     assert dotenv.dotenv_values().values(), ".env file not found or empty"
 
     # Load questions from JSONL file.
-    jsonl_path = "../2-bench-filter/test.jsonl"
-    questions = load_questions_from_jsonl(jsonl_path)
-    questions = questions[:10]
+    questions = load_questions_from_jsonl("../2-bench-filter/test.jsonl")
 
-    models = Models().by_tags(include={'openai'}, exclude={'prompt'}).by_max_price(input_cost=0.3, output_cost=0.9)
+    # Filter models.
+    models = Models().by_tags(exclude={'prompt'})
     print(f"Filtered models ({len(models)}): {models}")
     
-    # Default context.
-    default_context = Context(
+    # Create starting context.
+    start_ctx = Context(
         timeout_seconds=30, 
         delay_ms=10, 
         verbose=False, 
@@ -243,26 +246,26 @@ async def main():
         retry_failures=True, 
         use_caching=True, 
         use_open_router=True,
-        benchmark_n_times=2, 
+        benchmark_n_times=1, 
         reasoning_effort="low", 
         web_search=False)
 
-    # Benchmark reasoning effort.
+    # Benchmark models.
     perf_data = [
         await benchmark_models_n_times(
             # f"WEB SEARCH: {web}",
-            # default_context.with_changes(web_search=web),
+            # start_ctx.with_changes(web_search=web),
             f"{timeout}s, {reason} REASONING", 
-            default_context.with_changes(reasoning_effort=reason, timeout_seconds=timeout), 
+            start_ctx.with_changes(reasoning_effort=reason, timeout_seconds=timeout), 
             models, 
             questions)
-        # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
-        for timeout, reason in [(50, "low")]
         # for web in [False, True]
+        # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
+        for timeout, reason in [(60, "low")]
     ]
 
     # Print summary.
-    # print_metrics("=== SUMMARY OF ALL TESTS ===", perf_data)
+    print_metrics("=== SUMMARY OF ALL TESTS ===", perf_data)
     # print_metrics("=== SUMMARY OF: TOTAL ===", [summarize_metrics("TOTAL", perf_data)])
 
 if __name__ == "__main__":
