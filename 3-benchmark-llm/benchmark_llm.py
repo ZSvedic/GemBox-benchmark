@@ -233,7 +233,8 @@ async def main():
     questions = load_questions_from_jsonl("../2-bench-filter/test.jsonl")
 
     # Filter models.
-    models = Models().by_tags(exclude={'prompt'})
+    models = Models().by_tags(include={'prompt'})
+    # models = Models().by_names(['gpt-5-nano', 'gpt-5-mini', 'gpt-5', 'gpt-5-codex'])
     print(f"Filtered models ({len(models)}): {models}")
     
     # Create starting context.
@@ -244,9 +245,9 @@ async def main():
         truncate_length=150, 
         max_parallel_questions=30, 
         retry_failures=True, 
-        use_caching=True, 
-        use_open_router=True,
-        benchmark_n_times=1, 
+        use_caching=False, 
+        use_open_router=False,
+        benchmark_n_times=2, 
         reasoning_effort="low", 
         web_search=False)
 
@@ -261,7 +262,7 @@ async def main():
             questions)
         # for web in [False, True]
         # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
-        for timeout, reason in [(60, "low")]
+        for timeout, reason in [(60, "medium")]
     ]
 
     # Print summary.
