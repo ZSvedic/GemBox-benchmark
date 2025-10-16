@@ -24,55 +24,56 @@ QUESTION = """How do you set the value of cell B1 to Hi?\nworksheet.Cells[???].?
 
 def generate():
   client = genai.Client(vertexai=True, project=PROJECT_ID, location=LOCATION)
-
-  contents = [
-    types.Content(role="user", parts=[types.Part.from_text(text=QUESTION)]),
-  ]
-  tools = [
-    types.Tool(
-      retrieval=types.Retrieval(
+  resp = client.models.generate_content(
+    model=MODEL_NAME,
+    contents=[types.Content(role="user", parts=[types.Part.from_text(text=QUESTION)])],
+    config=types.GenerateContentConfig(
+      tools=[types.Tool(retrieval=types.Retrieval(
         vertex_rag_store=types.VertexRagStore(
-          rag_resources=[
-            types.VertexRagStoreRagResource(rag_corpus=RAG_CORPUS_PATH)
-          ],
+          rag_resources=[types.VertexRagStoreRagResource(rag_corpus=RAG_CORPUS_PATH)],
           similarity_top_k=20,
         )
-      )
-    )
-  ]
-
-  generate_content_config = types.GenerateContentConfig(
-    temperature = 1,
-    top_p = 0.95,
-    max_output_tokens = 65535,
-    safety_settings = [types.SafetySetting(
-      category="HARM_CATEGORY_HATE_SPEECH",
-      threshold="OFF"
-    ),types.SafetySetting(
-      category="HARM_CATEGORY_DANGEROUS_CONTENT",
-      threshold="OFF"
-    ),types.SafetySetting(
-      category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
-      threshold="OFF"
-    ),types.SafetySetting(
-      category="HARM_CATEGORY_HARASSMENT",
-      threshold="OFF"
-    )],
-    tools = tools,
-    system_instruction=[types.Part.from_text(text=PROMPT)],
-    thinking_config=types.ThinkingConfig(
-      thinking_budget=-1,
+      ))],
+      system_instruction=[types.Part.from_text(text=PROMPT)],
     ),
   )
+  print(resp.candidates[0].content.parts[0].text)
 
-  for chunk in client.models.generate_content_stream(
-    model = MODEL_NAME,
-    contents = contents,
-    config = generate_content_config,
-    ):
-    if not chunk.candidates or not chunk.candidates[0].content or not chunk.candidates[0].content.parts:
-        continue
-    print(chunk.text, end="")
+# def generate_old():
+#   # Client.
+#   client = genai.Client(vertexai=True, project=PROJECT_ID, location=LOCATION)
+#   # Contents.
+#   contents = [ types.Content(role="user", parts=[types.Part.from_text(text=QUESTION)]) ]
+#   # Tools.
+#   tools = [
+#     types.Tool(
+#       retrieval=types.Retrieval(
+#         vertex_rag_store=types.VertexRagStore(
+#           rag_resources=[types.VertexRagStoreRagResource(rag_corpus=RAG_CORPUS_PATH)],
+#           similarity_top_k=20,
+#         )
+#       )
+#     )
+#   ]
+#   # Generate content config.
+#   content_config = types.GenerateContentConfig(
+#     temperature = 1,
+#     top_p = 0.95,
+#     max_output_tokens = 65535,
+#     tools = tools,
+#     system_instruction=[types.Part.from_text(text=PROMPT)],
+#     thinking_config=types.ThinkingConfig(thinking_budget=-1),
+#   )
+#   # Get a generator over content stream.
+#   stream = client.models.generate_content_stream( 
+#     model = MODEL_NAME,
+#     contents = contents,
+#     config = content_config
+#   )
+#   # Iterate over content stream.
+#   for chunk in stream:
+#     if chunk.candidates and chunk.candidates[0].content and chunk.candidates[0].content.parts:
+#       print(chunk.candidates[0].content.parts[0].text, end="")
 
 if __name__ == "__main__":
   generate()
