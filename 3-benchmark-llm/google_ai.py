@@ -39,41 +39,6 @@ def generate():
   )
   print(resp.candidates[0].content.parts[0].text)
 
-# def generate_old():
-#   # Client.
-#   client = genai.Client(vertexai=True, project=PROJECT_ID, location=LOCATION)
-#   # Contents.
-#   contents = [ types.Content(role="user", parts=[types.Part.from_text(text=QUESTION)]) ]
-#   # Tools.
-#   tools = [
-#     types.Tool(
-#       retrieval=types.Retrieval(
-#         vertex_rag_store=types.VertexRagStore(
-#           rag_resources=[types.VertexRagStoreRagResource(rag_corpus=RAG_CORPUS_PATH)],
-#           similarity_top_k=20,
-#         )
-#       )
-#     )
-#   ]
-#   # Generate content config.
-#   content_config = types.GenerateContentConfig(
-#     temperature = 1,
-#     top_p = 0.95,
-#     max_output_tokens = 65535,
-#     tools = tools,
-#     system_instruction=[types.Part.from_text(text=PROMPT)],
-#     thinking_config=types.ThinkingConfig(thinking_budget=-1),
-#   )
-#   # Get a generator over content stream.
-#   stream = client.models.generate_content_stream( 
-#     model = MODEL_NAME,
-#     contents = contents,
-#     config = content_config
-#   )
-#   # Iterate over content stream.
-#   for chunk in stream:
-#     if chunk.candidates and chunk.candidates[0].content and chunk.candidates[0].content.parts:
-#       print(chunk.candidates[0].content.parts[0].text, end="")
 
 if __name__ == "__main__":
   generate()
