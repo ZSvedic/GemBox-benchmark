@@ -54,7 +54,7 @@ class GeminiPromptAgent:
 
     return await asyncio.to_thread(_call)
 
-  def response_2_usage_results(self, response) -> Tuple[dict, list[str]]:
+  def response_2_results_tokens(self, response) -> Tuple[list[str], int, int]:
     text = ""
     results: list[str] = []
     try:
@@ -71,7 +71,7 @@ class GeminiPromptAgent:
       results = []
 
     usage = getattr(response, "usage_metadata", {}) or {}
-    return usage, results
+    return results, usage.prompt_token_count, usage.candidates_token_count+usage.thoughts_token_count
 
 
 questions = [
@@ -81,8 +81,8 @@ questions = [
 ]
 
 
-class ListOfStrings(BaseModel):
-  completions: list[str]
+# class ListOfStrings(BaseModel):
+#   completions: list[str]
 
 
 async def main():
@@ -94,8 +94,8 @@ async def main():
   responses = await asyncio.gather(*async_responses)
 
   for res in responses:
-    usage, results = agent.response_2_usage_results(res)
-    print(f"\nUsage: {usage}\nResults: {results}")
+    results, input_tokens, output_tokens = agent.response_2_results_tokens(res)
+    print(f"\nResults: {results}\nInput tokens: {input_tokens}\nOutput tokens: {output_tokens}")
 
 
 if __name__ == "__main__":

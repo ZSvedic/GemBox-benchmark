@@ -29,7 +29,7 @@ _ALL_MODELS = [
     ModelInfo('openai/gpt-5-nano', 'openai:gpt-5-nano', 0.05, 0.40, {'openai', 'fast'}), # Low accuracy.            
     ModelInfo('openai/gpt-5-mini', 'openai:gpt-5-mini', 0.25, 2.00, {'openai', 'fast', 'accurate'}), 
     ModelInfo('openai/gpt-5', 'openai:gpt-5', 1.25, 10.00, {'openai', 'accurate'}),  
-    ModelInfo('openai/gpt-5-codex', 'openai:gpt-5-codex', 1.25, 10.0, {'openai', 'accurate'}),       
+    ModelInfo('openai/gpt-5-codex', 'openai:gpt-5-codex', 1.25, 10.0, {'openai', 'accurate'}), # Doesn't work directly.      
     # OpenAIPrompt models (Zel's private account): 
     # https://platform.openai.com/chat/edit?prompt=pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2&version=4
     # "openaiprompt" models are handled directly.
@@ -41,14 +41,17 @@ _ALL_MODELS = [
     ModelInfo('google/gemini-2.5-flash-lite', 'google-gla:gemini-2.5-flash-lite', 0.10, 0.40, {'google', 'fast', 'accurate'}), 
     ModelInfo('google/gemini-2.5-flash', 'google-gla:gemini-2.5-flash', 0.30, 2.50, {'google', 'fast', 'accurate'}),
     ModelInfo('google/gemini-2.5-pro', 'google-gla:gemini-2.5-pro',10.0, 5.16, {'google', 'accurate'}),
+    # Google Vertex AI models: 
+    # "googlevertexai" models are handled directly.
+    ModelInfo('googlevertexai/rag-gemini-2.5-flash', 'gemini-2.5-flash', 0.30, 2.50, {'google', 'prompt', 'accurate'}),
     # Mistral models: https://openrouter.ai/provider/mistral
     ModelInfo('mistralai/codestral-2508', 'mistral:codestral-latest', 0.30, 0.90, {'mistral', 'fast', 'accurate'}),
     ModelInfo('mistralai/devstral-medium', 'mistral:devstral-medium-latest', 0.40, 2.00, {'mistral'}),
-    ModelInfo('mistralai/mistral-large', 'mistralai/mistral-large-2407', 2.0, 6.0, {'mistral'}),
+    ModelInfo('mistralai/mistral-large', 'mistralai:mistral-medium-2508', 2.0, 6.0, {'mistral'}), # Doesn't work directly.
     # Anthropic models: https://openrouter.ai/provider/anthropic
     ModelInfo('anthropic/claude-3-haiku', 'anthropic:claude-3-5-haiku-latest', 0.25, 1.35, {'anthropic'}), # Low accuracy.
-    ModelInfo('anthropic/claude-sonnet-4.5', 'anthropic:claude-sonnet-4.5-latest', 3.0, 15.00, {'anthropic'}),
-    ModelInfo('anthropic/claude-opus-4.1', 'anthropic:claude-sonnet-4.5-haiku-latest', 15.00, 75.00, {'anthropic'}),
+    ModelInfo('anthropic/claude-sonnet-4.5', 'anthropic:claude-sonnet-4-5', 3.0, 15.00, {'anthropic'}), 
+    ModelInfo('anthropic/claude-opus-4.1', 'anthropic:claude-opus-4-1', 15.00, 75.00, {'anthropic'}), 
 ]
 
 class Models:
@@ -69,7 +72,9 @@ class Models:
         return self.filter(lambda m: m.input_cost <= input_cost and m.output_cost <= output_cost)
 
     def by_names(self, names: list[str]) -> Models:
-        return self.filter(lambda m: str(m) in names)
+        filtered = self.filter(lambda m: str(m) in names)
+        assert len(filtered) == len(names), f"Requested {len(names)} models ({names}), but got {len(filtered)} models ({filtered})."
+        return filtered
 
     def __str__(self):
         return ", ".join([str(m) for m in self.models])

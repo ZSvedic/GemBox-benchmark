@@ -18,6 +18,7 @@ from models import ModelInfo, Models
 from metrics import Metrics, get_accuracy, summarize_metrics, print_metrics
 from cached_agent_proxy import CachedAgentProxy
 from async_openai_prompts import OpenAIPromptAgent
+from async_google_prompt import GeminiPromptAgent
 
 # Data classes:
 
@@ -46,12 +47,12 @@ class CodeCompletion(BaseModel):
 # Protocol for agents.
 class AgentProtocol(Protocol):
     async def run(self, input: str) -> httpx.Response: ...
-    def response_2_usage_results(self, response: httpx.Response) -> tuple[dict, list[str]]: ...
+    def response_2_results_tokens(self, response: httpx.Response) -> tuple[list[str], int, int]: ...
 
 # Methods run() and __init__() are inherited from Agent, but response_2_usage_results() is implemented.
 class OpenRouterAgent(Agent, AgentProtocol):
-    def response_2_usage_results(self, response: httpx.Response) -> tuple[dict, list[str]]:
-        return response.usage(), response.output.completions
+    def response_2_results_tokens(self, response: httpx.Response) -> tuple[list[str], int, int]:
+        return response.output.completions, response.usage().input_tokens, response.usage().output_tokens
 
 PROGRAMMING_PROMPT = """Answer a coding question related to GemBox Software .NET components.
 Return a JSON object with a 'completions' array containing only the code strings that should replace the ??? marks, in order. 
@@ -79,6 +80,10 @@ def get_model_agent(ctx: Context, model_info: ModelInfo, run_index: int = 0) -> 
         model_name = model_info.direct_name
         print(f"\n--- Creating OpenAIPromptAgent for {model_name} ---")
         agent_code = OpenAIPromptAgent(model_name, CodeCompletion)
+    elif model_info.openrouter_name.startswith("googlevertexai"): # GeminiPromptAgent.
+        model_name = model_info.direct_name
+        print(f"\n--- Creating GeminiPromptAgent for {model_name} ---")
+        agent_code = GeminiPromptAgent(model_name)
     else:
         if ctx.use_open_router: # OpenRouterAgent.
             model_name = model_info.openrouter_name + (":online" if ctx.web_search else "")
@@ -128,11 +133,10 @@ async def get_question_task(ctx: Context, model: ModelInfo, agent: AgentProtocol
                 raise
         
         # Convert specific response to usage and results.
-        usage, results = agent.response_2_usage_results(response)
+        results, input_tokens, output_tokens = agent.response_2_results_tokens(response)
         
         # Calculate tokens, cost, and accuracy.
-        total_tokens = usage.input_tokens + usage.output_tokens
-        cost = model.calculate_cost(usage.input_tokens, usage.output_tokens)
+        cost = model.calculate_cost(input_tokens, output_tokens)
         accuracy = get_accuracy(f"Q{question_num}", results, question.answers)
         
         # Display results.  
@@ -149,7 +153,7 @@ async def get_question_task(ctx: Context, model: ModelInfo, agent: AgentProtocol
         was_cached = getattr(response, '_was_cached', False)
         
         # Return metrics.
-        return Metrics(f"Q{question_num}", cost, total_tokens, 0, was_cached, accuracy, 0, 1)
+        return Metrics(f"Q{question_num}", cost, input_tokens+output_tokens, 0, was_cached, accuracy, 0, 1)
 
     except Exception as e:
         print(f"Error: {repr(e)}")
@@ -233,8 +237,8 @@ async def main():
     questions = load_questions_from_jsonl("../2-bench-filter/test.jsonl")
 
     # Filter models.
-    models = Models().by_tags(include={'prompt'})
-    # models = Models().by_names(['gpt-5-nano', 'gpt-5-mini', 'gpt-5', 'gpt-5-codex'])
+    # models = Models().by_tags(exclude={'prompt'})
+    models = Models().by_names(['gpt-5-codex', 'mistral-large'])
     print(f"Filtered models ({len(models)}): {models}")
     
     # Create starting context.
@@ -247,7 +251,7 @@ async def main():
         retry_failures=True, 
         use_caching=False, 
         use_open_router=False,
-        benchmark_n_times=2, 
+        benchmark_n_times=1, 
         reasoning_effort="low", 
         web_search=False)
 

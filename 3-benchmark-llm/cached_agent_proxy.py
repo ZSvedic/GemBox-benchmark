@@ -44,8 +44,8 @@ class CachedAgentProxy(Agent):
             result._was_cached = False
             return result
 
-    def response_2_usage_results(self, response: httpx.Response) -> tuple[dict, list[str]]:
-        return response.usage(), response.output.completions
+    def response_2_results_tokens(self, response: httpx.Response) -> tuple[list[str], int, int]:
+        return response.output.completions, response.usage().input_tokens, response.usage().output_tokens
     
     def _make_cacheable(self, result):
         """Extract serializable data from the agent result."""

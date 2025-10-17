@@ -18,8 +18,8 @@ class OpenAIPromptAgent:
             input=[{"role": "user", "content": input}],
             text_format=self.passed_output_type)
 
-    def response_2_usage_results(self, response: httpx.Response) -> tuple[dict, list[str]]:
-        return response.usage, response.output_parsed.completions
+    def response_2_results_tokens(self, response: httpx.Response) -> tuple[list[str], int, int]:
+        return response.output_parsed.completions, response.usage.input_tokens, response.usage.output_tokens
 
 questions = [
     "How to set value of A1 to 'Abracadabra'?",
