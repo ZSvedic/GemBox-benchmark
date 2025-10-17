@@ -47,7 +47,7 @@ _ALL_MODELS = [
     # Mistral models: https://openrouter.ai/provider/mistral
     ModelInfo('mistralai/codestral-2508', 'mistral:codestral-latest', 0.30, 0.90, {'mistral', 'fast', 'accurate'}),
     ModelInfo('mistralai/devstral-medium', 'mistral:devstral-medium-latest', 0.40, 2.00, {'mistral'}),
-    ModelInfo('mistralai/mistral-large', 'mistralai:mistral-medium-2508', 2.0, 6.0, {'mistral'}), # Doesn't work directly.
+    ModelInfo('mistralai/mistral-large', 'mistralai:mistral-large-latest', 2.0, 6.0, {'mistral'}), # Doesn't work directly.
     # Anthropic models: https://openrouter.ai/provider/anthropic
     ModelInfo('anthropic/claude-3-haiku', 'anthropic:claude-3-5-haiku-latest', 0.25, 1.35, {'anthropic'}), # Low accuracy.
     ModelInfo('anthropic/claude-sonnet-4.5', 'anthropic:claude-sonnet-4-5', 3.0, 15.00, {'anthropic'}), 

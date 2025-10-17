@@ -237,20 +237,20 @@ async def main():
     questions = load_questions_from_jsonl("../2-bench-filter/test.jsonl")
 
     # Filter models.
-    # models = Models().by_tags(exclude={'prompt'})
-    models = Models().by_names(['gpt-5-codex', 'mistral-large'])
+    models = Models().by_tags(exclude={'prompt'})
+    # models = Models().by_names(['gpt-5-codex', 'mistral-large'])
     print(f"Filtered models ({len(models)}): {models}")
     
     # Create starting context.
     start_ctx = Context(
         timeout_seconds=30, 
-        delay_ms=10, 
+        delay_ms=50, 
         verbose=False, 
         truncate_length=150, 
         max_parallel_questions=30, 
         retry_failures=True, 
         use_caching=False, 
-        use_open_router=False,
+        use_open_router=True,
         benchmark_n_times=1, 
         reasoning_effort="low", 
         web_search=False)
