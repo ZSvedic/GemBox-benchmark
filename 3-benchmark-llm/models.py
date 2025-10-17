@@ -40,10 +40,13 @@ _ALL_MODELS = [
     ModelInfo('google/gemini-2.0-flash-001', 'google-gla:gemini-2.0-flash-001', 0.10, 0.40, {'google', 'fast'}),
     ModelInfo('google/gemini-2.5-flash-lite', 'google-gla:gemini-2.5-flash-lite', 0.10, 0.40, {'google', 'fast', 'accurate'}), 
     ModelInfo('google/gemini-2.5-flash', 'google-gla:gemini-2.5-flash', 0.30, 2.50, {'google', 'fast', 'accurate'}),
-    ModelInfo('google/gemini-2.5-pro', 'google-gla:gemini-2.5-pro',10.0, 5.16, {'google', 'accurate'}),
+    ModelInfo('google/gemini-2.5-pro', 'google-gla:gemini-2.5-pro',1.25, 10.00, {'google', 'accurate'}),
     # Google Vertex AI models: 
     # "googlevertexai" models are handled directly.
-    ModelInfo('googlevertexai/rag-gemini-2.5-flash', 'gemini-2.5-flash', 0.30, 2.50, {'google', 'prompt', 'accurate'}),
+    ModelInfo('googlevertexai/norag-gemini-2.5-flash', 'gemini-2.5-flash:none', 0.30, 2.50, {'google', 'prompt', 'accurate'}),
+    ModelInfo('googlevertexai/rag-gemini-2.5-flash', 'gemini-2.5-flash:4611686018427387904', 0.30, 2.50, {'google', 'prompt', 'accurate'}),
+    ModelInfo('googlevertexai/norag-gemini-2.5-pro', 'gemini-2.5-pro:none', 1.25, 10.00, {'google', 'prompt', 'accurate'}),
+    ModelInfo('googlevertexai/rag-gemini-2.5-pro', 'gemini-2.5-pro:4611686018427387904', 1.25, 10.00, {'google', 'prompt', 'accurate'}),
     # Mistral models: https://openrouter.ai/provider/mistral
     ModelInfo('mistralai/codestral-2508', 'mistral:codestral-latest', 0.30, 0.90, {'mistral', 'fast', 'accurate'}),
     ModelInfo('mistralai/devstral-medium', 'mistral:devstral-medium-latest', 0.40, 2.00, {'mistral'}),

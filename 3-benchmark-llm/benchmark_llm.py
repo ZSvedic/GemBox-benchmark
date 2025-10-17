@@ -59,13 +59,13 @@ Return a JSON object with a 'completions' array containing only the code strings
 Completions array should not contain any extra whitespace as results will be used for string comparison.
 
 Example question: 
-How do you set the value of cell A1 to Hello?
+How do you set the value of cell A1 to "Hello"?
 worksheet.Cells[???].??? = ???;
 Your response:
-{"completions": ["A1", "Value", "Hello"]}
+{'completions': ['"A1"', 'Value', '"Hello"']}
 
-Below is the question and masked code. Return only the JSON object with no explanations, comments, or additional text. """
-
+Below is the question and masked code. Return only the JSON object with no explanations, comments, or additional text. 
+"""
 # Utility functions:
 
 
@@ -81,9 +81,9 @@ def get_model_agent(ctx: Context, model_info: ModelInfo, run_index: int = 0) -> 
         print(f"\n--- Creating OpenAIPromptAgent for {model_name} ---")
         agent_code = OpenAIPromptAgent(model_name, CodeCompletion)
     elif model_info.openrouter_name.startswith("googlevertexai"): # GeminiPromptAgent.
-        model_name = model_info.direct_name
-        print(f"\n--- Creating GeminiPromptAgent for {model_name} ---")
-        agent_code = GeminiPromptAgent(model_name)
+        model_name, rag_id = model_info.direct_name.split(":")
+        print(f"\n--- Creating GeminiPromptAgent for model {model_name} and rag {rag_id} ---")
+        agent_code = GeminiPromptAgent(model_name, rag_id)
     else:
         if ctx.use_open_router: # OpenRouterAgent.
             model_name = model_info.openrouter_name + (":online" if ctx.web_search else "")
@@ -237,8 +237,8 @@ async def main():
     questions = load_questions_from_jsonl("../2-bench-filter/test.jsonl")
 
     # Filter models.
-    models = Models().by_tags(exclude={'prompt'})
-    # models = Models().by_names(['gpt-5-codex', 'mistral-large'])
+    # models = Models().by_tags(include={'prompt'})
+    models = Models().by_names(['rag-gemini-2.5-flash'])
     print(f"Filtered models ({len(models)}): {models}")
     
     # Create starting context.

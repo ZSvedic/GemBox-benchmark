@@ -7,12 +7,10 @@ from pydantic import BaseModel
 from google import genai
 from google.genai import types
 
-
-MODEL_NAME = "gemini-2.5-flash"
+# Google Vertex AI settings:
+LOCATION = "europe-west4"
 PROJECT_ID = "gen-lang-client-0658217610"
-LOCATION = "europe-west3"
-RAG_ID = "4611686018427387904"
-RAG_CORPUS_PATH = f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/{RAG_ID}"
+RAG_CORPUS_PATH = f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/"
 
 PROMPT = """Answer a coding question related to GemBox Software .NET components.
 Return a JSON object with a 'completions' array containing only the code strings that should replace the ??? marks, in order. 
@@ -29,18 +27,22 @@ Below is the question and masked code. Return only the JSON object with no expla
 
 
 class GeminiPromptAgent:
-  def __init__(self, model_name: str = MODEL_NAME):
+  def __init__(self, model_name: str, rag_id: str):
     self.client = genai.Client(vertexai=True, project=PROJECT_ID, location=LOCATION)
     self.model_name = model_name
+    if rag_id=="none":
+      self.tools = []
+    else:
+      self.tools = [types.Tool(retrieval=types.Retrieval(
+        vertex_rag_store=types.VertexRagStore(
+          rag_resources=[types.VertexRagStoreRagResource(rag_corpus=RAG_CORPUS_PATH + rag_id)],
+          similarity_top_k=20,
+        )
+      ))]
 
   def _config(self) -> types.GenerateContentConfig:
     return types.GenerateContentConfig(
-      tools=[types.Tool(retrieval=types.Retrieval(
-        vertex_rag_store=types.VertexRagStore(
-          rag_resources=[types.VertexRagStoreRagResource(rag_corpus=RAG_CORPUS_PATH)],
-          similarity_top_k=20,
-        )
-      ))],
+      tools=self.tools,
       system_instruction=[types.Part.from_text(text=PROMPT)],
     )
 
@@ -80,16 +82,15 @@ questions = [
   # "How to print sheet?"
 ]
 
-
-# class ListOfStrings(BaseModel):
-#   completions: list[str]
-
+# For local testing:
+MODEL_NAME = "gemini-2.5-flash"
+RAG_ID = "4611686018427387904"
 
 async def main():
   dotenv.load_dotenv()
   assert dotenv.dotenv_values().values(), ".env file not found or empty"
 
-  agent = GeminiPromptAgent()
+  agent = GeminiPromptAgent(MODEL_NAME, RAG_ID)
   async_responses = [agent.run(q) for q in questions]
   responses = await asyncio.gather(*async_responses)
 
