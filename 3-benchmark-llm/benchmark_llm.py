@@ -6,6 +6,7 @@ import httpx
 import re
 import textwrap
 
+from pathlib import Path
 from typing import Protocol
 from dataclasses import dataclass
 from pydantic import BaseModel
@@ -23,7 +24,7 @@ from async_google_prompt import GeminiPromptAgent
 # Data classes:
 
 @dataclass(frozen=True)
-class Context:
+class BenchmarkContext:
     timeout_seconds: int = 20           # Timeout for each question.
     delay_ms: int = 10                  # Delay between question calls.
     verbose: bool = True                # Verbose or quiet output?
@@ -35,6 +36,23 @@ class Context:
     benchmark_n_times: int = 1          # Benchmark n times?
     reasoning_effort: str = "low"       # Reasoning effort.
     web_search: bool = False            # Use web search?
+    docs: str = None                    # Documentation to use.
+
+    def __str__(self):
+        return f'''BenchmarkContext:
+        timeout_seconds: {self.timeout_seconds}
+        delay_ms: {self.delay_ms}
+        verbose: {self.verbose}
+        truncate_length: {self.truncate_length}
+        max_parallel_questions: {self.max_parallel_questions}
+        retry_failures: {self.retry_failures}
+        use_caching: {self.use_caching}
+        use_open_router: {self.use_open_router}
+        benchmark_n_times: {self.benchmark_n_times}
+        reasoning_effort: {self.reasoning_effort}
+        web_search: {self.web_search}
+        docs: {display_text(self.docs, self.truncate_length)}
+        '''
 
     def with_changes(self, **kwargs):
         """Creates a new Context with specified changes"""
@@ -64,8 +82,9 @@ worksheet.Cells[???].??? = ???;
 Your response:
 {'completions': ['"A1"', 'Value', '"Hello"']}
 
-Below is the question and masked code. Return only the JSON object with no explanations, comments, or additional text. 
-"""
+Below '--- QUESTION AND MASKED CODE:' line is the question and masked code. Return only the JSON object with no explanations, comments, or additional text.
+
+--- QUESTION AND MASKED CODE: """
 # Utility functions:
 
 
@@ -74,7 +93,7 @@ def display_text(text: str, max_length: int) -> str:
 
 # Benchmarking functions:
 
-def get_model_agent(ctx: Context, model_info: ModelInfo, run_index: int = 0) -> tuple[str, AgentProtocol]:
+def get_model_agent(ctx: BenchmarkContext, model_info: ModelInfo, run_index: int = 0) -> tuple[str, AgentProtocol]:
     """Get a model name and agent."""
     if model_info.openrouter_name.startswith("openaiprompt"): # OpenAIPromptAgent.
         model_name = model_info.direct_name
@@ -108,12 +127,15 @@ def get_model_agent(ctx: Context, model_info: ModelInfo, run_index: int = 0) -> 
 
     return model_name, agent_code
 
-async def get_question_task(ctx: Context, model: ModelInfo, agent: AgentProtocol,
+async def get_question_task(ctx: BenchmarkContext, model: ModelInfo, agent: AgentProtocol,
     question_num: int, question: QuestionData) -> Metrics:
     """Run a single question and return performance metrics."""
     # Prepare question and prompt.
     question_text = f"{question.question}\n{question.masked_code}"
     full_prompt = f"{PROGRAMMING_PROMPT}\n\n{question_text}"
+
+    if ctx.docs:
+        full_prompt += f"\n--- END OF QUESTION AND MASKED CODE ---\nBelow '--- DOCUMENTATION:' line is the documentation, which are all GemBox Software .NET components examples.\n--- DOCUMENTATION: \n{ctx.docs}\n--- END OF DOCUMENTATION ---\n Answer the question based on the documentation, return only the JSON object with no explanations, comments, or additional text.\n"
 
     if ctx.verbose:
         print(f"Q{question_num}: {textwrap.shorten(question_text, ctx.truncate_length)}")
@@ -159,7 +181,7 @@ async def get_question_task(ctx: Context, model: ModelInfo, agent: AgentProtocol
         print(f"Error: {repr(e)}")
         return Metrics("Error", 0.0, 0, 0, False, 0.0, 1, 1)
 
-async def run_model_benchmark(ctx: Context, model_info: ModelInfo, questions: list, run_index: int = 0) -> Metrics:
+async def run_model_benchmark(ctx: BenchmarkContext, model_info: ModelInfo, questions: list, run_index: int = 0) -> Metrics:
     """Run benchmark for a single model on all questions in parallel."""
     # Initialize model and agent.
     try:
@@ -204,7 +226,7 @@ async def run_model_benchmark(ctx: Context, model_info: ModelInfo, questions: li
         print_metrics(model_name, [sum_metrics])
     return sum_metrics
 
-async def benchmark_models_n_times(name: str, ctx: Context, models: list[ModelInfo], questions: list[QuestionData]) -> Metrics:
+async def benchmark_models_n_times(name: str, ctx: BenchmarkContext, models: list[ModelInfo], questions: list[QuestionData]) -> Metrics:
     """Benchmark models N times."""
     print(f"\n===== Benchmarking {len(models)} model(s) on {len(questions)} question(s) {ctx.benchmark_n_times} times. =====\n")
     print(ctx)
@@ -227,22 +249,34 @@ async def benchmark_models_n_times(name: str, ctx: Context, models: list[ModelIn
     else: # If only one measure, return it.
         return all_metrics[0]
 
+def load_txt_file(file_path: str) -> tuple[str, int]:
+    """Load a text file, then return its content and approximate number of tokens."""
+    p = Path(file_path)
+    size_tokens = p.stat().st_size // 3 # Code usually uses 3 chars per token.
+    txt = p.read_text(encoding="utf-8")
+    return txt, size_tokens
+
 # Async main.
 async def main():
     # Load environment variables from parent directory .env.
-    dotenv.load_dotenv()
-    assert dotenv.dotenv_values().values(), ".env file not found or empty"
+    if not dotenv.load_dotenv():
+        raise FileExistsError(".env file not found or empty")
 
     # Load questions from JSONL file.
     questions = load_questions_from_jsonl("../2-bench-filter/test.jsonl")
 
+    # Load documentation.
+    context_txt, context_approx_tokens = load_txt_file("GemBox-Spreadsheet-examples.txt")
+    print(f"Documentation of ~length: {context_approx_tokens} tokens, starting with: {context_txt[:100]}")
+
     # Filter models.
     # models = Models().by_tags(include={'prompt'})
-    models = Models().by_names(['rag-gemini-2.5-flash'])
+    # models = Models().by_min_context_length(context_approx_tokens).by_max_price(0.25, 2.0).by_tags(exclude={'prompt'})
+    models = Models().by_names(['gemini-2.5-flash', 'gpt-5-mini']) # Good long context models.
     print(f"Filtered models ({len(models)}): {models}")
     
     # Create starting context.
-    start_ctx = Context(
+    start_bench_ctx = BenchmarkContext(
         timeout_seconds=30, 
         delay_ms=50, 
         verbose=False, 
@@ -251,22 +285,23 @@ async def main():
         retry_failures=True, 
         use_caching=False, 
         use_open_router=True,
-        benchmark_n_times=1, 
+        benchmark_n_times=2, 
         reasoning_effort="low", 
-        web_search=False)
+        web_search=False, 
+        docs=None)
 
     # Benchmark models.
     perf_data = [
         await benchmark_models_n_times(
             # f"WEB SEARCH: {web}",
-            # start_ctx.with_changes(web_search=web),
-            f"{timeout}s, {reason} REASONING", 
-            start_ctx.with_changes(reasoning_effort=reason, timeout_seconds=timeout), 
+            # start_bench_ctx.with_changes(web_search=web),
+            f"{timeout}s, {reason} REASONING, {len(docs) if docs else 0} bytes of documentation", 
+            start_bench_ctx.with_changes(timeout_seconds=timeout, reasoning_effort=reason, docs=docs), 
             models, 
             questions)
         # for web in [False, True]
         # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
-        for timeout, reason in [(60, "medium")]
+        for timeout, reason, docs in [(60, "medium", context_txt), (30, "medium", "")]
     ]
 
     # Print summary.

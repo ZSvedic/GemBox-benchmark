@@ -9,6 +9,7 @@ class ModelInfo:
     direct_name: str
     input_cost: float
     output_cost: float
+    context_length: int
     tags: set[str]
 
     def __str__(self) -> str:
@@ -22,39 +23,39 @@ _ALL_MODELS = [
     # TEMPLATE:
     # ModelInfo('', '', 0.0, 0.0, {''}),
     # OpenAI models: https://openrouter.ai/provider/openai
-    ModelInfo('openai/gpt-3.5-turbo', 'openai:gpt-3.5-turbo', 0.50, 1.50, {'openai', 'fast'}),
-    ModelInfo('openai/gpt-4.1', 'openai:gpt-4.1', 2.0, 8.0, {'openai', 'fast'}),
-    ModelInfo('openai/gpt-4o-2024-11-20', 'openai:gpt-4o-2024-11-20', 2.5, 10.0, {'openai'}),
-    ModelInfo('openai/gpt-4o-mini', 'openai:gpt-4o-mini', 0.15, 0.60, {'openai', 'fast'}), # Low accuracy.
-    ModelInfo('openai/gpt-5-nano', 'openai:gpt-5-nano', 0.05, 0.40, {'openai', 'fast'}), # Low accuracy.            
-    ModelInfo('openai/gpt-5-mini', 'openai:gpt-5-mini', 0.25, 2.00, {'openai', 'fast', 'accurate'}), 
-    ModelInfo('openai/gpt-5', 'openai:gpt-5', 1.25, 10.00, {'openai', 'accurate'}),  
-    ModelInfo('openai/gpt-5-codex', 'openai:gpt-5-codex', 1.25, 10.0, {'openai', 'accurate'}), # Doesn't work directly.      
+    ModelInfo('openai/gpt-3.5-turbo', 'openai:gpt-3.5-turbo', 0.50, 1.50, 16_385, {'openai', 'fast'}),
+    ModelInfo('openai/gpt-4.1', 'openai:gpt-4.1', 2.0, 8.0, 1_050_000, {'openai', 'fast'}),
+    ModelInfo('openai/gpt-4o-2024-11-20', 'openai:gpt-4o-2024-11-20', 2.5, 10.0, 128_000, {'openai'}),
+    ModelInfo('openai/gpt-4o-mini', 'openai:gpt-4o-mini', 0.15, 0.60, 128_000, {'openai', 'fast'}), # Low accuracy.
+    ModelInfo('openai/gpt-5-nano', 'openai:gpt-5-nano', 0.05, 0.40, 400_000, {'openai', 'fast'}), # Low accuracy.            
+    ModelInfo('openai/gpt-5-mini', 'openai:gpt-5-mini', 0.25, 2.00, 400_000, {'openai', 'fast', 'accurate'}), 
+    ModelInfo('openai/gpt-5', 'openai:gpt-5', 1.25, 10.00, 400_000, {'openai', 'accurate'}),  
+    ModelInfo('openai/gpt-5-codex', 'openai:gpt-5-codex', 1.25, 10.0, 400_000, {'openai', 'accurate'}), # Doesn't work directly.      
     # OpenAIPrompt models (Zel's private account): 
     # https://platform.openai.com/chat/edit?prompt=pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2&version=4
     # "openaiprompt" models are handled directly.
     # Prompt version 4 uses gpt-5-mini.
-    ModelInfo('openaiprompt/GBS-examples-GPT5mini', 'pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2', 0.25, 2.00, {'openai', 'prompt', 'accurate'}),
-    ModelInfo('openaiprompt/GBS-examples-GPT5', 'pmpt_68ee4f81f8d4819786ff5301af701ced0843964564bf8684', 1.25, 10.00, {'openai', 'prompt', 'accurate'}),
+    ModelInfo('openaiprompt/GBS-examples-GPT5mini', 'pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2', 0.25, 2.00, 400_000, {'openai', 'prompt', 'accurate'}),
+    ModelInfo('openaiprompt/GBS-examples-GPT5', 'pmpt_68ee4f81f8d4819786ff5301af701ced0843964564bf8684', 1.25, 10.00, 400_000, {'openai', 'prompt', 'accurate'}),
     # Google models: https://openrouter.ai/provider/google-ai-studio
-    ModelInfo('google/gemini-2.0-flash-001', 'google-gla:gemini-2.0-flash-001', 0.10, 0.40, {'google', 'fast'}),
-    ModelInfo('google/gemini-2.5-flash-lite', 'google-gla:gemini-2.5-flash-lite', 0.10, 0.40, {'google', 'fast', 'accurate'}), 
-    ModelInfo('google/gemini-2.5-flash', 'google-gla:gemini-2.5-flash', 0.30, 2.50, {'google', 'fast', 'accurate'}),
-    ModelInfo('google/gemini-2.5-pro', 'google-gla:gemini-2.5-pro',1.25, 10.00, {'google', 'accurate'}),
+    ModelInfo('google/gemini-2.0-flash-001', 'google-gla:gemini-2.0-flash-001', 0.10, 0.40, 1_050_000, {'google', 'fast'}),
+    ModelInfo('google/gemini-2.5-flash-lite', 'google-gla:gemini-2.5-flash-lite', 0.10, 0.40, 1_050_000, {'google', 'fast', 'accurate'}), 
+    ModelInfo('google/gemini-2.5-flash', 'google-gla:gemini-2.5-flash', 0.30, 2.50, 1_050_000, {'google', 'fast', 'accurate'}),
+    ModelInfo('google/gemini-2.5-pro', 'google-gla:gemini-2.5-pro',1.25, 10.00, 1_050_000, {'google', 'accurate'}),
     # Google Vertex AI models: 
     # "googlevertexai" models are handled directly.
-    ModelInfo('googlevertexai/norag-gemini-2.5-flash', 'gemini-2.5-flash:none', 0.30, 2.50, {'google', 'prompt', 'accurate'}),
-    ModelInfo('googlevertexai/rag-gemini-2.5-flash', 'gemini-2.5-flash:4611686018427387904', 0.30, 2.50, {'google', 'prompt', 'accurate'}),
-    ModelInfo('googlevertexai/norag-gemini-2.5-pro', 'gemini-2.5-pro:none', 1.25, 10.00, {'google', 'prompt', 'accurate'}),
-    ModelInfo('googlevertexai/rag-gemini-2.5-pro', 'gemini-2.5-pro:4611686018427387904', 1.25, 10.00, {'google', 'prompt', 'accurate'}),
+    ModelInfo('googlevertexai/norag-gemini-2.5-flash', 'gemini-2.5-flash:none', 0.30, 2.50, 1_050_000, {'google', 'prompt', 'accurate'}),
+    ModelInfo('googlevertexai/rag-gemini-2.5-flash', 'gemini-2.5-flash:6917529027641081856', 0.30, 2.50, 1_050_000, {'google', 'prompt', 'accurate'}),
+    ModelInfo('googlevertexai/norag-gemini-2.5-pro', 'gemini-2.5-pro:none', 1.25, 10.00, 1_050_000, {'google', 'prompt', 'accurate'}),
+    ModelInfo('googlevertexai/rag-gemini-2.5-pro', 'gemini-2.5-pro:6917529027641081856', 1.25, 10.00, 1_050_000, {'google', 'prompt', 'accurate'}),
     # Mistral models: https://openrouter.ai/provider/mistral
-    ModelInfo('mistralai/codestral-2508', 'mistral:codestral-latest', 0.30, 0.90, {'mistral', 'fast', 'accurate'}),
-    ModelInfo('mistralai/devstral-medium', 'mistral:devstral-medium-latest', 0.40, 2.00, {'mistral'}),
-    ModelInfo('mistralai/mistral-large', 'mistralai:mistral-large-latest', 2.0, 6.0, {'mistral'}), # Doesn't work directly.
+    ModelInfo('mistralai/codestral-2508', 'mistral:codestral-latest', 0.30, 0.90, 256_000, {'mistral', 'fast', 'accurate'}),
+    ModelInfo('mistralai/devstral-medium', 'mistral:devstral-medium-latest', 0.40, 2.00, 131_000, {'mistral'}),
+    ModelInfo('mistralai/mistral-large', 'mistralai:mistral-large-latest', 2.0, 6.0, 128_000, {'mistral'}), # Doesn't work directly.
     # Anthropic models: https://openrouter.ai/provider/anthropic
-    ModelInfo('anthropic/claude-3-haiku', 'anthropic:claude-3-5-haiku-latest', 0.25, 1.35, {'anthropic'}), # Low accuracy.
-    ModelInfo('anthropic/claude-sonnet-4.5', 'anthropic:claude-sonnet-4-5', 3.0, 15.00, {'anthropic'}), 
-    ModelInfo('anthropic/claude-opus-4.1', 'anthropic:claude-opus-4-1', 15.00, 75.00, {'anthropic'}), 
+    ModelInfo('anthropic/claude-3-haiku', 'anthropic:claude-3-5-haiku-latest', 0.25, 1.35, 200_000, {'anthropic'}), # Low accuracy.
+    ModelInfo('anthropic/claude-sonnet-4.5', 'anthropic:claude-sonnet-4-5', 3.0, 15.00, 1_000_000, {'anthropic'}), 
+    ModelInfo('anthropic/claude-opus-4.1', 'anthropic:claude-opus-4-1', 15.00, 75.00, 200_000, {'anthropic'}), 
 ]
 
 class Models:
@@ -73,6 +74,9 @@ class Models:
 
     def by_max_price(self, input_cost: float, output_cost: float) -> Models:
         return self.filter(lambda m: m.input_cost <= input_cost and m.output_cost <= output_cost)
+
+    def by_min_context_length(self, min_context_length: int) -> Models:
+        return self.filter(lambda m: m.context_length >= min_context_length)
 
     def by_names(self, names: list[str]) -> Models:
         filtered = self.filter(lambda m: str(m) in names)
