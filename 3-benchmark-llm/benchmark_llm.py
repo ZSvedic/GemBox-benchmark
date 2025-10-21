@@ -36,7 +36,7 @@ class BenchmarkContext:
     benchmark_n_times: int = 1          # Benchmark n times?
     reasoning_effort: str = "low"       # Reasoning effort.
     web_search: bool = False            # Use web search?
-    docs: str = None                    # Documentation to use.
+    context: str = None                 # Context with documentation/examples.
 
     def __str__(self):
         return f'''BenchmarkContext:
@@ -51,7 +51,7 @@ class BenchmarkContext:
         benchmark_n_times: {self.benchmark_n_times}
         reasoning_effort: {self.reasoning_effort}
         web_search: {self.web_search}
-        docs: {display_text(self.docs, self.truncate_length)}
+        context: {display_text(self.context, self.truncate_length)}
         '''
 
     def with_changes(self, **kwargs):
@@ -134,8 +134,8 @@ async def get_question_task(ctx: BenchmarkContext, model: ModelInfo, agent: Agen
     question_text = f"{question.question}\n{question.masked_code}"
     full_prompt = f"{PROGRAMMING_PROMPT}\n\n{question_text}"
 
-    if ctx.docs:
-        full_prompt += f"\n--- END OF QUESTION AND MASKED CODE ---\nBelow '--- DOCUMENTATION:' line is the documentation, which are all GemBox Software .NET components examples.\n--- DOCUMENTATION: \n{ctx.docs}\n--- END OF DOCUMENTATION ---\n Answer the question based on the documentation, return only the JSON object with no explanations, comments, or additional text.\n"
+    if ctx.context:
+        full_prompt += f"\n--- END OF QUESTION AND MASKED CODE ---\nBelow '--- DOCUMENTATION:' line is the documentation, which are all GemBox Software .NET components examples.\n--- DOCUMENTATION: \n{ctx.context}\n--- END OF DOCUMENTATION ---\n Answer the question based on the documentation, return only the JSON object with no explanations, comments, or additional text.\n"
 
     if ctx.verbose:
         print(f"Q{question_num}: {textwrap.shorten(question_text, ctx.truncate_length)}")
@@ -267,7 +267,7 @@ async def main():
 
     # Load documentation.
     context_txt, context_approx_tokens = load_txt_file("GemBox-Spreadsheet-examples.txt")
-    print(f"Documentation of ~length: {context_approx_tokens} tokens, starting with: {context_txt[:100]}")
+    print(f"Documentation 1 of ~length: {context_approx_tokens} tokens, starting with: {context_txt[:100]}")
 
     # Filter models.
     # models = Models().by_tags(include={'prompt'})
@@ -277,7 +277,7 @@ async def main():
     
     # Create starting context.
     start_bench_ctx = BenchmarkContext(
-        timeout_seconds=30, 
+        timeout_seconds=40, 
         delay_ms=50, 
         verbose=False, 
         truncate_length=150, 
@@ -285,23 +285,23 @@ async def main():
         retry_failures=True, 
         use_caching=False, 
         use_open_router=True,
-        benchmark_n_times=2, 
-        reasoning_effort="low", 
+        benchmark_n_times=1, 
+        reasoning_effort="medium", 
         web_search=False, 
-        docs=None)
+        context=None)
 
     # Benchmark models.
     perf_data = [
         await benchmark_models_n_times(
-            # f"WEB SEARCH: {web}",
-            # start_bench_ctx.with_changes(web_search=web),
-            f"{timeout}s, {reason} REASONING, {len(docs) if docs else 0} bytes of documentation", 
-            start_bench_ctx.with_changes(timeout_seconds=timeout, reasoning_effort=reason, docs=docs), 
+            f"WEB SEARCH: {web}",
+            start_bench_ctx.with_changes(web_search=web),
+            # f"{timeout}s, {reason} REASONING, {len(context) if context else 0} bytes of documentation", 
+            # start_bench_ctx.with_changes(timeout_seconds=timeout, reasoning_effort=reason, context=context), 
             models, 
             questions)
-        # for web in [False, True]
+        for web in [False, True]
         # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
-        for timeout, reason, docs in [(60, "medium", context_txt), (30, "medium", "")]
+        # for timeout, reason, context in [(40, "medium", context_txt)]
     ]
 
     # Print summary.
