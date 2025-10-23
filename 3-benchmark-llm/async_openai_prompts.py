@@ -16,6 +16,7 @@ class OpenAIPromptAgent:
         return await self.client.responses.parse(
             prompt=self.prompt, 
             input=[{"role": "user", "content": input}],
+            tools=[{"type": "web_search_preview"}],
             text_format=self.passed_output_type)
 
     def response_2_results_tokens(self, response: httpx.Response) -> tuple[list[str], int, int]:
@@ -34,15 +35,15 @@ async def main():
     dotenv.load_dotenv()
     assert dotenv.dotenv_values().values(), ".env file not found or empty"
 
-    agent_code = OpenAIPromptAgent(
+    agent = OpenAIPromptAgent(
             prompt_id="pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2",
             passed_output_type=ListOfStrings)
 
-    async_responses = [agent_code.run(q) for q in questions]
+    async_responses = [agent.run(q) for q in questions]
 
     responses = await asyncio.gather(*async_responses)
     for res in responses:
-        usage, results = agent_code.response_2_usage_results(res)
+        usage, results = agent.response_2_usage_results(res)
         print(f"\nUsage: {usage}\nResults: {results}")
 
 if __name__ == "__main__":

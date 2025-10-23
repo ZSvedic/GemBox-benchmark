@@ -23,14 +23,14 @@ _ALL_MODELS = [
     # TEMPLATE:
     # ModelInfo('', '', 0.0, 0.0, {''}),
     # OpenAI models: https://openrouter.ai/provider/openai
-    ModelInfo('openai/gpt-3.5-turbo', 'openai:gpt-3.5-turbo', 0.50, 1.50, 16_385, {'openai', 'fast'}),
-    ModelInfo('openai/gpt-4.1', 'openai:gpt-4.1', 2.0, 8.0, 1_050_000, {'openai', 'fast'}),
-    ModelInfo('openai/gpt-4o-2024-11-20', 'openai:gpt-4o-2024-11-20', 2.5, 10.0, 128_000, {'openai'}),
-    ModelInfo('openai/gpt-4o-mini', 'openai:gpt-4o-mini', 0.15, 0.60, 128_000, {'openai', 'fast'}), # Low accuracy.
-    ModelInfo('openai/gpt-5-nano', 'openai:gpt-5-nano', 0.05, 0.40, 400_000, {'openai', 'fast'}), # Low accuracy.            
-    ModelInfo('openai/gpt-5-mini', 'openai:gpt-5-mini', 0.25, 2.00, 400_000, {'openai', 'fast', 'accurate'}), 
-    ModelInfo('openai/gpt-5', 'openai:gpt-5', 1.25, 10.00, 400_000, {'openai', 'accurate'}),  
-    ModelInfo('openai/gpt-5-codex', 'openai:gpt-5-codex', 1.25, 10.0, 400_000, {'openai', 'accurate'}), # Doesn't work directly.      
+    ModelInfo('openai/gpt-3.5-turbo', 'openai-responses:gpt-3.5-turbo', 0.50, 1.50, 16_385, {'openai', 'fast'}),
+    ModelInfo('openai/gpt-4.1', 'openai-responses:gpt-4.1', 2.0, 8.0, 1_050_000, {'openai', 'fast'}),
+    ModelInfo('openai/gpt-4o-2024-11-20', 'openai-responses:gpt-4o-2024-11-20', 2.5, 10.0, 128_000, {'openai'}),
+    ModelInfo('openai/gpt-4o-mini', 'openai-responses:gpt-4o-mini', 0.15, 0.60, 128_000, {'openai', 'fast'}), # Low accuracy.
+    ModelInfo('openai/gpt-5-nano', 'openai-responses:gpt-5-nano', 0.05, 0.40, 400_000, {'openai', 'fast'}), # Low accuracy.            
+    ModelInfo('openai/gpt-5-mini', 'openai-responses:gpt-5-mini', 0.25, 2.00, 400_000, {'openai', 'fast', 'accurate'}), 
+    ModelInfo('openai/gpt-5', 'openai-responses:gpt-5', 1.25, 10.00, 400_000, {'openai', 'accurate'}),  
+    ModelInfo('openai/gpt-5-codex', 'openai-responses:gpt-5-codex', 1.25, 10.0, 400_000, {'openai', 'accurate'}), # Doesn't work directly.      
     # OpenAIPrompt models (Zel's private account): 
     # https://platform.openai.com/chat/edit?prompt=pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2&version=4
     # "openaiprompt" models are handled directly.

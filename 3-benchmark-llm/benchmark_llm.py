@@ -10,8 +10,9 @@ from pathlib import Path
 from typing import Protocol
 from dataclasses import dataclass
 from pydantic import BaseModel
-from pydantic_ai import Agent
-from pydantic_ai.models.openai import OpenAIChatModel, OpenAIChatModelSettings
+from pydantic_ai import Agent, WebSearchTool
+# from pydantic_ai.models.openai import OpenAIChatModel, OpenAIChatModelSettings # Old.
+from pydantic_ai.models.openai import OpenAIResponsesModel, OpenAIResponsesModelSettings
 from pydantic_ai.providers.openrouter import OpenRouterProvider
 
 from questions import QuestionData, load_questions_from_jsonl
@@ -36,7 +37,7 @@ class BenchmarkContext:
     benchmark_n_times: int = 1          # Benchmark n times?
     reasoning_effort: str = "low"       # Reasoning effort.
     web_search: bool = False            # Use web search?
-    context: str = None                 # Context with documentation/examples.
+    context: str = ""                   # Context with documentation/examples.
 
     def __str__(self):
         return f'''BenchmarkContext:
@@ -68,7 +69,7 @@ class AgentProtocol(Protocol):
     def response_2_results_tokens(self, response: httpx.Response) -> tuple[list[str], int, int]: ...
 
 # Methods run() and __init__() are inherited from Agent, but response_2_usage_results() is implemented.
-class OpenRouterAgent(Agent, AgentProtocol):
+class PydanticAgent(Agent, AgentProtocol):
     def response_2_results_tokens(self, response: httpx.Response) -> tuple[list[str], int, int]:
         return response.output.completions, response.usage().input_tokens, response.usage().output_tokens
 
@@ -98,34 +99,40 @@ def get_model_agent(ctx: BenchmarkContext, model_info: ModelInfo, run_index: int
     if model_info.openrouter_name.startswith("openaiprompt"): # OpenAIPromptAgent.
         model_name = model_info.direct_name
         print(f"\n--- Creating OpenAIPromptAgent for {model_name} ---")
-        agent_code = OpenAIPromptAgent(model_name, CodeCompletion)
+        agent = OpenAIPromptAgent(model_name, CodeCompletion)
     elif model_info.openrouter_name.startswith("googlevertexai"): # GeminiPromptAgent.
         model_name, rag_id = model_info.direct_name.split(":")
         print(f"\n--- Creating GeminiPromptAgent for model {model_name} and rag {rag_id} ---")
-        agent_code = GeminiPromptAgent(model_name, rag_id)
+        agent = GeminiPromptAgent(model_name, rag_id)
     else:
+        tools = [WebSearchTool()] if ctx.web_search else ()
+
         if ctx.use_open_router: # OpenRouterAgent.
-            model_name = model_info.openrouter_name + (":online" if ctx.web_search else "")
-            model = OpenAIChatModel(
+            model_name = model_info.openrouter_name # + (":online" if ctx.web_search else "")
+            model = OpenAIResponsesModel(
                 model_name, 
                 provider=OpenRouterProvider(),
-                settings=OpenAIChatModelSettings(
-                    openai_reasoning_effort=ctx.reasoning_effort)
-                )
+                settings=OpenAIResponsesModelSettings(
+                    openai_reasoning_effort=ctx.reasoning_effort) )
         else: # OpenRouterAgent but with direct name.
             model_name = model_info.direct_name
-            model = model_name
+            # model = model_name
+            model = OpenAIResponsesModel(
+                model_name, 
+                settings=OpenAIResponsesModelSettings(
+                    openai_reasoning_effort=ctx.reasoning_effort) )
 
         if ctx.use_caching:
             cache_name = f"cache/responses_{re.sub(r'[^A-Za-z0-9._-]', '_', model_name)}_run{run_index + 1}.json"
             print(f"\n--- Creating CachedAgentProxy for {model_name} (run {run_index + 1}) ---")
-            agent_code = CachedAgentProxy(
+            agent = CachedAgentProxy(
                 model, CodeCompletion, cache_name, ctx.verbose)
         else:
             print(f"\n--- Creating Agent for {model_name} ---")
-            agent_code = OpenRouterAgent(model, output_type=CodeCompletion)
+            agent = PydanticAgent(
+                model, output_type=CodeCompletion, builtin_tools=tools)
 
-    return model_name, agent_code
+    return model_name, agent
 
 async def get_question_task(ctx: BenchmarkContext, model: ModelInfo, agent: AgentProtocol,
     question_num: int, question: QuestionData) -> Metrics:
@@ -263,7 +270,7 @@ async def main():
         raise FileExistsError(".env file not found or empty")
 
     # Load questions from JSONL file.
-    questions = load_questions_from_jsonl("../2-bench-filter/test.jsonl")
+    questions = load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:3]
 
     # Load documentation.
     context_txt, context_approx_tokens = load_txt_file("GemBox-Spreadsheet-examples.txt")
@@ -272,23 +279,24 @@ async def main():
     # Filter models.
     # models = Models().by_tags(include={'prompt'})
     # models = Models().by_min_context_length(context_approx_tokens).by_max_price(0.25, 2.0).by_tags(exclude={'prompt'})
-    models = Models().by_names(['gemini-2.5-flash', 'gpt-5-mini']) # Good long context models.
+    models = Models().by_names(['gpt-5-nano']) # For testing web search.
+    # models = Models().by_names(['gpt-5-mini']) # 'gemini-2.5-flash' Good long context models.
     print(f"Filtered models ({len(models)}): {models}")
     
     # Create starting context.
     start_bench_ctx = BenchmarkContext(
-        timeout_seconds=40, 
+        timeout_seconds=60, 
         delay_ms=50, 
         verbose=False, 
         truncate_length=150, 
         max_parallel_questions=30, 
         retry_failures=True, 
         use_caching=False, 
-        use_open_router=True,
+        use_open_router=False,
         benchmark_n_times=1, 
         reasoning_effort="medium", 
         web_search=False, 
-        context=None)
+        context="")
 
     # Benchmark models.
     perf_data = [
@@ -299,7 +307,7 @@ async def main():
             # start_bench_ctx.with_changes(timeout_seconds=timeout, reasoning_effort=reason, context=context), 
             models, 
             questions)
-        for web in [False, True]
+        for web in [True]
         # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
         # for timeout, reason, context in [(40, "medium", context_txt)]
     ]
