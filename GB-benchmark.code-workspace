@@ -2,7 +2,8 @@
 	"folders": [
     	{ "path": "1-inputs" },
     	{ "path": "2-bench-filter" },
-    	{ "path": "3-benchmark-llm" }
+    	{ "path": "3-benchmark-llm" },
+    	{ "path": "3-benchmark-direct" }
   	],
 	"settings": {}
 }
