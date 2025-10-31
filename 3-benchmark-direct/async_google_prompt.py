@@ -1,105 +1,119 @@
 import asyncio
-import json
-import dotenv
+from typing import override
 
-from typing import Tuple
-from pydantic import BaseModel
+import dotenv
 from google import genai
 from google.genai import types
+from pydantic import BaseModel
+
+import base_classes as bc
 
 # Google Vertex AI settings:
-LOCATION = "europe-west4"
-PROJECT_ID = "gen-lang-client-0658217610"
-RAG_CORPUS_PATH = f"projects/{PROJECT_ID}/locations/{LOCATION}/ragCorpora/"
+_LOCATION = "europe-west4"
+_PROJECT_ID = "gen-lang-client-0658217610"
+_RAG_CORPUS_PATH = f"projects/{_PROJECT_ID}/locations/{_LOCATION}/ragCorpora/"
 
-PROMPT = """Answer a coding question related to GemBox Software .NET components.
-Return a JSON object with a 'completions' array containing only the code strings that should replace the ??? marks, in order. 
-Completions array should not contain any extra whitespace as results will be used for string comparison.
+class GoogleHandler(bc.LLMHandler):
+    @override
+    def __init__(
+        self, 
+        model_info: bc.ModelInfo, 
+        *,
+        system_prompt: str | None = None, 
+        parse_type: type[BaseModel] | None = None,
+        web_search: bool = False,
+        verbose: bool = True): 
 
-Example question: 
-How do you set the value of cell A1 to Hello?
-worksheet.Cells[???].??? = ???;
-Your response:
-{'completions': ['A1', 'Value', 'Hello']}
+        self.model_info = model_info
+        self.model_name = model_info.name
+        if model_info.prompt_id:
+            self.tools = [types.Tool(retrieval=types.Retrieval(
+                vertex_rag_store=types.VertexRagStore(
+                rag_resources=[types.VertexRagStoreRagResource(rag_corpus=_RAG_CORPUS_PATH + model_info.prompt_id)],
+                similarity_top_k=20,
+            )
+            ))]
+        else:
+            self.tools = []
 
-Below is the question and masked code. Return only the JSON object with no explanations, comments, or additional text.
-"""
+        self.system_prompt = system_prompt
+        self.parse_type = parse_type
+        self.web_search = web_search
+        self.verbose = verbose
+        self.client = genai.Client(vertexai=True, project=_PROJECT_ID, location=_LOCATION)
 
+    def _config(self) -> types.GenerateContentConfig:
+        return types.GenerateContentConfig(
+            tools=self.tools,
+            system_instruction=[types.Part.from_text(text=self.system_prompt)])
 
-class GeminiPromptAgent:
-  def __init__(self, model_name: str, rag_id: str):
-    self.client = genai.Client(vertexai=True, project=PROJECT_ID, location=LOCATION)
-    self.model_name = model_name
-    if rag_id=="none":
-      self.tools = []
-    else:
-      self.tools = [types.Tool(retrieval=types.Retrieval(
-        vertex_rag_store=types.VertexRagStore(
-          rag_resources=[types.VertexRagStoreRagResource(rag_corpus=RAG_CORPUS_PATH + rag_id)],
-          similarity_top_k=20,
+    async def call(self, input: str) -> tuple[list[str], int, int]:
+        content = types.Content(
+            role="user", 
+            parts=[types.Part.from_text(text=input)])
+        config = types.GenerateContentConfig(
+            tools=self.tools,
+            system_instruction=[types.Part.from_text(text=self.system_prompt)])
+        
+        if self.verbose:
+            print(content)
+
+        response = await asyncio.to_thread(
+            self.client.models.generate_content,
+            model=self.model_info.name,
+            contents=[content],
+            config=config,
         )
-      ))]
 
-  def _config(self) -> types.GenerateContentConfig:
-    return types.GenerateContentConfig(
-      tools=self.tools,
-      system_instruction=[types.Part.from_text(text=PROMPT)],
-    )
+        results: list[str] = []
+        try:
+            text = response.candidates[0].content.parts[0].text or ""
+            candidate = text.strip()
+            if text.startswith("```json") and text.endswith("```"):
+                candidate = text[len("```json"):-len("```")]
+            if candidate and candidate[0] == "{" and "'" in candidate and '"' not in candidate:
+                candidate = candidate.replace("'", '"')
+            obj = bc.ListOfStrings.model_validate_json(candidate)
+            results = obj.completions
+        except Exception as e:
+            print(f"Error: {e}")
+            results = []
+        usage = getattr(response, "usage_metadata", {}) or {}
+        return results, usage.prompt_token_count, usage.candidates_token_count+usage.thoughts_token_count
 
-  async def run(self, input: str):
-    def _call():
-      return self.client.models.generate_content(
-        model=self.model_name,
-        contents=[types.Content(role="user", parts=[types.Part.from_text(text=input)])],
-        config=self._config(),
-      )
-
-    return await asyncio.to_thread(_call)
-
-  def response_2_results_tokens(self, response) -> Tuple[list[str], int, int]:
-    text = ""
-    results: list[str] = []
-    try:
-      text = response.candidates[0].content.parts[0].text
-      candidate = text.strip()
-      if text.startswith("```json") and text.endswith("```"):
-        candidate = text[len("```json"):-len("```")]
-      # Accept both single-quoted and standard JSON
-      if candidate and candidate[0] == "{" and "'" in candidate and '"' not in candidate:
-        candidate = candidate.replace("'", '"')
-      obj = json.loads(candidate)
-      results = obj.get("completions", [])
-    except Exception:
-      results = []
-
-    usage = getattr(response, "usage_metadata", {}) or {}
-    return results, usage.prompt_token_count, usage.candidates_token_count+usage.thoughts_token_count
-
-
-questions = [
-  "How to set value of A1 to 'Abracadabra'?",
-  # "How to format B2 to bold?",
-  # "How to print sheet?"
+_GOOGLE_MODELS = [
+    # ModelInfo('name', prompt_id, input_cost, output_cost, context_length, direct_class, tags),
+    # TEMPLATE:
+    # ModelInfo('', None, 0.0, 0.0, 0, None, {''}),
+    # Google models: https://openrouter.ai/provider/google-ai-studio
+    bc.ModelInfo('gemini-2.0-flash-001', None, 0.10, 0.40, 1_050_000, GoogleHandler, {'google', 'fast'}),
+    bc.ModelInfo('gemini-2.5-flash-lite', None, 0.10, 0.40, 1_050_000, GoogleHandler, {'google', 'fast'}), 
+    bc.ModelInfo('gemini-2.5-flash', None, 0.30, 2.50, 1_050_000, GoogleHandler, {'google', 'fast'}),
+    bc.ModelInfo('gemini-2.5-pro', None,1.25, 10.00, 1_050_000, GoogleHandler, {'google', 'accurate'}),
+    # Google Vertex AI models: 
+    # "googlevertexai" models are handled directly.
+    bc.ModelInfo('rag-gemini-2.5-flash', '6917529027641081856', 0.30, 2.50, 1_050_000, GoogleHandler, {'google', 'prompt'}),
+    bc.ModelInfo('rag-gemini-2.5-pro', '6917529027641081856', 1.25, 10.00, 1_050_000, GoogleHandler, {'google', 'prompt'}),
 ]
 
-# For local testing:
-MODEL_NAME = "gemini-2.5-flash"
-RAG_ID = "4611686018427387904"
+bc.Models._MODEL_REGISTRY += _GOOGLE_MODELS
 
-async def main():
-  dotenv.load_dotenv()
-  assert dotenv.dotenv_values().values(), ".env file not found or empty"
+async def call_handler(handler: GoogleHandler):
+    async_responses = [handler.call(q) for q in bc._TEST_QUESTIONS]
+    responses = await asyncio.gather(*async_responses)
+    for results, input_tokens, output_tokens in responses:
+        print(f"\nResults: {results}\nInput tokens: {input_tokens}\nOutput tokens: {output_tokens}")
 
-  agent = GeminiPromptAgent(MODEL_NAME, RAG_ID)
-  async_responses = [agent.run(q) for q in questions]
-  responses = await asyncio.gather(*async_responses)
+async def test_main():
+    if not dotenv.load_dotenv():
+        raise FileNotFoundError(".env file not found or empty")
 
-  for res in responses:
-    results, input_tokens, output_tokens = agent.response_2_results_tokens(res)
-    print(f"\nResults: {results}\nInput tokens: {input_tokens}\nOutput tokens: {output_tokens}")
+    handler = bc.Models().by_name('gemini-2.5-flash').create_handler(
+        system_prompt=bc._DEFAULT_SYSTEM_PROMPT, parse_type=bc.ListOfStrings)
 
+    await call_handler(handler)
+
+    # TODO: Test with prompt_id.
 
 if __name__ == "__main__":
-  asyncio.run(main())
-
-
+    asyncio.run(test_main())
