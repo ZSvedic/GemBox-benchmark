@@ -61,10 +61,6 @@ def load_txt_file(file_path: str) -> tuple[str, int]:
 
 # Benchmarking functions:
 
-def get_model_agent(ctx: BenchmarkContext, model_info: bc.ModelInfo, run_index: int = 0) -> tuple[str, bc.LLMHandler]:
-    """Get a model name and agent."""
-    raise NotImplementedError("Not implemented")
-
 async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: bc.LLMHandler,
     question_num: int, question: QuestionData) -> mt.Metrics:
     """Run a single question and return performance metrics."""
@@ -84,7 +80,8 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
             try:
                 if ctx.delay_ms:
                     await asyncio.sleep(ctx.delay_ms / 1000)
-                results, input_tokens, output_tokens = await asyncio.wait_for(agent.run(full_prompt), timeout=ctx.timeout_seconds)
+                results, input_tokens, output_tokens = await asyncio.wait_for(
+                    agent.call(full_prompt), timeout=ctx.timeout_seconds)
                 break
             except Exception as e:
                 if attempt == 0:  # First failure.
@@ -117,14 +114,18 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
     """Run benchmark for a single model on all questions in parallel."""
     # Initialize model and agent.
     try:
-        model_name, agent = get_model_agent(ctx, model_info, run_index)
+        handler = model_info.create_handler(
+            system_prompt=bc._DEFAULT_SYSTEM_PROMPT, 
+            parse_type=bc.ListOfStrings,
+            web_search=ctx.web_search, 
+            verbose=False)
     except Exception as e:
-        print(f"\n--- Can't get model agent: {repr(e)}")
+        print(f"\n--- Can't get model handler: {repr(e)}")
         return mt.Metrics(f"ERROR-{model_info.name}", 0.0, 0, 0, 0.0, len(questions))
     
     # Create tasks for all questions to run in parallel.
     question_tasks = [
-        get_question_task(ctx, model_info, agent, qi, question) 
+        get_question_task(ctx, model_info, handler, qi, question) 
         for qi, question in enumerate(questions, 1)
     ]
     
@@ -147,11 +148,11 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
     task_metrics[-1].time = model_time
     
     # Summarize model metrics, print, and return data.
-    sum_metrics = mt.summarize_metrics(model_name, task_metrics)
+    sum_metrics = mt.summarize_metrics(model_info.name, task_metrics)
     if ctx.verbose:
-        mt.print_metrics(model_name, task_metrics)
+        mt.print_metrics(model_info.name, task_metrics)
     else:
-        mt.print_metrics(model_name, [sum_metrics])
+        mt.print_metrics(model_info.name, [sum_metrics])
     return sum_metrics
 
 async def benchmark_models_n_times(name: str, ctx: BenchmarkContext, models: list[bc.ModelInfo], questions: list[QuestionData]) -> mt.Metrics:
