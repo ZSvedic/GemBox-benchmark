@@ -65,20 +65,18 @@ class GoogleHandler(bc.LLMHandler):
             config=config,
         )
 
-        results: list[str] = []
-        try:
-            text = response.candidates[0].content.parts[0].text or ""
-            candidate = text.strip()
-            if text.startswith("```json") and text.endswith("```"):
-                candidate = text[len("```json"):-len("```")]
-            if candidate and candidate[0] == "{" and "'" in candidate and '"' not in candidate:
-                candidate = candidate.replace("'", '"')
-            obj = bc.ListOfStrings.model_validate_json(candidate)
-            results = obj.completions
-        except Exception as e:
-            print(f"Error: {e}")
-            results = []
-        usage = getattr(response, "usage_metadata", {}) or {}
+        results = response.candidates[0].content.parts[0].text.strip()
+        if self.parse_type:
+            try:
+                if results.startswith("```json") and results.endswith("```"):
+                    results = results[len("```json"):-len("```")]
+                if results[0] == "{" and "'" in results and '"' not in results:
+                    results = results.replace("'", '"')
+                results = self.parse_type.model_validate_json(results)
+            except Exception as e:
+                print(f"Error: {e}")
+
+        usage = response.usage_metadata
         return results, usage.prompt_token_count, usage.candidates_token_count+usage.thoughts_token_count
 
 _GOOGLE_MODELS = [

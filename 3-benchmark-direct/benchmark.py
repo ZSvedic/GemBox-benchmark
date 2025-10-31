@@ -3,6 +3,7 @@ import asyncio
 import dotenv
 
 import async_openai_prompts # Required to populate model registry.
+import async_google_prompt # Required to populate model registry.
 import base_classes as bc
 
 async def main_test():
@@ -18,5 +19,10 @@ async def main_test():
     results, input_tokens, output_tokens = await handler.call("What is the capital of France?")
     print(f"results: {results}, input_tokens: {input_tokens}, output_tokens: {output_tokens}")
 
+    model = all_models.by_name('gemini-2.5-flash')
+    handler = model.create_handler(system_prompt="Answer questions about mathematics.", web_search=False)
+    results, input_tokens, output_tokens = await handler.call("Calculate 3 * 100.")
+    print(f"results: {results}, input_tokens: {input_tokens}, output_tokens: {output_tokens}")
+    
 if __name__ == "__main__":
     asyncio.run(main_test())
