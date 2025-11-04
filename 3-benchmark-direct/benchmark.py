@@ -1,8 +1,8 @@
 import asyncio
 import dataclasses as dc
-from pathlib import Path
-import time
+import pathlib
 import textwrap
+import time
 
 import dotenv
 
@@ -10,7 +10,7 @@ import async_google_prompt
 import async_openai_prompts
 import base_classes as bc
 import metrics as mt
-from questions import QuestionData, load_questions_from_jsonl
+import questions as qs
 
 # Data classes:
 
@@ -54,7 +54,7 @@ def display_text(text: str, max_length: int) -> str:
 
 def load_txt_file(file_path: str) -> tuple[str, int]:
     """Load a text file, then return its content and approximate number of tokens."""
-    p = Path(file_path)
+    p = pathlib.Path(file_path)
     size_tokens = p.stat().st_size // 3 # Code usually uses 3 chars per token.
     txt = p.read_text(encoding="utf-8")
     return txt, size_tokens
@@ -62,7 +62,7 @@ def load_txt_file(file_path: str) -> tuple[str, int]:
 # Benchmarking functions:
 
 async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: bc.LLMHandler,
-    question_num: int, question: QuestionData) -> mt.Metrics:
+    question_num: int, question: qs.QuestionData) -> mt.Metrics:
     """Run a single question and return performance metrics."""
     # Prepare question and prompt.
     question_text = f"{question.question}\n{question.masked_code}"
@@ -155,7 +155,7 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
         mt.print_metrics(model_info.name, [sum_metrics])
     return sum_metrics
 
-async def benchmark_models_n_times(name: str, ctx: BenchmarkContext, models: list[bc.ModelInfo], questions: list[QuestionData]) -> mt.Metrics:
+async def benchmark_models_n_times(name: str, ctx: BenchmarkContext, models: list[bc.ModelInfo], questions: list[qs.QuestionData]) -> mt.Metrics:
     """Benchmark models N times."""
     print(f"\n===== Benchmarking {len(models)} model(s) on {len(questions)} question(s) {ctx.benchmark_n_times} times. =====\n")
     print(ctx)
@@ -185,7 +185,7 @@ async def main_test():
         raise FileExistsError(".env file not found or empty")
 
     # Load questions from JSONL file.
-    questions = load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:3]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:3]
 
     # Load documentation.
     context_txt, context_approx_tokens = load_txt_file("GemBox-Spreadsheet-examples.txt")
@@ -194,8 +194,8 @@ async def main_test():
     # Filter models.
     # models = bc.Models().by_tags(include={'prompt'})
     # models = bc.Models().by_min_context_length(context_approx_tokens).by_max_price(0.25, 2.0).by_tags(exclude={'prompt'})
-    models = bc.Models().by_names(['gpt-5-nano']) # For testing web search.
-    # models = bc.Models().by_names(['gpt-5-mini']) # 'gemini-2.5-flash' Good long context models.
+    models = bc.Models().by_names(['gpt-5']) # For testing web search.
+    # models = bc.Models().by_names(['gpt-5-mini', 'gemini-2.5-flash' Good long context models.
     print(f"Filtered models ({len(models)}): {models}")
     
     # Create starting context.
@@ -228,25 +228,6 @@ async def main_test():
 
     # Print summary.
     mt.print_metrics("=== SUMMARY OF ALL TESTS ===", perf_data)
-
-    # OLD CODE:
-    # print_metrics("=== SUMMARY OF: TOTAL ===", [summarize_metrics("TOTAL", perf_data)])
-    # if not dotenv.load_dotenv():
-    #     raise FileNotFoundError(".env file not found or empty")
-
-    # all_models = bc.Models()
-
-    # all_models.print_by_tags()
-
-    # model = all_models.by_name('gpt-5-mini')
-    # handler = model.create_handler(system_prompt="Answer questions about geography.", web_search=False)
-    # results, input_tokens, output_tokens = await handler.call("What is the capital of France?")
-    # print(f"results: {results}, input_tokens: {input_tokens}, output_tokens: {output_tokens}")
-
-    # model = all_models.by_name('gemini-2.5-flash')
-    # handler = model.create_handler(system_prompt="Answer questions about mathematics.", web_search=False)
-    # results, input_tokens, output_tokens = await handler.call("Calculate 3 * 100.")
-    # print(f"results: {results}, input_tokens: {input_tokens}, output_tokens: {output_tokens}")
     
 if __name__ == "__main__":
     asyncio.run(main_test())

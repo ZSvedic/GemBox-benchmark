@@ -29,7 +29,8 @@ class OpenAIHandler(bc.LLMHandler):
 
         self.system_prompt = [{"role": "system", "content": system_prompt}] if system_prompt else []
         self.parse_type = parse_type
-        self.tools = [{"type": "web_search_preview"}] if web_search else []
+        self.tools = [{"type": "web_search"}] if web_search else []
+        self.include = ["web_search_call.action.sources"] if web_search else []
         self.verbose = verbose
         self.client = AsyncOpenAI()
 
@@ -42,11 +43,20 @@ class OpenAIHandler(bc.LLMHandler):
         if self.verbose:
             pprint(input)
 
-        response = await self.client.responses.parse(model=self.model, prompt=self.prompt, input=input, tools=self.tools, text_format=self.parse_type)
+        response = await self.client.responses.parse(model=self.model, prompt=self.prompt, input=input, tools=self.tools, include=self.include, text_format=self.parse_type)
         result = response.output_parsed.completions if response.output_parsed else [response.output_text]
         usage = response.usage 
+        links = OpenAIHandler.get_web_search_links(response)
 
         return result, usage.input_tokens, usage.output_tokens
+
+    @staticmethod
+    def get_web_search_links(response) -> list[str]:
+        links = []
+        for item in response.output:
+            if item.type == "web_search_call" and getattr(item.action, "sources", None):
+                links.extend(item.action.sources)
+        return links
 
 _OPENAI_MODELS = [
     # ModelInfo('name', prompt_id, input_cost, output_cost, context_length, direct_class, tags),
