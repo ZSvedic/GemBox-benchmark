@@ -1,10 +1,16 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
+import asyncio
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import override
+from typing import Any, override
 
 from pydantic import BaseModel
+
+# LLMHandler call result types.
+
+CallDetailsType = dict[str, list[str]]
+UsageType = tuple[int, int]
 
 class LLMHandler(ABC):
     @abstractmethod
@@ -18,12 +24,23 @@ class LLMHandler(ABC):
         verbose: bool): 
         ...
     @abstractmethod
-    async def call(self, input: str) -> tuple[list[str], int, int]: 
+    async def call(self, input: str) -> tuple[Any, CallDetailsType, UsageType]: 
         ...
 
 @dataclass(frozen=True)
 class ListOfStrings(BaseModel):
     completions: list[str]
+
+class _AcmeLLMHandler(LLMHandler):
+    @override
+    def __init__(self, *args, **kwargs): 
+        ...
+    
+    @override
+    async def call(self, input: str) -> tuple[Any, CallDetailsType, UsageType]:
+        return (['AcmeLLM response for input'], {'web_search': ['https://www.acme.com']}, (5, 10))
+
+# ModelInfo and Models classes.
 
 @dataclass(frozen=True)
 class ModelInfo:
@@ -102,14 +119,7 @@ class Models:
         for tag, models in by_tag.items(): 
             print(f"{tag} ({len(models)}): {Models(models)}")     
 
-class _AcmeLLMHandler(LLMHandler):
-    @override
-    def __init__(self, *args, **kwargs): 
-        ...
-    
-    @override
-    def call(self, input: str) -> tuple[list[str], int, int]:
-        return (['AcmeLLM response for input'], 5, 10)
+# Constants.
 
 _DEFAULT_SYSTEM_PROMPT = """Answer a coding question related to GemBox Software .NET components.
 Return a JSON object with a 'completions' array containing only the code strings that should replace the ??? marks, in order. 
@@ -126,8 +136,8 @@ Below '--- QUESTION AND MASKED CODE:' line is the question and masked code. Retu
 --- QUESTION AND MASKED CODE: """
 
 _TEST_QUESTIONS = [
-    "How to set value of A1 to 'Abracadabra'?",
-    "How to format B2 to bold?",
+    "How to set value of A1 to 'Abracadabra'?\nworksheet.Cells[???].??? = ???;",
+    "How to format B2 to bold?\nworksheet.Cells[???].??? = ???;",
 ]
 
 _TEST_MODEL_REGISTRY = [
@@ -142,7 +152,16 @@ _TEST_MODEL_REGISTRY = [
     ModelInfo('BarLLM-2', None, 0.05, 0.20, 4000, _AcmeLLMHandler, {'bar'}),
 ]
 
-def main_test():
+# Test functions.
+
+async def _test_call_handler(handler: LLMHandler, questions: list[str]):
+    async_responses = [handler.call(q) for q in questions]
+    responses = await asyncio.gather(*async_responses)
+    for question, response in zip(questions, responses):
+        result, links, (input_tokens, output_tokens) = response
+        print(f"\nQuestion: {question}\nResults: {result}\nLinks: {links}\nInput tokens: {input_tokens}\nOutput tokens: {output_tokens}\n")
+
+async def main_test():
     # Create test models.
     test_models = Models(_TEST_MODEL_REGISTRY)
 
@@ -184,8 +203,12 @@ def main_test():
     print("\n=== test model_info.create_handler(...) ===")
     model_info = test_models.by_name('AcmeLLM-5')
     handler = model_info.create_handler()
-    results, input_tokens, output_tokens = handler.call("What is the capital of France?")
-    print(f"results: {results}, input_tokens: {input_tokens}, output_tokens: {output_tokens}")
+    results, links, (input_tokens, output_tokens) = await handler.call("What is the capital of France?")
+    print(f"results: {results}\nlinks: {links}\ninput_tokens: {input_tokens}\noutput_tokens: {output_tokens}")
+
+    # Demonstrate _test_call_handler().
+    print("\n=== _test_call_handler(handler, ['What is the capital of France?']) ===")
+    await _test_call_handler(handler, ['What is the capital of France?'])
 
 if __name__ == "__main__":
-    main_test()
+    asyncio.run(main_test())

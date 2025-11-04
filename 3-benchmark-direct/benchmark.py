@@ -80,8 +80,7 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
             try:
                 if ctx.delay_ms:
                     await asyncio.sleep(ctx.delay_ms / 1000)
-                results, input_tokens, output_tokens = await asyncio.wait_for(
-                    agent.call(full_prompt), timeout=ctx.timeout_seconds)
+                response = await asyncio.wait_for(agent.call(full_prompt), timeout=ctx.timeout_seconds)
                 break
             except Exception as e:
                 if attempt == 0:  # First failure.
@@ -89,6 +88,9 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
                     continue
                 raise
         
+        los, links, (input_tokens, output_tokens) = response
+        results = los.completions
+
         # Calculate tokens, cost, and accuracy.
         cost = model.calculate_cost(input_tokens, output_tokens)
         accuracy = mt.get_accuracy(f"Q{question_num}", results, question.answers)

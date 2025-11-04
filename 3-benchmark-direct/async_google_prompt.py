@@ -1,5 +1,7 @@
 import asyncio
-from typing import override
+import dataclasses as dc
+from dataclasses import field
+from typing import Any, override
 
 import dotenv
 from google import genai
@@ -8,53 +10,40 @@ from pydantic import BaseModel
 
 import base_classes as bc
 
-# Google Vertex AI settings:
+if not dotenv.load_dotenv():
+    raise FileNotFoundError(".env file not found or empty")
+    
+# Constants.
+
 _LOCATION = "europe-west4"
 _PROJECT_ID = "gen-lang-client-0658217610"
 _RAG_CORPUS_PATH = f"projects/{_PROJECT_ID}/locations/{_LOCATION}/ragCorpora/"
 
+# GoogleHandler class.
+
+@dc.dataclass
 class GoogleHandler(bc.LLMHandler):
+    model_info: bc.ModelInfo
+    system_prompt: str | None = None
+    parse_type: type[BaseModel] | None = None
+    web_search: bool = False
+    verbose: bool = False
+    client: genai.Client = genai.Client(vertexai=True, project=_PROJECT_ID, location=_LOCATION)
+
     @override
-    def __init__(
-        self, 
-        model_info: bc.ModelInfo, 
-        *,
-        system_prompt: str | None = None, 
-        parse_type: type[BaseModel] | None = None,
-        web_search: bool = False,
-        verbose: bool = True): 
-
-        self.model_info = model_info
-        self.model_name = model_info.name
-        if model_info.prompt_id:
-            self.tools = [types.Tool(retrieval=types.Retrieval(
-                vertex_rag_store=types.VertexRagStore(
-                rag_resources=[types.VertexRagStoreRagResource(rag_corpus=_RAG_CORPUS_PATH + model_info.prompt_id)],
-                similarity_top_k=20,
-            )
-            ))]
-        else:
-            self.tools = []
-
-        self.system_prompt = system_prompt
-        self.parse_type = parse_type
-        self.web_search = web_search
-        self.verbose = verbose
-        self.client = genai.Client(vertexai=True, project=_PROJECT_ID, location=_LOCATION)
-
-    def _config(self) -> types.GenerateContentConfig:
-        return types.GenerateContentConfig(
-            tools=self.tools,
-            system_instruction=[types.Part.from_text(text=self.system_prompt)])
-
-    async def call(self, input: str) -> tuple[list[str], int, int]:
-        content = types.Content(
-            role="user", 
-            parts=[types.Part.from_text(text=input)])
+    async def call(self, input_text: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]:
+        tools = []
+        if self.model_info.prompt_id:
+            tools.append(types.Tool(retrieval=types.Retrieval(vertex_rag_store=types.VertexRagStore(
+                rag_resources=[types.VertexRagStoreRagResource(rag_corpus=_RAG_CORPUS_PATH + self.model_info.prompt_id)],
+                similarity_top_k=20))))
+        if self.web_search:
+            tools.append(types.Tool(google_search=types.GoogleSearchRetrieval()))
+        content = types.Content(role="user", parts=[types.Part.from_text(text=input_text)])
         config = types.GenerateContentConfig(
-            tools=self.tools,
-            system_instruction=[types.Part.from_text(text=self.system_prompt)])
-        
+            tools=tools,
+            system_instruction=[types.Part.from_text(text=self.system_prompt)] if self.system_prompt is not None else None )
+
         if self.verbose:
             print(content)
 
@@ -65,19 +54,37 @@ class GoogleHandler(bc.LLMHandler):
             config=config,
         )
 
-        results = response.candidates[0].content.parts[0].text.strip()
-        if self.parse_type:
-            try:
-                if results.startswith("```json") and results.endswith("```"):
-                    results = results[len("```json"):-len("```")]
-                if results[0] == "{" and "'" in results and '"' not in results:
-                    results = results.replace("'", '"')
-                results = self.parse_type.model_validate_json(results)
-            except Exception as e:
-                print(f"Error: {e}")
-
+        candidate = response.candidates[0]
+        text = GoogleHandler.strip_code_fences(candidate.content.parts[0].text.strip())
+        result = self.parse_type.model_validate_json(text) if self.parse_type else text
+        links = self.get_web_search_links(candidate)
         usage = response.usage_metadata
-        return results, usage.prompt_token_count, usage.candidates_token_count+usage.thoughts_token_count
+        usage_tuple = (usage.prompt_token_count, usage.candidates_token_count + usage.thoughts_token_count)
+        
+        if self.verbose:
+            print(f"result: {result}\nlinks: {links}")
+        
+        return result, links, usage_tuple
+
+    def get_web_search_links(self, candidate: types.Candidate) -> bc.CallDetailsType:
+        grounding_chunks = candidate.grounding_metadata.grounding_chunks
+        links = {
+            f'web_search_calls': [chunk.web.uri for chunk in grounding_chunks],
+            f'web_search_queries': candidate.grounding_metadata.web_search_queries,
+        } if grounding_chunks else None
+        if self.web_search and not links and self.verbose:
+            print("WARNING: web_search is True but no links were returned.")
+        return links
+
+    @staticmethod
+    def strip_code_fences(text: str) -> str:
+        if text.startswith("```") and text.endswith("```"):
+            lines = text.splitlines()
+            if lines and lines[0].startswith("```") and lines[-1].strip() == "```":
+                return "\n".join(lines[1:-1])
+        return text
+
+# Google models registry.
 
 _GOOGLE_MODELS = [
     # ModelInfo('name', prompt_id, input_cost, output_cost, context_length, direct_class, tags),
@@ -96,20 +103,16 @@ _GOOGLE_MODELS = [
 
 bc.Models._MODEL_REGISTRY += _GOOGLE_MODELS
 
-async def call_handler(handler: GoogleHandler):
-    async_responses = [handler.call(q) for q in bc._TEST_QUESTIONS]
-    responses = await asyncio.gather(*async_responses)
-    for results, input_tokens, output_tokens in responses:
-        print(f"\nResults: {results}\nInput tokens: {input_tokens}\nOutput tokens: {output_tokens}")
+# Test functions.
 
 async def test_main():
-    if not dotenv.load_dotenv():
-        raise FileNotFoundError(".env file not found or empty")
+    # Test plain text response for question about today's news.
+    handler = bc.Models().by_name('gemini-2.5-flash').create_handler(web_search=True)
+    await bc._test_call_handler(handler, ["What are the latest tech news today, be concise?"])
 
-    handler = bc.Models().by_name('gemini-2.5-flash').create_handler(
-        system_prompt=bc._DEFAULT_SYSTEM_PROMPT, parse_type=bc.ListOfStrings)
-
-    await call_handler(handler)
+    # Test with model default system prompt and web search.
+    handler = bc.Models().by_name('gemini-2.5-flash').create_handler(system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)
+    await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
 
     # TODO: Test with prompt_id.
 

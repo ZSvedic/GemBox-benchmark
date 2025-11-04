@@ -24,7 +24,7 @@ def get_web_search_links_print(response) -> set[str]:
     return links
 
 response = client.responses.create(
-  model="gpt-5",
+  model="gpt-5-mini",
   reasoning={"effort": "low"},
   tools=[
       {

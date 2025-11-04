@@ -1,6 +1,7 @@
 import asyncio
+import dataclasses as dc
 from pprint import pprint
-from typing import override
+from typing import Any, override
 
 import dotenv
 from openai import AsyncOpenAI, Omit, omit
@@ -8,55 +9,67 @@ from pydantic import BaseModel
 
 import base_classes as bc
 
+if not dotenv.load_dotenv():
+    raise FileNotFoundError(".env file not found or empty")
+
+# OpenAIHandler class.
+
+@dc.dataclass
 class OpenAIHandler(bc.LLMHandler):
-    @override
-    def __init__(
-        self, 
-        model_info: bc.ModelInfo, 
-        *,
-        system_prompt: str | Omit = omit, 
-        parse_type: type[BaseModel] | Omit = omit,
-        web_search: bool | Omit = omit,
-        verbose: bool = True): 
+    model_info: bc.ModelInfo
+    system_prompt: str | Omit = omit
+    parse_type: type[BaseModel] | Omit = omit
+    web_search: bool | Omit = omit
+    verbose: bool = False
+    client: AsyncOpenAI = AsyncOpenAI()
 
-        self.model_info = model_info
-        if model_info.prompt_id: # OpenAI prompt.
-            self.model = omit
-            self.prompt = {"id": model_info.prompt_id}
+    @override
+    async def call(self, input_dict: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]: 
+        if self.model_info.prompt_id: # OpenAI prompt.
+            model = omit
+            prompt_dict = {"id": self.model_info.prompt_id}
         else: # OpenAI model.
-            self.model = model_info.name
-            self.prompt = omit
+            model = self.model_info.name
+            prompt_dict = omit
 
-        self.system_prompt = [{"role": "system", "content": system_prompt}] if system_prompt else []
-        self.parse_type = parse_type
-        self.tools = [{"type": "web_search"}] if web_search else []
-        self.include = ["web_search_call.action.sources"] if web_search else []
-        self.verbose = verbose
-        self.client = AsyncOpenAI()
+        input_dict = [{"role": "user", "content": input_dict}]
 
-    @override
-    async def call(self, input: str) -> tuple[list[str], int, int]: 
-        input = [
-            *self.system_prompt, 
-            {"role": "user", "content": input}]
+        if self.system_prompt:
+            input_dict = [{"role": "system", "content": self.system_prompt}] + input_dict
+
+        if self.web_search:
+            tools_dict = [{"type": "web_search"}]
+            include_list = ["web_search_call.action.sources"]
+        else:
+            tools_dict = include_list = omit
 
         if self.verbose:
-            pprint(input)
+            pprint(input_dict)
 
-        response = await self.client.responses.parse(model=self.model, prompt=self.prompt, input=input, tools=self.tools, include=self.include, text_format=self.parse_type)
-        result = response.output_parsed.completions if response.output_parsed else [response.output_text]
+        response = await self.client.responses.parse(
+            model=model, prompt=prompt_dict, input=input_dict, tools=tools_dict, include=include_list, text_format=self.parse_type)
+
+        result = response.output_parsed if self.parse_type else response.output_text
+        links = self.get_web_search_links(response)
         usage = response.usage 
-        links = OpenAIHandler.get_web_search_links(response)
 
-        return result, usage.input_tokens, usage.output_tokens
+        if self.verbose:
+            print(f"result: {result}\nlinks: {links}")
 
-    @staticmethod
-    def get_web_search_links(response) -> list[str]:
-        links = []
-        for item in response.output:
-            if item.type == "web_search_call" and getattr(item.action, "sources", None):
-                links.extend(item.action.sources)
-        return links
+        return result, links, (usage.input_tokens, usage.output_tokens)
+
+    def get_web_search_links(self, response) -> bc.CallDetailsType:
+        links_dict = {
+            f'web_search_call: {item.action.query}': [source.url for source in item.action.sources] 
+            for item in response.output if item.type == "web_search_call" 
+            }
+
+        if self.web_search and not links_dict and self.verbose:
+            print("WARNING: web_search is True but no links were returned.")
+            
+        return links_dict
+
+# OpenAI models.
 
 _OPENAI_MODELS = [
     # ModelInfo('name', prompt_id, input_cost, output_cost, context_length, direct_class, tags),
@@ -80,23 +93,20 @@ _OPENAI_MODELS = [
     
 bc.Models._MODEL_REGISTRY += _OPENAI_MODELS
 
-async def call_handler(handler: OpenAIHandler):
-    async_responses = [handler.call(q) for q in bc._TEST_QUESTIONS]
-    responses = await asyncio.gather(*async_responses)
-    for results, input_tokens, output_tokens in responses:
-        print(f"\nResults: {results}\nInput tokens: {input_tokens}\nOutput tokens: {output_tokens}")
+# Main test functions.
 
 async def main_test():
-    if not dotenv.load_dotenv():
-        raise FileNotFoundError(".env file not found or empty")
+    # Test plain text response for question about today's news.
+    handler = bc.Models().by_name('gpt-5-mini').create_handler(web_search=True)
+    await bc._test_call_handler(handler, ["What are the latest tech news today, be concise?"])
 
-    # Test with model and system prompt.
-    handler = bc.Models().by_name('gpt-5-mini').create_handler(system_prompt=bc._DEFAULT_SYSTEM_PROMPT, parse_type=bc.ListOfStrings)
-    await call_handler(handler)
+    # Test with model default system prompt and web search.
+    handler = bc.Models().by_name('gpt-5-mini').create_handler(system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)
+    await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
 
     # Test with prompt_id.
     handler = bc.Models().by_name('prompt-GBS-examples-GPT5mini').create_handler(parse_type=bc.ListOfStrings)
-    await call_handler(handler)
+    await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
 
 if __name__ == "__main__":
     asyncio.run(main_test())
