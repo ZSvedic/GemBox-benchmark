@@ -6,8 +6,8 @@ import time
 
 import dotenv
 
-import async_google_prompt
-import async_openai_prompts
+import async_google_prompt # Required to populate bc.Models._MODEL_REGISTRY.
+import async_openai_prompts # Required to populate bc.Models._MODEL_REGISTRY.
 import base_classes as bc
 import metrics as mt
 import questions as qs
@@ -180,12 +180,11 @@ async def benchmark_models_n_times(name: str, ctx: BenchmarkContext, models: lis
     else: # If only one measure, return it.
         return all_metrics[0]
 
-# Async main.
-async def main_test():
-    # Load environment variables from parent directory .env.
-    if not dotenv.load_dotenv():
-        raise FileExistsError(".env file not found or empty")
+# Main test functions.
 
+async def main_test():
+    print("===== benchmark.main_test() =====")
+    
     # Load questions from JSONL file.
     questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:3]
 
@@ -232,4 +231,8 @@ async def main_test():
     mt.print_metrics("=== SUMMARY OF ALL TESTS ===", perf_data)
     
 if __name__ == "__main__":
+    # Load environment variables from parent directory .env.
+    if not dotenv.load_dotenv():
+        raise FileExistsError(".env file not found or empty")
+        
     asyncio.run(main_test())

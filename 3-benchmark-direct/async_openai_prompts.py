@@ -9,9 +9,6 @@ from pydantic import BaseModel
 
 import base_classes as bc
 
-if not dotenv.load_dotenv():
-    raise FileNotFoundError(".env file not found or empty")
-
 # OpenAIHandler class.
 
 @dc.dataclass
@@ -21,7 +18,9 @@ class OpenAIHandler(bc.LLMHandler):
     parse_type: type[BaseModel] | Omit = omit
     web_search: bool | Omit = omit
     verbose: bool = False
-    client: AsyncOpenAI = AsyncOpenAI()
+
+    def __post_init__(self):
+        self.client = AsyncOpenAI()
 
     @override
     async def call(self, input_dict: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]: 
@@ -62,7 +61,7 @@ class OpenAIHandler(bc.LLMHandler):
         links_dict = {
             f'web_search_call: {item.action.query}': [source.url for source in item.action.sources] 
             for item in response.output if item.type == "web_search_call" 
-            }
+        } if self.web_search else None
 
         if self.web_search and not links_dict and self.verbose:
             print("WARNING: web_search is True but no links were returned.")
@@ -96,6 +95,8 @@ bc.Models._MODEL_REGISTRY += _OPENAI_MODELS
 # Main test functions.
 
 async def main_test():
+    print("===== async_openai_prompts.main_test() =====")
+    
     # Test plain text response for question about today's news.
     handler = bc.Models().by_name('gpt-5-mini').create_handler(web_search=True)
     await bc._test_call_handler(handler, ["What are the latest tech news today, be concise?"])
@@ -109,4 +110,7 @@ async def main_test():
     await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
 
 if __name__ == "__main__":
+    if not dotenv.load_dotenv():
+        raise FileNotFoundError(".env file not found or empty")
+        
     asyncio.run(main_test())

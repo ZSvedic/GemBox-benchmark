@@ -155,13 +155,18 @@ _TEST_MODEL_REGISTRY = [
 # Test functions.
 
 async def _test_call_handler(handler: LLMHandler, questions: list[str]):
+    print(f'Calling LLM for {len(questions)} questions...')
+
     async_responses = [handler.call(q) for q in questions]
     responses = await asyncio.gather(*async_responses)
+    
     for question, response in zip(questions, responses):
         result, links, (input_tokens, output_tokens) = response
         print(f"\nQuestion: {question}\nResults: {result}\nLinks: {links}\nInput tokens: {input_tokens}\nOutput tokens: {output_tokens}\n")
 
 async def main_test():
+    print("===== base_classes.main_test() =====")
+
     # Create test models.
     test_models = Models(_TEST_MODEL_REGISTRY)
 

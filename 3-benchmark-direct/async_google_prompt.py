@@ -9,9 +9,6 @@ from google.genai import types
 from pydantic import BaseModel
 
 import base_classes as bc
-
-if not dotenv.load_dotenv():
-    raise FileNotFoundError(".env file not found or empty")
     
 # Constants.
 
@@ -28,7 +25,9 @@ class GoogleHandler(bc.LLMHandler):
     parse_type: type[BaseModel] | None = None
     web_search: bool = False
     verbose: bool = False
-    client: genai.Client = genai.Client(vertexai=True, project=_PROJECT_ID, location=_LOCATION)
+
+    def __post_init__(self):
+        self.client = genai.Client(vertexai=True, project=_PROJECT_ID, location=_LOCATION)
 
     @override
     async def call(self, input_text: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]:
@@ -68,13 +67,13 @@ class GoogleHandler(bc.LLMHandler):
 
     def get_web_search_links(self, candidate: types.Candidate) -> bc.CallDetailsType:
         grounding_chunks = candidate.grounding_metadata.grounding_chunks
-        links = {
+        links_dict = {
             f'web_search_calls': [chunk.web.uri for chunk in grounding_chunks],
             f'web_search_queries': candidate.grounding_metadata.web_search_queries,
         } if grounding_chunks else None
-        if self.web_search and not links and self.verbose:
+        if self.web_search and not links_dict and self.verbose:
             print("WARNING: web_search is True but no links were returned.")
-        return links
+        return links_dict
 
     @staticmethod
     def strip_code_fences(text: str) -> str:
@@ -103,9 +102,11 @@ _GOOGLE_MODELS = [
 
 bc.Models._MODEL_REGISTRY += _GOOGLE_MODELS
 
-# Test functions.
+# Main test functions.
 
-async def test_main():
+async def main_test():
+    print("===== async_google_prompt.main_test() =====")
+    
     # Test plain text response for question about today's news.
     handler = bc.Models().by_name('gemini-2.5-flash').create_handler(web_search=True)
     await bc._test_call_handler(handler, ["What are the latest tech news today, be concise?"])
@@ -117,4 +118,7 @@ async def test_main():
     # TODO: Test with prompt_id.
 
 if __name__ == "__main__":
-    asyncio.run(test_main())
+    if not dotenv.load_dotenv():
+        raise FileNotFoundError(".env file not found or empty")
+        
+    asyncio.run(main_test())
