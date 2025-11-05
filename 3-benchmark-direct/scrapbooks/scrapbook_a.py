@@ -48,4 +48,4 @@ response = client.responses.create(
 print(response.output_text)
 links = get_web_search_links(response)
 print(links)
-print('end of links')
+print('end of links') 

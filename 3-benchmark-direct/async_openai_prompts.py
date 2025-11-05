@@ -23,7 +23,7 @@ class OpenAIHandler(bc.LLMHandler):
         self.client = AsyncOpenAI()
 
     @override
-    async def call(self, input_dict: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]: 
+    async def call(self, input: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]: 
         if self.model_info.prompt_id: # OpenAI prompt.
             model = omit
             prompt_dict = {"id": self.model_info.prompt_id}
@@ -31,7 +31,7 @@ class OpenAIHandler(bc.LLMHandler):
             model = self.model_info.name
             prompt_dict = omit
 
-        input_dict = [{"role": "user", "content": input_dict}]
+        input_dict = [{"role": "user", "content": input}]
 
         if self.system_prompt:
             input_dict = [{"role": "system", "content": self.system_prompt}] + input_dict
