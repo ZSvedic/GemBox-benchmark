@@ -2,8 +2,9 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import asyncio
 from collections import defaultdict
+from collections.abc import Iterator, Callable, Collection
 from dataclasses import dataclass
-from typing import Any, override
+from typing import Any, override, Optional
 
 from pydantic import BaseModel
 
@@ -50,7 +51,7 @@ class ModelInfo:
     output_cost: float
     context_length: int
     direct_class: type[LLMHandler]
-    tags: frozenset[str]
+    tags: set[str]
 
     def __str__(self) -> str:
         return self.name
@@ -61,20 +62,20 @@ class ModelInfo:
     def create_handler(self, *args, **kwargs) -> LLMHandler:
         return self.direct_class(self, *args, **kwargs)
 
-class Models:
+class Models(Collection[ModelInfo]):
     '''Fluent query object for model filtering.'''
 
     _MODEL_REGISTRY = []
 
-    def __init__(self, models: list[ModelInfo] = None):
+    def __init__(self, models: Optional[list[ModelInfo]] = None):
         self.models = models or Models._MODEL_REGISTRY
 
-    def filter(self, condition: callable) -> Models:
+    def filter(self, condition: Callable) -> Models:
         """Filter models using a condition function."""
         filtered = [m for m in self.models if condition(m)]
         return Models(filtered)
 
-    def by_tags(self, include: frozenset[str] = frozenset[str](), exclude: frozenset[str] = frozenset[str]()) -> Models:
+    def by_tags(self, include: set[str] = set[str](), exclude: set[str] = set[str]()) -> Models:
         return self.filter(lambda m: include.issubset(m.tags) and not (exclude & m.tags))
 
     def by_max_price(self, input_cost: float, output_cost: float) -> Models:
@@ -97,13 +98,13 @@ class Models:
     def __str__(self):
         return ", ".join([str(m) for m in self.models])
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[ModelInfo]:
         return iter(self.models)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> ModelInfo:
         return self.models[index]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.models)
 
     def __add__(self, other: Models) -> Models:
@@ -117,7 +118,10 @@ class Models:
                 by_tag[t].append(m)
         # Print models by tags.
         for tag, models in by_tag.items(): 
-            print(f"{tag} ({len(models)}): {Models(models)}")     
+            print(f"{tag} ({len(models)}): {Models(models)}")    
+
+    def __contains__(self, x: object) -> bool:
+        return self._MODEL_REGISTRY.__contains__(x)
 
 # Constants.
 

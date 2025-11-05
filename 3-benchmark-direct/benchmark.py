@@ -3,11 +3,12 @@ import dataclasses as dc
 import pathlib
 import textwrap
 import time
+from collections.abc import Collection
 
 import dotenv
 
-import async_google_prompt # Required to populate bc.Models._MODEL_REGISTRY.
-import async_openai_prompts # Required to populate bc.Models._MODEL_REGISTRY.
+import async_google_prompt  # Required to populate bc.Models._MODEL_REGISTRY.
+import async_openai_prompts  # Required to populate bc.Models._MODEL_REGISTRY.
 import base_classes as bc
 import metrics as mt
 import questions as qs
@@ -144,7 +145,7 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
                 raise r   # Let cancellation terminate everything.
             else:
                 print(f"Unexpected task error: {repr(r)}")
-                task_metrics.append(mt.Metrics("Error", 0.0, 0, 0, False, 0.0, 1))
+                task_metrics.append(mt.Metrics("Error", 0.0, 0, 0.0, 0.0, 1, 1))
     model_time = time.time() - model_start_time
     # Hack: last task metric has the model time, others have 0. That way summation works in summarize_metrics().
     task_metrics[-1].time = model_time
@@ -157,7 +158,7 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
         mt.print_metrics(model_info.name, [sum_metrics])
     return sum_metrics
 
-async def benchmark_models_n_times(name: str, ctx: BenchmarkContext, models: list[bc.ModelInfo], questions: list[qs.QuestionData]) -> mt.Metrics:
+async def benchmark_models_n_times(name: str, ctx: BenchmarkContext, models: Collection[bc.ModelInfo], questions: list[qs.QuestionData]) -> mt.Metrics:
     """Benchmark models N times."""
     print(f"\n===== Benchmarking {len(models)} model(s) on {len(questions)} question(s) {ctx.benchmark_n_times} times. =====\n")
     print(ctx)
