@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 @dataclass
 class Metrics:
@@ -6,11 +7,11 @@ class Metrics:
     cost: float
     tokens: int
     time: float
-    accuracy: float # None for complete failures.
+    accuracy: Optional[float] # None for complete failures.
     error_count: int = 0
     api_calls: int = 0
 
-def get_accuracy(name: str, results: list[str], expected_answers: list[str] = None) -> float:
+def get_accuracy(name: str, results: list[str], expected_answers: list[str]) -> float:
     """Validate model response against expected answers and return accuracy."""
     max_length = max(len(results), len(expected_answers))
     try:
