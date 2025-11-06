@@ -14,18 +14,28 @@ CallDetailsType = dict[str, list[str]]
 UsageType = tuple[int, int]
 
 class LLMHandler(ABC):
-    @abstractmethod
     def __init__(
-        self, 
-        model_info: ModelInfo, 
-        *,
-        system_prompt: str | None, 
-        parse_type: type[BaseModel] | None,
-        web_search: bool,
-        verbose: bool): 
-        ...
+            self, 
+            model_info: ModelInfo, 
+            *,
+            system_prompt: str | None = None, 
+            parse_type: type[BaseModel] | None = None,
+            web_search: bool = None,
+            verbose: bool = False): 
+        # Plain params:
+        self.model_info = model_info
+        self.system_prompt = system_prompt
+        self.parse_type = parse_type
+        self.web_search = web_search
+        self.verbose = verbose
+
     @abstractmethod
     async def call(self, input: str) -> tuple[Any, CallDetailsType, UsageType]: 
+        ...
+    @classmethod
+    @abstractmethod
+    async def close(cls):
+        '''Implement if the handler needs to release resources.'''
         ...
 
 @dataclass(frozen=True)
@@ -35,11 +45,16 @@ class ListOfStrings(BaseModel):
 class _AcmeLLMHandler(LLMHandler):
     @override
     def __init__(self, *args, **kwargs): 
-        ...
+        pass
     
     @override
     async def call(self, input: str) -> tuple[Any, CallDetailsType, UsageType]:
         return (['AcmeLLM response for input'], {'web_search': ['https://www.acme.com']}, (5, 10))
+    
+    @override
+    @classmethod
+    async def close(cls):
+        pass
 
 # ModelInfo and Models classes.
 
@@ -126,14 +141,14 @@ class Models(Collection[ModelInfo]):
 # Constants.
 
 _DEFAULT_SYSTEM_PROMPT = """Answer a coding question related to GemBox Software .NET components.
-Return a JSON object with a 'completions' array containing only the code strings that should replace the ??? marks, in order. 
+Return a JSON object with a "completions" array containing only the code strings that should replace the ??? marks, in order. 
 Completions array should not contain any extra whitespace as results will be used for string comparison.
 
 Example question: 
 How do you set the value of cell A1 to "Hello"?
 worksheet.Cells[???].??? = ???;
 Your response:
-{'completions': ['"A1"', 'Value', '"Hello"']}
+{"completions": ["\\"A1\\"", "Value", "\\"Hello\\""]}
 
 Below '--- QUESTION AND MASKED CODE:' line is the question and masked code. Return only the JSON object with no explanations, comments, or additional text.
 

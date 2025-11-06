@@ -1,12 +1,10 @@
 import asyncio
-import dataclasses as dc
-from dataclasses import field
+import threading
 from typing import Any, override
 
 import dotenv
 from google import genai
 from google.genai import types
-from pydantic import BaseModel
 
 import base_classes as bc
     
@@ -16,18 +14,27 @@ _LOCATION = "europe-west4"
 _PROJECT_ID = "gen-lang-client-0658217610"
 _RAG_CORPUS_PATH = f"projects/{_PROJECT_ID}/locations/{_LOCATION}/ragCorpora/"
 
-# GoogleHandler class.
+# GoogleHandler.
 
-@dc.dataclass
 class GoogleHandler(bc.LLMHandler):
-    model_info: bc.ModelInfo
-    system_prompt: str | None = None
-    parse_type: type[BaseModel] | None = None
-    web_search: bool = False
-    verbose: bool = False
+    # Client is a singleton that requires close() is protected by a lock:
+    _client = None
+    _lock = threading.Lock()
 
-    def __post_init__(self):
-        self.client = genai.Client(vertexai=True, project=_PROJECT_ID, location=_LOCATION)
+    @classmethod
+    def get_client(cls):
+        with cls._lock:
+            if cls._client is None:
+                cls._client = genai.Client(vertexai=True, project=_PROJECT_ID, location=_LOCATION)
+            return cls._client
+
+    @override
+    @classmethod
+    async def close(cls):
+        with cls._lock:
+            if cls._client:
+                cls._client.close()
+                cls._client = None
 
     @override
     async def call(self, input_text: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]:
@@ -47,7 +54,7 @@ class GoogleHandler(bc.LLMHandler):
             print(content)
 
         response = await asyncio.to_thread(
-            self.client.models.generate_content,
+            GoogleHandler.get_client().models.generate_content,
             model=self.model_info.name,
             contents=[content],
             config=config,
@@ -58,7 +65,8 @@ class GoogleHandler(bc.LLMHandler):
         result = self.parse_type.model_validate_json(text) if self.parse_type else text
         links = self.get_web_search_links(candidate)
         usage = response.usage_metadata
-        usage_tuple = (usage.prompt_token_count, usage.candidates_token_count + usage.thoughts_token_count)
+        out_tokens = usage.candidates_token_count + (usage.thoughts_token_count if usage.thoughts_token_count else 0)
+        usage_tuple = (usage.prompt_token_count, out_tokens)
         
         if self.verbose:
             print(f"result: {result}\nlinks: {links}")
@@ -66,11 +74,11 @@ class GoogleHandler(bc.LLMHandler):
         return result, links, usage_tuple
 
     def get_web_search_links(self, candidate: types.Candidate) -> bc.CallDetailsType:
-        grounding_chunks = candidate.grounding_metadata.grounding_chunks
+        metadata = candidate.grounding_metadata
         links_dict = {
-            f'web_search_calls': [chunk.web.uri for chunk in grounding_chunks],
-            f'web_search_queries': candidate.grounding_metadata.web_search_queries,
-        } if grounding_chunks else None
+            f'web_search_calls': [chunk.web.uri for chunk in metadata.grounding_chunks],
+            f'web_search_queries': metadata.web_search_queries,
+        } if metadata and metadata.grounding_chunks else None
         if self.web_search and not links_dict and self.verbose:
             print("WARNING: web_search is True but no links were returned.")
         return links_dict

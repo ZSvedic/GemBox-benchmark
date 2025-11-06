@@ -156,6 +156,10 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
         mt.print_metrics(model_info.name, task_metrics)
     else:
         mt.print_metrics(model_info.name, [sum_metrics])
+
+    # Close handler to clean up resources.
+    await handler.close()
+
     return sum_metrics
 
 async def benchmark_models_n_times(name: str, ctx: BenchmarkContext, models: Collection[bc.ModelInfo], questions: list[qs.QuestionData]) -> mt.Metrics:
@@ -188,6 +192,7 @@ async def main_test():
     
     # Load questions from JSONL file.
     questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:3]
+    print(f"Using {len(questions)} questions.")
 
     # Load documentation.
     context_txt, context_approx_tokens = load_txt_file("GemBox-Spreadsheet-examples.txt")
@@ -196,8 +201,8 @@ async def main_test():
     # Filter models.
     # models = bc.Models().by_tags(include={'prompt'})
     # models = bc.Models().by_min_context_length(context_approx_tokens).by_max_price(0.25, 2.0).by_tags(exclude={'prompt'})
-    models = bc.Models().by_names(['gpt-5']) # For testing web search.
-    # models = bc.Models().by_names(['gpt-5-mini', 'gemini-2.5-flash' Good long context models.
+    models = bc.Models().by_names(['gpt-5-mini', 'gemini-2.5-flash']) # For testing web search.
+    # models = bc.Models().by_names(['gemini-2.0-flash-001', 'gemini-2.5-flash']) # Good long context models.
     print(f"Filtered models ({len(models)}): {models}")
     
     # Create starting context.
@@ -223,17 +228,17 @@ async def main_test():
             # start_bench_ctx.with_changes(timeout_seconds=timeout, reasoning_effort=reason, context=context), 
             models, 
             questions)
-        for web in [True]
+        for web in [False]
         # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
         # for timeout, reason, context in [(40, "medium", context_txt)]
     ]
 
     # Print summary.
     mt.print_metrics("=== SUMMARY OF ALL TESTS ===", perf_data)
-    
+
 if __name__ == "__main__":
     # Load environment variables from parent directory .env.
     if not dotenv.load_dotenv():
         raise FileExistsError(".env file not found or empty")
-        
+            
     asyncio.run(main_test())

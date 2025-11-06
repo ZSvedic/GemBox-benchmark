@@ -1,26 +1,32 @@
 import asyncio
-import dataclasses as dc
+import threading
 from pprint import pprint
 from typing import Any, override
 
 import dotenv
-from openai import AsyncOpenAI, Omit, omit
-from pydantic import BaseModel
+from openai import AsyncOpenAI, omit
 
 import base_classes as bc
 
-# OpenAIHandler class.
-
-@dc.dataclass
 class OpenAIHandler(bc.LLMHandler):
-    model_info: bc.ModelInfo
-    system_prompt: str | Omit = omit
-    parse_type: type[BaseModel] | Omit = omit
-    web_search: bool | Omit = omit
-    verbose: bool = False
+    # Client is a singleton that requires close() is protected by a lock:
+    _client = None
+    _lock = threading.Lock()
 
-    def __post_init__(self):
-        self.client = AsyncOpenAI()
+    @classmethod
+    def get_client(cls):
+        with cls._lock:
+            if cls._client is None:
+                cls._client = AsyncOpenAI()
+            return cls._client
+
+    @override
+    @classmethod
+    async def close(cls):
+        with cls._lock:
+            if cls._client:
+                await cls._client.close()
+                cls._client = None
 
     @override
     async def call(self, input: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]: 
@@ -45,8 +51,13 @@ class OpenAIHandler(bc.LLMHandler):
         if self.verbose:
             pprint(input_dict)
 
-        response = await self.client.responses.parse(
-            model=model, prompt=prompt_dict, input=input_dict, tools=tools_dict, include=include_list, text_format=self.parse_type)
+        if self.parse_type:
+            format = self.parse_type
+        else:
+            format = omit
+
+        response = await OpenAIHandler.get_client().responses.parse(
+            model=model, prompt=prompt_dict, input=input_dict, tools=tools_dict, include=include_list, text_format=format)
 
         result = response.output_parsed if self.parse_type else response.output_text
         links = self.get_web_search_links(response)
