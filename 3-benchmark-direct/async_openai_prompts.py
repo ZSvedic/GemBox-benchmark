@@ -70,11 +70,12 @@ class OpenAIHandler(bc.LLMHandler):
 
     def get_web_search_links(self, response) -> bc.CallDetailsType:
         links_dict = {
-            f'web_search_call: {item.action.query}': [source.url for source in item.action.sources] 
+            f'web_search_call: {item.action.query}': \
+                [source.url for source in (item.action.sources if item.action.sources else [])] 
             for item in response.output if item.type == "web_search_call" 
         } if self.web_search else None
 
-        if self.web_search and not links_dict and self.verbose:
+        if self.web_search and not links_dict:
             print("WARNING: web_search is True but no links were returned.")
             
         return links_dict
