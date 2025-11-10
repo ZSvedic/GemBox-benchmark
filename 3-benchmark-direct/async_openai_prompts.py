@@ -76,7 +76,7 @@ class OpenAIHandler(bc.LLMHandler):
         } if self.web_search else None
 
         if self.web_search and not links_dict:
-            print("WARNING: web_search is True but no links were returned.")
+            print(f"WARNING: OpenAI({self.model_info.name}) web_search is True but no links were returned.")
             
         return links_dict
 
@@ -87,9 +87,9 @@ _OPENAI_MODELS = [
     # TEMPLATE:
     # ModelInfo('', None, 0.0, 0.0, 0, None, {''}),
     # OpenAI models: https://openrouter.ai/provider/openai
-    bc.ModelInfo('gpt-3.5-turbo', None, 0.50, 1.50, 16_385, OpenAIHandler, {'openai', 'fast'}),
-    bc.ModelInfo('gpt-4.1', None, 2.0, 8.0, 1_050_000, OpenAIHandler, {'openai', 'fast'}),
-    bc.ModelInfo('gpt-4o-2024-11-20', None, 2.5, 10.0, 128_000, OpenAIHandler, {'openai'}),
+    bc.ModelInfo('gpt-3.5-turbo', None, 0.50, 1.50, 16_385, OpenAIHandler, {'openai', 'fast', 'old'}),
+    bc.ModelInfo('gpt-4.1', None, 2.0, 8.0, 1_050_000, OpenAIHandler, {'openai', 'fast', 'old'}),
+    bc.ModelInfo('gpt-4o-2024-11-20', None, 2.5, 10.0, 128_000, OpenAIHandler, {'openai', 'old'}),
     bc.ModelInfo('gpt-4o-mini', None, 0.15, 0.60, 128_000, OpenAIHandler, {'openai', 'fast'}), 
     bc.ModelInfo('gpt-5-nano', None, 0.05, 0.40, 400_000, OpenAIHandler, {'openai', 'fast'}),            
     bc.ModelInfo('gpt-5-mini', None, 0.25, 2.00, 400_000, OpenAIHandler, {'openai', 'fast',}), 

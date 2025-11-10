@@ -80,7 +80,7 @@ class GoogleHandler(bc.LLMHandler):
             f'web_search_queries': metadata.web_search_queries,
         } if metadata and metadata.grounding_chunks else None
         if self.web_search and not links_dict and self.verbose:
-            print("WARNING: web_search is True but no links were returned.")
+            print(f"WARNING: Google({self.model_info.name}) web_search is True but no links were returned.")
         return links_dict
 
     @staticmethod

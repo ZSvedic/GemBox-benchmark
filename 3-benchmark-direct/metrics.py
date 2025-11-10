@@ -40,9 +40,8 @@ def summarize_metrics(name: str, metrics: list[Metrics]) -> Metrics:
         api_calls=sum(m.api_calls for m in metrics),
     )
 
-def print_metrics(name: str, metrics: list[Metrics]) -> None:
+def print_metrics(metrics: list[Metrics]) -> None:
     """Print a list of Metrics entries."""
-    print(f"\n==={name}===")
     for m in metrics:
         acc_str = f"{m.accuracy:.0%}" if m.accuracy is not None else "N/A"
         print(f"\t{m.name:32.32}\ttokens={m.tokens},\tcost=${m.cost:.6f},\ttime={m.time:.2f}s,\taccuracy={acc_str},\terrors={m.error_count}/{m.api_calls}")

@@ -115,6 +115,7 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
 
 async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, questions: list, run_index: int = 0) -> mt.Metrics:
     """Run benchmark for a single model on all questions in parallel."""
+    print(f"\n==={model_info.name}===")
     # Initialize model and agent.
     try:
         handler = model_info.create_handler(
@@ -153,9 +154,9 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
     # Summarize model metrics, print, and return data.
     sum_metrics = mt.summarize_metrics(model_info.name, task_metrics)
     if ctx.verbose:
-        mt.print_metrics(model_info.name, task_metrics)
+        mt.print_metrics(task_metrics)
     else:
-        mt.print_metrics(model_info.name, [sum_metrics])
+        mt.print_metrics([sum_metrics])
 
     # Close handler to clean up resources.
     await handler.close()
@@ -180,7 +181,8 @@ async def benchmark_models_n_times(name: str, ctx: BenchmarkContext, models: Col
         for model_name, model_metrics in perf_data.items()]
 
     if len(all_metrics) > 1: # If more than one measure, calculate averages.
-        mt.print_metrics(f" SUMMARY OF: {name} ", all_metrics)
+        print(f"\n=== SUMMARY OF: {name} ===")
+        mt.print_metrics(all_metrics)
         return mt.summarize_metrics(name, all_metrics)
     else: # If only one measure, return it.
         return all_metrics[0]
@@ -191,7 +193,7 @@ async def main_test():
     print("===== benchmark.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:3]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:2]
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
@@ -199,9 +201,9 @@ async def main_test():
     print(f"Documentation 1 of ~length: {context_approx_tokens} tokens, starting with: {context_txt[:100]}")
 
     # Filter models.
-    # models = bc.Models().by_tags(include={'prompt'})
-    # models = bc.Models().by_min_context_length(context_approx_tokens).by_max_price(0.25, 2.0).by_tags(exclude={'prompt'})
-    models = bc.Models().by_names(['gpt-5-mini', 'gemini-2.5-flash']) # For testing web search.
+    # models = bc.Models().by_tags(exclude={'old', 'prompt'})
+    models = bc.Models().by_min_context_length(context_approx_tokens).by_max_price(0.25, 2.0).by_tags(exclude={'prompt'})
+    # models = bc.Models().by_names(['gemini-2.5-flash-lite']) 
     # models = bc.Models().by_names(['gemini-2.0-flash-001', 'gemini-2.5-flash']) # Good long context models.
     print(f"Filtered models ({len(models)}): {models}")
     
@@ -228,13 +230,14 @@ async def main_test():
             # start_bench_ctx.with_changes(timeout_seconds=timeout, reasoning_effort=reason, context=context), 
             models, 
             questions)
-        for web in [False]
+        for web in [True]
         # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
         # for timeout, reason, context in [(40, "medium", context_txt)]
     ]
 
     # Print summary.
-    mt.print_metrics("=== SUMMARY OF ALL TESTS ===", perf_data)
+    print(f"\n=== SUMMARY OF ALL TESTS ===")
+    mt.print_metrics(perf_data)
 
 if __name__ == "__main__":
     # Load environment variables from parent directory .env.
