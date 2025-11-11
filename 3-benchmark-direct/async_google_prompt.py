@@ -98,14 +98,16 @@ _GOOGLE_MODELS = [
     # TEMPLATE:
     # ModelInfo('', None, 0.0, 0.0, 0, None, {''}),
     # Google models: https://openrouter.ai/provider/google-ai-studio
-    bc.ModelInfo('gemini-2.0-flash-001', None, 0.10, 0.40, 1_050_000, GoogleHandler, {'google', 'fast'}),
-    bc.ModelInfo('gemini-2.5-flash-lite', None, 0.10, 0.40, 1_050_000, GoogleHandler, {'google', 'fast'}), 
-    bc.ModelInfo('gemini-2.5-flash', None, 0.30, 2.50, 1_050_000, GoogleHandler, {'google', 'fast'}),
-    bc.ModelInfo('gemini-2.5-pro', None,1.25, 10.00, 1_050_000, GoogleHandler, {'google', 'accurate'}),
+    bc.ModelInfo('gemini-2.0-flash-001', None, 0.10, 0.40, 1_050_000, GoogleHandler, True, {'google', 'fast'}),
+    bc.ModelInfo('gemini-2.5-flash-lite', None, 0.10, 0.40, 1_050_000, GoogleHandler, True, {'google', 'fast'}), 
+    bc.ModelInfo('gemini-2.5-flash', None, 0.30, 2.50, 1_050_000, GoogleHandler, True, {'google', 'fast'}),
+    bc.ModelInfo('gemini-2.5-pro', None,1.25, 10.00, 1_050_000, GoogleHandler, True, {'google', 'accurate'}),
     # Google Vertex AI models: 
     # "googlevertexai" models are handled directly.
-    bc.ModelInfo('rag-gemini-2.5-flash', '6917529027641081856', 0.30, 2.50, 1_050_000, GoogleHandler, {'google', 'prompt'}),
-    bc.ModelInfo('rag-gemini-2.5-pro', '6917529027641081856', 1.25, 10.00, 1_050_000, GoogleHandler, {'google', 'prompt'}),
+    bc.ModelInfo('rag-gemini-2.5-flash', '6917529027641081856', 
+                 0.30, 2.50, 1_050_000, GoogleHandler, False, {'google', 'prompt'}),
+    bc.ModelInfo('rag-gemini-2.5-pro', '6917529027641081856', 
+                 1.25, 10.00, 1_050_000, GoogleHandler, False, {'google', 'prompt'}),
 ]
 
 bc.Models._MODEL_REGISTRY += _GOOGLE_MODELS

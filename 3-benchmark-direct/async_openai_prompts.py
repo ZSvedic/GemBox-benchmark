@@ -87,19 +87,21 @@ _OPENAI_MODELS = [
     # TEMPLATE:
     # ModelInfo('', None, 0.0, 0.0, 0, None, {''}),
     # OpenAI models: https://openrouter.ai/provider/openai
-    bc.ModelInfo('gpt-3.5-turbo', None, 0.50, 1.50, 16_385, OpenAIHandler, {'openai', 'fast', 'old'}),
-    bc.ModelInfo('gpt-4.1', None, 2.0, 8.0, 1_050_000, OpenAIHandler, {'openai', 'fast', 'old'}),
-    bc.ModelInfo('gpt-4o-2024-11-20', None, 2.5, 10.0, 128_000, OpenAIHandler, {'openai', 'old'}),
-    bc.ModelInfo('gpt-4o-mini', None, 0.15, 0.60, 128_000, OpenAIHandler, {'openai', 'fast'}), 
-    bc.ModelInfo('gpt-5-nano', None, 0.05, 0.40, 400_000, OpenAIHandler, {'openai', 'fast'}),            
-    bc.ModelInfo('gpt-5-mini', None, 0.25, 2.00, 400_000, OpenAIHandler, {'openai', 'fast',}), 
-    bc.ModelInfo('gpt-5', None, 1.25, 10.00, 400_000, OpenAIHandler, {'openai', 'accurate'}),  
-    bc.ModelInfo('gpt-5-codex', None, 1.25, 10.0, 400_000, OpenAIHandler, {'openai'}), # Doesn't work directly?      
+    bc.ModelInfo('gpt-3.5-turbo', None, 0.50, 1.50, 16_385, OpenAIHandler, False, {'openai', 'fast', 'old'}),
+    bc.ModelInfo('gpt-4.1', None, 2.0, 8.0, 1_050_000, OpenAIHandler, False, {'openai', 'fast', 'old'}),
+    bc.ModelInfo('gpt-4o-2024-11-20', None, 2.5, 10.0, 128_000, OpenAIHandler, False, {'openai', 'old'}),
+    bc.ModelInfo('gpt-4o-mini', None, 0.15, 0.60, 128_000, OpenAIHandler, False, {'openai', 'fast', 'old'}), 
+    bc.ModelInfo('gpt-5-nano', None, 0.05, 0.40, 400_000, OpenAIHandler, True, {'openai', 'fast'}),            
+    bc.ModelInfo('gpt-5-mini', None, 0.25, 2.00, 400_000, OpenAIHandler, True, {'openai', 'fast',}), 
+    bc.ModelInfo('gpt-5', None, 1.25, 10.00, 400_000, OpenAIHandler, True, {'openai', 'accurate'}),  
+    bc.ModelInfo('gpt-5-codex', None, 1.25, 10.0, 400_000, OpenAIHandler, True, {'openai'}),      
     # OpenAIPrompt models (Zel's private account): 
     # https://platform.openai.com/chat/edit?prompt=pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2&version=4
     # Prompt version 4 uses gpt-5-mini.
-    bc.ModelInfo('prompt-GBS-examples-GPT5mini', 'pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2', 0.25, 2.00, 400_000, OpenAIHandler, {'openai', 'prompt'}),
-    bc.ModelInfo('prompt-GBS-examples-GPT5', 'pmpt_68ee4f81f8d4819786ff5301af701ced0843964564bf8684', 1.25, 10.00, 400_000, OpenAIHandler, {'openai', 'prompt'}),
+    bc.ModelInfo('prompt-GBS-examples-GPT5mini', 'pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2', 
+                 0.25, 2.00, 400_000, OpenAIHandler, False, {'openai', 'prompt'}),
+    bc.ModelInfo('prompt-GBS-examples-GPT5', 'pmpt_68ee4f81f8d4819786ff5301af701ced0843964564bf8684', 
+                 1.25, 10.00, 400_000, OpenAIHandler, False, {'openai', 'prompt'}),
 ]
     
 bc.Models._MODEL_REGISTRY += _OPENAI_MODELS

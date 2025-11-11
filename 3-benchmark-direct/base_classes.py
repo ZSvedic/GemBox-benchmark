@@ -66,6 +66,7 @@ class ModelInfo:
     output_cost: float
     context_length: int
     direct_class: type[LLMHandler]
+    web_search: bool
     tags: set[str]
 
     def __str__(self) -> str:
@@ -163,12 +164,12 @@ _TEST_MODEL_REGISTRY = [
     # ModelInfo('name', prompt_id, input_cost, output_cost, context_length, direct_class, tags),
     # TEMPLATE:
     # ModelInfo('', None, 0.0, 0.0, 0, None, {''}),
-    ModelInfo('AcmeLLM-3', None, 0.03, 0.05, 1000, _AcmeLLMHandler, {'acme', 'fast'}),
-    ModelInfo('AcmeLLM-4', None, 0.05, 0.10, 2000, _AcmeLLMHandler, {'acme'}),
-    ModelInfo('AcmeLLM-5', None, 0.10, 0.20, 3000, _AcmeLLMHandler, {'acme'}),
-    ModelInfo('FooLLM-2-mini', None, 0.02, 0.10, 2000, _AcmeLLMHandler, {'foo', 'fast'}),
-    ModelInfo('BarLLM-1', None, 0.03, 0.15, 3000, _AcmeLLMHandler, {'bar', 'fast'}),
-    ModelInfo('BarLLM-2', None, 0.05, 0.20, 4000, _AcmeLLMHandler, {'bar'}),
+    ModelInfo('AcmeLLM-3', None, 0.03, 0.05, 1000, _AcmeLLMHandler, False, {'acme', 'fast'}),
+    ModelInfo('AcmeLLM-4', None, 0.05, 0.10, 2000, _AcmeLLMHandler, False, {'acme'}),
+    ModelInfo('AcmeLLM-5', None, 0.10, 0.20, 3000, _AcmeLLMHandler, True, {'acme'}),
+    ModelInfo('FooLLM-2-mini', None, 0.02, 0.10, 2000, _AcmeLLMHandler, False, {'foo', 'fast'}),
+    ModelInfo('BarLLM-1', None, 0.03, 0.15, 3000, _AcmeLLMHandler, False, {'bar', 'fast'}),
+    ModelInfo('BarLLM-2', None, 0.05, 0.20, 4000, _AcmeLLMHandler, True, {'bar'}),
 ]
 
 # Test functions.
