@@ -69,18 +69,25 @@ class OpenAIHandler(bc.LLMHandler):
         return result, links, (usage.input_tokens, usage.output_tokens)
 
     def get_web_search_links(self, response) -> bc.CallDetailsType:
-        links_dict = {
-            f'web_search_call: {item.action.query}': \
-                [source.url for source in (item.action.sources if item.action.sources else [])] 
-            for item in response.output if item.type == "web_search_call" 
-        } if self.web_search else None
+        if not self.web_search:
+            return None
 
-        if links_dict:
-            print(f"DEBUG: Found {sum(len(v) for v in links_dict.values())} web search links.")
-        elif self.web_search:
-            print(f"WARNING: OpenAI({self.model_info.name}) web_search is True but no links were returned.")
-            
-        return links_dict
+        links = {}
+        for item in response.output:
+            if item.type == "web_search_call":
+                action = item.action
+                match action.type:
+                    case "search":
+                        links[f"search(query={action.query})"] = [s.url for s in (action.sources or [])]
+                    case "open_page":
+                        links["open_page"] = action.url
+                    case other:
+                        print(f"WARNING: Unexpected web_search_call action type: {other}")
+
+        print(f"DEBUG: Found {sum(len(v) for v in links.values())} web search links."
+              if links else f"WARNING: web_search True but no links were returned.")
+        
+        return links
 
 # OpenAI models.
 
@@ -114,11 +121,12 @@ async def main_test():
     print("===== async_openai_prompts.main_test() =====")
 
     # Test web search.
-    for model in _OPENAI_MODELS:
-        if model.web_search:
-            print(f"\n--- Testing model: {model.name} (web_search=True) ---")
-            handler = bc.Models().by_name(model.name).create_handler(web_search=True)
-            await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
+    for _ in range(3):
+        for model in _OPENAI_MODELS:
+            if model.name == 'gpt-5-codex':
+                print(f"\n--- Testing model: {model.name} (web_search=True) ---")
+                handler = bc.Models().by_name(model.name).create_handler(web_search=True)
+                await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
 
     # Test with model default system prompt and web search.
     handler = bc.Models().by_name('gpt-5-mini').create_handler(system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)
