@@ -20,7 +20,7 @@ class LLMHandler(ABC):
             *,
             system_prompt: str | None = None, 
             parse_type: type[BaseModel] | None = None,
-            web_search: bool = None,
+            web_search: bool = False,
             verbose: bool = False): 
         # Plain params:
         self.model_info = model_info
@@ -99,6 +99,9 @@ class Models(Collection[ModelInfo]):
 
     def by_min_context_length(self, min_context_length: int) -> Models:
         return self.filter(lambda m: m.context_length >= min_context_length)
+    
+    def by_web_search(self, web_search: bool) -> Models:
+        return self.filter(lambda m: m.web_search == web_search)
 
     def by_names(self, names: list[str]) -> Models:
         filtered = self.filter(lambda m: str(m) in names)
@@ -144,6 +147,7 @@ class Models(Collection[ModelInfo]):
 _DEFAULT_SYSTEM_PROMPT = """Answer a coding question related to GemBox Software .NET components.
 Return a JSON object with a "completions" array containing only the code strings that should replace the ??? marks, in order. 
 Completions array should not contain any extra whitespace as results will be used for string comparison.
+Use web search to find the most recent version of the GemBox API.
 
 Example question: 
 How do you set the value of cell A1 to "Hello"?

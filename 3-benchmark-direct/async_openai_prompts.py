@@ -75,7 +75,9 @@ class OpenAIHandler(bc.LLMHandler):
             for item in response.output if item.type == "web_search_call" 
         } if self.web_search else None
 
-        if self.web_search and not links_dict:
+        if links_dict:
+            print(f"DEBUG: Found {sum(len(v) for v in links_dict.values())} web search links.")
+        elif self.web_search:
             print(f"WARNING: OpenAI({self.model_info.name}) web_search is True but no links were returned.")
             
         return links_dict
@@ -90,7 +92,7 @@ _OPENAI_MODELS = [
     bc.ModelInfo('gpt-3.5-turbo', None, 0.50, 1.50, 16_385, OpenAIHandler, False, {'openai', 'fast', 'old'}),
     bc.ModelInfo('gpt-4.1', None, 2.0, 8.0, 1_050_000, OpenAIHandler, False, {'openai', 'fast', 'old'}),
     bc.ModelInfo('gpt-4o-2024-11-20', None, 2.5, 10.0, 128_000, OpenAIHandler, False, {'openai', 'old'}),
-    bc.ModelInfo('gpt-4o-mini', None, 0.15, 0.60, 128_000, OpenAIHandler, False, {'openai', 'fast', 'old'}), 
+    bc.ModelInfo('gpt-4o-mini', None, 0.15, 0.60, 128_000, OpenAIHandler, True, {'openai', 'fast', 'old'}), 
     bc.ModelInfo('gpt-5-nano', None, 0.05, 0.40, 400_000, OpenAIHandler, True, {'openai', 'fast'}),            
     bc.ModelInfo('gpt-5-mini', None, 0.25, 2.00, 400_000, OpenAIHandler, True, {'openai', 'fast',}), 
     bc.ModelInfo('gpt-5', None, 1.25, 10.00, 400_000, OpenAIHandler, True, {'openai', 'accurate'}),  
@@ -110,10 +112,13 @@ bc.Models._MODEL_REGISTRY += _OPENAI_MODELS
 
 async def main_test():
     print("===== async_openai_prompts.main_test() =====")
-    
-    # Test plain text response for question about today's news.
-    handler = bc.Models().by_name('gpt-5-mini').create_handler(web_search=True)
-    await bc._test_call_handler(handler, ["What are the latest tech news today, be concise?"])
+
+    # Test web search.
+    for model in _OPENAI_MODELS:
+        if model.web_search:
+            print(f"\n--- Testing model: {model.name} (web_search=True) ---")
+            handler = bc.Models().by_name(model.name).create_handler(web_search=True)
+            await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
 
     # Test with model default system prompt and web search.
     handler = bc.Models().by_name('gpt-5-mini').create_handler(system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)

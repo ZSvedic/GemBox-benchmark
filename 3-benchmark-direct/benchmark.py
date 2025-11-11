@@ -193,15 +193,17 @@ async def main_test():
     print("===== benchmark.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:5]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[20:25]
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
     context_txt, context_approx_tokens = load_txt_file("GemBox-Spreadsheet-examples.txt")
     print(f"Documentation 1 of ~length: {context_approx_tokens} tokens, starting with: {context_txt[:100]}")
 
+    print(f"PROMPT:\n{bc._DEFAULT_SYSTEM_PROMPT}\n")
+
     # Filter models.
-    models = bc.Models().by_tags(include={'google'}, exclude={'prompt'})
+    models = bc.Models().by_web_search(True).by_tags(exclude={'old'})
     # models = bc.Models().by_min_context_length(context_approx_tokens).by_max_price(0.25, 2.0).by_tags(exclude={'prompt'})
     # models = bc.Models().by_names(['gemini-2.5-flash-lite']) 
     # models = bc.Models().by_names(['gemini-2.0-flash-001', 'gemini-2.5-flash']) # Good long context models.
@@ -218,9 +220,9 @@ async def main_test():
         use_open_router=False,
         benchmark_n_times=1, 
         reasoning_effort="medium", 
-        web_search=False, 
+        web_search=True, 
         context="")
-
+    
     # Benchmark models.
     perf_data = [
         await benchmark_models_n_times(

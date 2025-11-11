@@ -79,8 +79,12 @@ class GoogleHandler(bc.LLMHandler):
             f'web_search_calls': [chunk.web.uri for chunk in metadata.grounding_chunks],
             f'web_search_queries': metadata.web_search_queries,
         } if metadata and metadata.grounding_chunks else None
-        if self.web_search and not links_dict and self.verbose:
+
+        if links_dict:
+            print(f"DEBUG: Found {len(links_dict['web_search_calls'])} web search links.")
+        elif self.web_search:
             print(f"WARNING: Google({self.model_info.name}) web_search is True but no links were returned.")
+
         return links_dict
 
     @staticmethod
@@ -98,8 +102,8 @@ _GOOGLE_MODELS = [
     # TEMPLATE:
     # ModelInfo('', None, 0.0, 0.0, 0, None, {''}),
     # Google models: https://openrouter.ai/provider/google-ai-studio
-    bc.ModelInfo('gemini-2.0-flash-001', None, 0.10, 0.40, 1_050_000, GoogleHandler, True, {'google', 'fast'}),
-    bc.ModelInfo('gemini-2.5-flash-lite', None, 0.10, 0.40, 1_050_000, GoogleHandler, True, {'google', 'fast'}), 
+    bc.ModelInfo('gemini-2.0-flash-001', None, 0.10, 0.40, 1_050_000, GoogleHandler, False, {'google', 'fast', 'old'}),
+    bc.ModelInfo('gemini-2.5-flash-lite', None, 0.10, 0.40, 1_050_000, GoogleHandler, False, {'google', 'fast'}), 
     bc.ModelInfo('gemini-2.5-flash', None, 0.30, 2.50, 1_050_000, GoogleHandler, True, {'google', 'fast'}),
     bc.ModelInfo('gemini-2.5-pro', None,1.25, 10.00, 1_050_000, GoogleHandler, True, {'google', 'accurate'}),
     # Google Vertex AI models: 
@@ -116,10 +120,13 @@ bc.Models._MODEL_REGISTRY += _GOOGLE_MODELS
 
 async def main_test():
     print("===== async_google_prompt.main_test() =====")
-    
-    # Test plain text response for question about today's news.
-    handler = bc.Models().by_name('gemini-2.5-flash').create_handler(web_search=True)
-    await bc._test_call_handler(handler, ["What are the latest tech news today, be concise?"])
+
+    # Test web search.
+    for model in _GOOGLE_MODELS:
+        if model.web_search:
+            print(f"\n--- Testing model: {model.name} (web_search=True) ---")
+            handler = bc.Models().by_name(model.name).create_handler(web_search=True)
+            await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
 
     # Test with model default system prompt and web search.
     handler = bc.Models().by_name('gemini-2.5-flash').create_handler(system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)
