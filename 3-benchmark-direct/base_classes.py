@@ -147,7 +147,7 @@ class Models(Collection[ModelInfo]):
 _DEFAULT_SYSTEM_PROMPT = """Answer a coding question related to GemBox Software .NET components.
 Return a JSON object with a "completions" array containing only the code strings that should replace the ??? marks, in order. 
 Completions array should not contain any extra whitespace as results will be used for string comparison.
-Use web search to find the most recent version of the GemBox API.
+If needed and available, use web search to find the most recent version of the GemBox API help pages.
 
 Example question: 
 How do you set the value of cell A1 to "Hello"?

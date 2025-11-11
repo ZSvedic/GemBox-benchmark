@@ -203,10 +203,10 @@ async def main_test():
     print(f"PROMPT:\n{bc._DEFAULT_SYSTEM_PROMPT}\n")
 
     # Filter models.
-    models = bc.Models().by_web_search(True).by_tags(exclude={'old'})
+    # models = bc.Models().by_web_search(True).by_tags(exclude={'old'})
     # models = bc.Models().by_min_context_length(context_approx_tokens).by_max_price(0.25, 2.0).by_tags(exclude={'prompt'})
     # models = bc.Models().by_names(['gemini-2.5-flash-lite']) 
-    # models = bc.Models().by_names(['gemini-2.0-flash-001', 'gemini-2.5-flash']) # Good long context models.
+    models = bc.Models().by_names(['gpt-5-mini', 'gemini-2.5-flash']) # Good long context models.
     print(f"Filtered models ({len(models)}): {models}")
     
     # Create starting context.
@@ -223,19 +223,26 @@ async def main_test():
         web_search=True, 
         context="")
     
+    # Create testing contents.
+    bench_contexts = [
+        ("Plain call + low reasoning", False, "low", 30, ""),
+        ("Web search + medium reasoning", True, "medium", 60, ""),
+        ("Context + medium reasoning", False, "medium", 60, context_txt),
+        ]
+    
     # Benchmark models.
     perf_data = [
         await benchmark_models_n_times(
-            f"WEB SEARCH: {web}",
-            start_bench_ctx.with_changes(web_search=web),
-            # f"{timeout}s, {reason} REASONING, {len(context) if context else 0} bytes of documentation", 
-            # start_bench_ctx.with_changes(timeout_seconds=timeout, reasoning_effort=reason, context=context), 
+            text,
+            start_bench_ctx.with_changes(
+                web_search=web, 
+                reasoning_effort=reasoning,
+                timeout_seconds=timeout,
+                context=context),
             models, 
             questions)
-        for web in [True]
-        # for timeout, reason in [(30, "low"), (60, "medium"), (100, "high")]
-        # for timeout, reason, context in [(40, "medium", context_txt)]
-    ]
+        for text, web, reasoning, timeout, context, in bench_contexts
+        ]
 
     # Print summary.
     print(f"\n=== SUMMARY OF ALL TESTS ===")

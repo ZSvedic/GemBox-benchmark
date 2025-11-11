@@ -122,14 +122,15 @@ async def main_test():
     print("===== async_google_prompt.main_test() =====")
 
     # Test web search.
-    for model in _GOOGLE_MODELS:
-        if model.web_search:
-            print(f"\n--- Testing model: {model.name} (web_search=True) ---")
-            handler = bc.Models().by_name(model.name).create_handler(web_search=True)
-            await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
+    # for model in _GOOGLE_MODELS:
+    #     if model.web_search:
+    #         print(f"\n--- Testing model: {model.name} (web_search=True) ---")
+    #         handler = bc.Models().by_name(model.name).create_handler(web_search=True)
+    #         await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
 
     # Test with model default system prompt and web search.
-    handler = bc.Models().by_name('gemini-2.5-flash').create_handler(system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)
+    handler = bc.Models().by_name('gemini-2.5-flash').create_handler(
+        system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)
     await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
 
     # TODO: Test with prompt_id.
