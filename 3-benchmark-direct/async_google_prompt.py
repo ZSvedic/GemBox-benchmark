@@ -74,18 +74,21 @@ class GoogleHandler(bc.LLMHandler):
         return result, links, usage_tuple
 
     def get_web_search_links(self, candidate: types.Candidate) -> bc.CallDetailsType:
+        if not self.web_search:
+            return None
+
         metadata = candidate.grounding_metadata
-        links_dict = {
+        links = {
             f'web_search_calls': [chunk.web.uri for chunk in metadata.grounding_chunks],
             f'web_search_queries': metadata.web_search_queries,
         } if metadata and metadata.grounding_chunks else None
 
-        if links_dict:
-            print(f"DEBUG: Found {len(links_dict['web_search_calls'])} web search links.")
+        if links and 'web_search_calls' in links:
+            print(f"DEBUG: Found {len(links['web_search_calls'])} web search links.")
         elif self.web_search:
-            print(f"WARNING: Google({self.model_info.name}) web_search is True but no links were returned.")
+            print(f"WARNING: web_search is True but no links were returned.")
 
-        return links_dict
+        return links
 
     @staticmethod
     def strip_code_fences(text: str) -> str:
@@ -122,11 +125,11 @@ async def main_test():
     print("===== async_google_prompt.main_test() =====")
 
     # Test web search.
-    # for model in _GOOGLE_MODELS:
-    #     if model.web_search:
-    #         print(f"\n--- Testing model: {model.name} (web_search=True) ---")
-    #         handler = bc.Models().by_name(model.name).create_handler(web_search=True)
-    #         await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
+    for model in _GOOGLE_MODELS:
+        if model.web_search:
+            print(f"\n--- Testing model: {model.name} (web_search=True) ---")
+            handler = bc.Models().by_name(model.name).create_handler(web_search=True)
+            await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
 
     # Test with model default system prompt and web search.
     handler = bc.Models().by_name('gemini-2.5-flash').create_handler(
