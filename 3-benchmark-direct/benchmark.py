@@ -194,7 +194,7 @@ async def main_test():
     print("===== benchmark.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:5]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
@@ -223,14 +223,15 @@ async def main_test():
         max_parallel_questions=30, 
         retry_failures=True, 
         use_open_router=False,
-        benchmark_n_times=1, 
+        benchmark_n_times=3, 
         reasoning_effort="medium", 
         web_search=True, 
         context="")
     
     # Create testing contents.
     bench_contexts = [
-        ("Plain call + low reasoning", False, "low", 30, ""),
+        ("OpenAI's prompt + medium reasoning", False, "medium", 60, ""),
+        # ("Plain call + low reasoning", False, "low", 30, ""),
         # ("Web search + medium reasoning", True, "medium", 60, ""),
         # ("Context + medium reasoning", False, "medium", 60, context_txt),
         ]

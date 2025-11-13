@@ -23,7 +23,18 @@
     gpt-5,                                   tokens=4591842, cost=$6.049684, time=89.92s,    accuracy=100%,  errors=0/84
     gpt-5-codex,                             tokens=4574946, cost=$5.880724, time=110.99s,   accuracy=100%,  errors=0/84
 
+=== SUMMARY OF: OpenAI's prompts + low reasoning ===
+    prompt-GBS-examples-GPT5mini,       tokens=1522406, cost=$0.476267, time=169.24s,   accuracy=91%,   errors=2/84
+    prompt-GBS-examples-GPT5,           tokens=221197,  cost=$0.624116, time=180.48s,   accuracy=67%,   errors=24/84
+
+=== SUMMARY OF: OpenAI's prompt + medium reasoning ===
+    prompt-GBS-examples-GPT5mini,           tokens=1604146, cost=$0.507688, time=165.33s,   accuracy=92%,   errors=0/84
+    prompt-GBS-examples-GPT5,               tokens=839029,  cost=$1.703523, time=348.87s,   accuracy=93%,   errors=0/84
+
+
 === SUMMARY OF ALL TESTS ===
 	Plain call + low reasoning,      	     tokens=601069,	    cost=$2.000385,	    time=867.61s,	accuracy=70%,	errors=16/504
     Web search + medium reasoning,           tokens=4880134,    cost=$5.273750,     time=1260.32s,  accuracy=90%,   errors=3/504
     Context + medium reasoning,              tokens=26449884,   cost=$18.790000,    time=650.42s,   accuracy=86%,   errors=43/504
+    OpenAI's prompts + low reasoning,        tokens=1743603,    cost=$1.100383,     time=349.71s,   accuracy=79%,   errors=26/168
+    OpenAI's prompt + medium reasoning,      tokens=2443175,    cost=$2.211211,     time=514.19s,   accuracy=93%,   errors=0/168
