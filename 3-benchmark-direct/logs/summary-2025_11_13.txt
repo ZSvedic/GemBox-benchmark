@@ -1,0 +1,29 @@
+
+=== SUMMARY OF: Plain call + low reasoning ===
+	gemini-2.5-flash                	tokens=67936,	cost=$0.098982,	time=85.03s,	accuracy=69%,	errors=0/84
+	gemini-2.5-pro                  	tokens=106430,	cost=$0.806227,	time=180.51s,	accuracy=69%,	errors=7/84
+	gpt-5-nano                      	tokens=195898,	cost=$0.066103,	time=162.33s,	accuracy=43%,	errors=1/84
+	gpt-5-mini                      	tokens=77960,	cost=$0.094598,	time=98.74s,	accuracy=72%,	errors=1/84
+	gpt-5                           	tokens=84086,	cost=$0.557211,	time=178.28s,	accuracy=81%,	errors=7/84
+	gpt-5-codex                     	tokens=68759,	cost=$0.377263,	time=162.72s,	accuracy=87%,	errors=0/84
+
+=== SUMMARY OF: Web search + medium reasoning ===
+    gemini-2.5-flash                        tokens=64454,   cost=$0.090277, time=39.40s,    accuracy=84%,   errors=0/84
+    gemini-2.5-pro                          tokens=122781,  cost=$0.945990, time=185.41s,   accuracy=93%,   errors=0/84
+    gpt-5-nano                              tokens=1339744, cost=$0.133538, time=282.95s,   accuracy=75%,   errors=1/84
+    gpt-5-mini                              tokens=1165475, cost=$0.378013, time=184.91s,   accuracy=96%,   errors=0/84
+    gpt-5                                   tokens=1114771, cost=$2.033894, time=284.07s,   accuracy=99%,   errors=0/84
+    gpt-5-codex                             tokens=1072909, cost=$1.692038, time=283.59s,   accuracy=93%,   errors=2/84
+
+=== SUMMARY OF: Context + medium reasoning ===
+    gemini-2.5-flash                        tokens=5367368, cost=$1.668757, time=37.70s,    accuracy=95%,   errors=0/84
+    gemini-2.5-pro                          tokens=2652250, cost=$3.713551, time=264.55s,   accuracy=48%,   errors=43/84
+    gpt-5-nano                              tokens=4675734, cost=$0.275544, time=93.67s,    accuracy=77%,   errors=0/84
+    gpt-5-mini                              tokens=4587744, cost=$1.201741, time=53.58s,    accuracy=98%,   errors=0/84
+    gpt-5                                   tokens=4591842, cost=$6.049684, time=89.92s,    accuracy=100%,  errors=0/84
+    gpt-5-codex                             tokens=4574946, cost=$5.880724, time=110.99s,   accuracy=100%,  errors=0/84
+
+=== SUMMARY OF ALL TESTS ===
+	Plain call + low reasoning      	    tokens=601069,	cost=$2.000385,	time=867.61s,	accuracy=70%,	errors=16/504
+    Web search + medium reasoning           tokens=4880134, cost=$5.273750, time=1260.32s,  accuracy=90%,   errors=3/504
+    Context + medium reasoning              tokens=26449884,        cost=$18.790000,        time=650.42s,   accuracy=86%,   errors=43/504

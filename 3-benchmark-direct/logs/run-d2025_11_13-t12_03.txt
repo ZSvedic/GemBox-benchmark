@@ -1,0 +1,779 @@
+ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `LocalShellCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpListTools` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpApprovalRequest` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCustomToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str])
+  PydanticSerializationUnexpectedValue(Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...emBox.Spreadsheet.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...emBox.Spreadsheet.html'), input_type=ActionSearch])
+  return self.__pydantic_serializer__.to_python(
+WARNING: Unexpected web_search_call action type: find_in_page
+DEBUG: Found 100 web search links.
+/Users/zsvedic/LOCAL/CODE-2025/GemBox-benchmark/3-benchmark-direct/.venv/lib/python3.13/site-packages/pydantic/main.py:464: UserWarning: Pydantic serializer warnings:
+  PydanticSerializationUnexpectedValue(Expected `ResponseOutputMessage` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFileSearchToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFunctionToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(PydanticSerializationUnexpectedValue: Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str]
+PydanticSerializationUnexpectedValue: Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelCell.html'), input_type=ActionSearch]
+PydanticSerializationUnexpectedValue: Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelCell.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseComputerToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseReasoningItem` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ImageGenerationCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCodeInterpreterToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `LocalShellCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpListTools` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpApprovalRequest` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCustomToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str])
+  PydanticSerializationUnexpectedValue(Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelCell.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelCell.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseOutputMessage` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFileSearchToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFunctionToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(PydanticSerializationUnexpectedValue: Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str]
+PydanticSerializationUnexpectedValue: Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch]
+PydanticSerializationUnexpectedValue: Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseComputerToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseReasoningItem` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ImageGenerationCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCodeInterpreterToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `LocalShellCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpListTools` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpApprovalRequest` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCustomToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str])
+  PydanticSerializationUnexpectedValue(Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch])
+  return self.__pydantic_serializer__.to_python(
+WARNING: Unexpected web_search_call action type: find_in_page
+WARNING: Unexpected web_search_call action type: find_in_page
+DEBUG: Found 98 web search links.
+DEBUG: Found 28 web search links.
+Retrying because of exception: TimeoutError()
+Error: TimeoutError()
+        gpt-5-codex                             tokens=378710,  cost=$0.589290, time=120.15s,   accuracy=89%,   errors=1/28
+
+=== Run 2 of 3 ===
+
+===gemini-2.5-flash===
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+        gemini-2.5-flash                        tokens=23149,   cost=$0.034253, time=20.05s,    accuracy=83%,   errors=0/28
+
+===gemini-2.5-pro===
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+        gemini-2.5-pro                          tokens=45127,   cost=$0.357330, time=53.98s,    accuracy=91%,   errors=0/28
+
+===gpt-5-nano===
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 11 web search links.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 8 web search links.
+DEBUG: Found 7 web search links.
+DEBUG: Found 9 web search links.
+DEBUG: Found 14 web search links.
+DEBUG: Found 8 web search links.
+DEBUG: Found 4 web search links.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 31 web search links.
+DEBUG: Found 8 web search links.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 10 web search links.
+DEBUG: Found 17 web search links.
+DEBUG: Found 7 web search links.
+DEBUG: Found 27 web search links.
+DEBUG: Found 25 web search links.
+DEBUG: Found 23 web search links.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 7 web search links.
+DEBUG: Found 20 web search links.
+DEBUG: Found 9 web search links.
+DEBUG: Found 24 web search links.
+DEBUG: Found 23 web search links.
+Retrying because of exception: TimeoutError()
+DEBUG: Found 13 web search links.
+        gpt-5-nano                              tokens=456652,  cost=$0.045316, time=103.93s,   accuracy=74%,   errors=0/28
+
+===gpt-5-mini===
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 7 web search links.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 9 web search links.
+DEBUG: Found 8 web search links.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 7 web search links.
+DEBUG: Found 4 web search links.
+DEBUG: Found 7 web search links.
+DEBUG: Found 11 web search links.
+DEBUG: Found 6 web search links.
+DEBUG: Found 13 web search links.
+DEBUG: Found 10 web search links.
+DEBUG: Found 12 web search links.
+DEBUG: Found 12 web search links.
+DEBUG: Found 24 web search links.
+DEBUG: Found 17 web search links.
+DEBUG: Found 12 web search links.
+DEBUG: Found 12 web search links.
+DEBUG: Found 17 web search links.
+DEBUG: Found 28 web search links.
+DEBUG: Found 21 web search links.
+DEBUG: Found 11 web search links.
+DEBUG: Found 26 web search links.
+DEBUG: Found 15 web search links.
+DEBUG: Found 45 web search links.
+        gpt-5-mini                              tokens=350800,  cost=$0.114867, time=31.23s,    accuracy=92%,   errors=0/28
+
+===gpt-5===
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 8 web search links.
+DEBUG: Found 9 web search links.
+DEBUG: Found 11 web search links.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 4 web search links.
+DEBUG: Found 7 web search links.
+DEBUG: Found 6 web search links.
+DEBUG: Found 21 web search links.
+DEBUG: Found 22 web search links.
+DEBUG: Found 14 web search links.
+DEBUG: Found 14 web search links.
+DEBUG: Found 8 web search links.
+DEBUG: Found 21 web search links.
+DEBUG: Found 9 web search links.
+DEBUG: Found 14 web search links.
+DEBUG: Found 38 web search links.
+DEBUG: Found 11 web search links.
+DEBUG: Found 32 web search links.
+Retrying because of exception: TimeoutError()
+DEBUG: Found 23 web search links.
+        gpt-5                                   tokens=365371,  cost=$0.673705, time=103.77s,   accuracy=100%,  errors=0/28
+
+===gpt-5-codex===
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 8 web search links.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 8 web search links.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 3 web search links.
+DEBUG: Found 10 web search links.
+DEBUG: Found 9 web search links.
+DEBUG: Found 80 web search links.
+DEBUG: Found 22 web search links.
+DEBUG: Found 109 web search links.
+DEBUG: Found 9 web search links.
+DEBUG: Found 20 web search links.
+DEBUG: Found 15 web search links.
+/Users/zsvedic/LOCAL/CODE-2025/GemBox-benchmark/3-benchmark-direct/.venv/lib/python3.13/site-packages/pydantic/main.py:464: UserWarning: Pydantic serializer warnings:
+  PydanticSerializationUnexpectedValue(Expected `ResponseOutputMessage` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFileSearchToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFunctionToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(PydanticSerializationUnexpectedValue: Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str]
+PydanticSerializationUnexpectedValue: Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch]
+PydanticSerializationUnexpectedValue: Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseComputerToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseReasoningItem` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ImageGenerationCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCodeInterpreterToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `LocalShellCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpListTools` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpApprovalRequest` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCustomToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str])
+  PydanticSerializationUnexpectedValue(Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseOutputMessage` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFileSearchToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFunctionToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(PydanticSerializationUnexpectedValue: Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str]
+PydanticSerializationUnexpectedValue: Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch]
+PydanticSerializationUnexpectedValue: Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseComputerToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseReasoningItem` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ImageGenerationCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCodeInterpreterToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `LocalShellCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpListTools` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpApprovalRequest` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCustomToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str])
+  PydanticSerializationUnexpectedValue(Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseOutputMessage` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFileSearchToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFunctionToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(PydanticSerializationUnexpectedValue: Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str]
+PydanticSerializationUnexpectedValue: Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch]
+PydanticSerializationUnexpectedValue: Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseComputerToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseReasoningItem` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ImageGenerationCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCodeInterpreterToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `LocalShellCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpListTools` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpApprovalRequest` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCustomToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str])
+  PydanticSerializationUnexpectedValue(Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...adsheet.ExcelFont.html'), input_type=ActionSearch])
+  return self.__pydantic_serializer__.to_python(
+WARNING: Unexpected web_search_call action type: find_in_page
+WARNING: Unexpected web_search_call action type: find_in_page
+WARNING: Unexpected web_search_call action type: find_in_page
+DEBUG: Found 19 web search links.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 31 web search links.
+/Users/zsvedic/LOCAL/CODE-2025/GemBox-benchmark/3-benchmark-direct/.venv/lib/python3.13/site-packages/pydantic/main.py:464: UserWarning: Pydantic serializer warnings:
+  PydanticSerializationUnexpectedValue(Expected `ResponseOutputMessage` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFileSearchToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFunctionToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(PydanticSerializationUnexpectedValue: Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str]
+PydanticSerializationUnexpectedValue: Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...dsheet.CellBorder.html'), input_type=ActionSearch]
+PydanticSerializationUnexpectedValue: Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...dsheet.CellBorder.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseComputerToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseReasoningItem` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ImageGenerationCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCodeInterpreterToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `LocalShellCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpListTools` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpApprovalRequest` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCustomToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str])
+  PydanticSerializationUnexpectedValue(Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...dsheet.CellBorder.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...dsheet.CellBorder.html'), input_type=ActionSearch])
+  return self.__pydantic_serializer__.to_python(
+WARNING: Unexpected web_search_call action type: find_in_page
+DEBUG: Found 100 web search links.
+DEBUG: Found 9 web search links.
+        gpt-5-codex                             tokens=346927,  cost=$0.545764, time=43.28s,    accuracy=93%,   errors=0/28
+
+=== Run 3 of 3 ===
+
+===gemini-2.5-flash===
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+        gemini-2.5-flash                        tokens=19832,   cost=$0.025961, time=9.11s,     accuracy=79%,   errors=0/28
+
+===gemini-2.5-pro===
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+WARNING: web_search is True but no links were returned.
+Retrying because of exception: TimeoutError()
+WARNING: web_search is True but no links were returned.
+        gemini-2.5-pro                          tokens=39537,   cost=$0.301430, time=85.33s,    accuracy=93%,   errors=0/28
+
+===gpt-5-nano===
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 6 web search links.
+DEBUG: Found 9 web search links.
+DEBUG: Found 6 web search links.
+DEBUG: Found 6 web search links.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 8 web search links.
+DEBUG: Found 10 web search links.
+DEBUG: Found 12 web search links.
+DEBUG: Found 17 web search links.
+DEBUG: Found 7 web search links.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 17 web search links.
+DEBUG: Found 17 web search links.
+DEBUG: Found 8 web search links.
+DEBUG: Found 13 web search links.
+DEBUG: Found 46 web search links.
+DEBUG: Found 20 web search links.
+DEBUG: Found 9 web search links.
+DEBUG: Found 37 web search links.
+DEBUG: Found 10 web search links.
+DEBUG: Found 25 web search links.
+Retrying because of exception: TimeoutError()
+Retrying because of exception: TimeoutError()
+DEBUG: Found 44 web search links.
+Error: TimeoutError()
+        gpt-5-nano                              tokens=464881,  cost=$0.043051, time=120.15s,   accuracy=77%,   errors=1/28
+
+===gpt-5-mini===
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 11 web search links.
+DEBUG: Found 8 web search links.
+DEBUG: Found 7 web search links.
+DEBUG: Found 7 web search links.
+DEBUG: Found 8 web search links.
+DEBUG: Found 9 web search links.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 5 web search links.
+DEBUG: Found 10 web search links.
+DEBUG: Found 11 web search links.
+DEBUG: Found 13 web search links.
+DEBUG: Found 11 web search links.
+DEBUG: Found 13 web search links.
+DEBUG: Found 9 web search links.
+DEBUG: Found 9 web search links.
+DEBUG: Found 11 web search links.
+DEBUG: Found 17 web search links.
+DEBUG: Found 26 web search links.
+DEBUG: Found 18 web search links.
+DEBUG: Found 23 web search links.
+DEBUG: Found 9 web search links.
+DEBUG: Found 28 web search links.
+DEBUG: Found 35 web search links.
+DEBUG: Found 44 web search links.
+DEBUG: Found 46 web search links.
+DEBUG: Found 42 web search links.
+        gpt-5-mini                              tokens=440870,  cost=$0.140412, time=47.99s,    accuracy=97%,   errors=0/28
+
+===gpt-5===
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 5 web search links.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 5 web search links.
+DEBUG: Found 8 web search links.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 5 web search links.
+DEBUG: Found 5 web search links.
+DEBUG: Found 14 web search links.
+DEBUG: Found 6 web search links.
+DEBUG: Found 18 web search links.
+DEBUG: Found 16 web search links.
+DEBUG: Found 7 web search links.
+DEBUG: Found 16 web search links.
+DEBUG: Found 18 web search links.
+DEBUG: Found 22 web search links.
+DEBUG: Found 11 web search links.
+DEBUG: Found 24 web search links.
+DEBUG: Found 22 web search links.
+DEBUG: Found 41 web search links.
+DEBUG: Found 24 web search links.
+Retrying because of exception: TimeoutError()
+DEBUG: Found 29 web search links.
+        gpt-5                                   tokens=391617,  cost=$0.697666, time=85.48s,    accuracy=98%,   errors=0/28
+
+===gpt-5-codex===
+WARNING: web_search True but no links were returned.
+DEBUG: Found 12 web search links.
+WARNING: web_search True but no links were returned.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 11 web search links.
+DEBUG: Found 7 web search links.
+DEBUG: Found 12 web search links.
+DEBUG: Found 9 web search links.
+DEBUG: Found 12 web search links.
+DEBUG: Found 11 web search links.
+DEBUG: Found 7 web search links.
+DEBUG: Found 20 web search links.
+DEBUG: Found 18 web search links.
+DEBUG: Found 17 web search links.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 20 web search links.
+DEBUG: Found 12 web search links.
+DEBUG: Found 17 web search links.
+WARNING: web_search True but no links were returned.
+DEBUG: Found 17 web search links.
+DEBUG: Found 12 web search links.
+DEBUG: Found 9 web search links.
+/Users/zsvedic/LOCAL/CODE-2025/GemBox-benchmark/3-benchmark-direct/.venv/lib/python3.13/site-packages/pydantic/main.py:464: UserWarning: Pydantic serializer warnings:
+  PydanticSerializationUnexpectedValue(Expected `ResponseOutputMessage` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFileSearchToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFunctionToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(PydanticSerializationUnexpectedValue: Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str]
+PydanticSerializationUnexpectedValue: Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...et.ExcelWorksheet.html'), input_type=ActionSearch]
+PydanticSerializationUnexpectedValue: Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...et.ExcelWorksheet.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseComputerToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseReasoningItem` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ImageGenerationCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCodeInterpreterToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `LocalShellCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpListTools` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpApprovalRequest` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCustomToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str])
+  PydanticSerializationUnexpectedValue(Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...et.ExcelWorksheet.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ...et.ExcelWorksheet.html'), input_type=ActionSearch])
+  return self.__pydantic_serializer__.to_python(
+WARNING: Unexpected web_search_call action type: find_in_page
+DEBUG: Found 105 web search links.
+WARNING: web_search True but no links were returned.
+/Users/zsvedic/LOCAL/CODE-2025/GemBox-benchmark/3-benchmark-direct/.venv/lib/python3.13/site-packages/pydantic/main.py:464: UserWarning: Pydantic serializer warnings:
+  PydanticSerializationUnexpectedValue(Expected `ResponseOutputMessage` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFileSearchToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFunctionToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(PydanticSerializationUnexpectedValue: Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str]
+PydanticSerializationUnexpectedValue: Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ....ExcelFillPattern.html'), input_type=ActionSearch]
+PydanticSerializationUnexpectedValue: Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ....ExcelFillPattern.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseComputerToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseReasoningItem` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ImageGenerationCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCodeInterpreterToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `LocalShellCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpListTools` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpApprovalRequest` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCustomToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str])
+  PydanticSerializationUnexpectedValue(Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ....ExcelFillPattern.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ....ExcelFillPattern.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseOutputMessage` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFileSearchToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseFunctionToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(PydanticSerializationUnexpectedValue: Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str]
+PydanticSerializationUnexpectedValue: Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ....ExcelFillPattern.html'), input_type=ActionSearch]
+PydanticSerializationUnexpectedValue: Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ....ExcelFillPattern.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseComputerToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseReasoningItem` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ImageGenerationCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCodeInterpreterToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `LocalShellCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpListTools` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `McpApprovalRequest` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `ResponseCustomToolCall` - serialized value may not be as expected [field_name='output', input_value=ResponseFunctionWebSearch... type='web_search_call'), input_type=ResponseFunctionWebSearch])
+  PydanticSerializationUnexpectedValue(Expected `literal['search']` - serialized value may not be as expected [field_name='type', input_value='find_in_page', input_type=str])
+  PydanticSerializationUnexpectedValue(Expected `ActionOpenPage` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ....ExcelFillPattern.html'), input_type=ActionSearch])
+  PydanticSerializationUnexpectedValue(Expected `ActionFind` - serialized value may not be as expected [field_name='action', input_value=ActionSearch(query=None, ....ExcelFillPattern.html'), input_type=ActionSearch])
+  return self.__pydantic_serializer__.to_python(
+WARNING: Unexpected web_search_call action type: find_in_page
+WARNING: Unexpected web_search_call action type: find_in_page
+DEBUG: Found 25 web search links.
+WARNING: web_search True but no links were returned.
+Retrying because of exception: TimeoutError()
+Retrying because of exception: TimeoutError()
+DEBUG: Found 6 web search links.
+Error: TimeoutError()
+        gpt-5-codex                             tokens=347272,  cost=$0.556984, time=120.15s,   accuracy=96%,   errors=1/28
+
+=== SUMMARY OF: Web search + medium reasoning ===
+        gemini-2.5-flash                        tokens=64454,   cost=$0.090277, time=39.40s,    accuracy=84%,   errors=0/84
+        gemini-2.5-pro                          tokens=122781,  cost=$0.945990, time=185.41s,   accuracy=93%,   errors=0/84
+        gpt-5-nano                              tokens=1339744, cost=$0.133538, time=282.95s,   accuracy=75%,   errors=1/84
+        gpt-5-mini                              tokens=1165475, cost=$0.378013, time=184.91s,   accuracy=96%,   errors=0/84
+        gpt-5                                   tokens=1114771, cost=$2.033894, time=284.07s,   accuracy=99%,   errors=0/84
+        gpt-5-codex                             tokens=1072909, cost=$1.692038, time=283.59s,   accuracy=93%,   errors=2/84
+
+===== Benchmarking 6 model(s) on 28 question(s) 3 times. =====
+
+BenchmarkContext:
+        timeout_seconds: 60
+        delay_ms: 50
+        verbose: False
+        truncate_length: 150
+        max_parallel_questions: 30
+        retry_failures: True
+        use_open_router: False
+        benchmark_n_times: 3
+        reasoning_effort: medium
+        web_search: False
+        context: --- Example: ../GitHub-GB-examples/GemBox.Spreadsheet.Examples-master/C#/Platforms/DataGridView in WindowsForms/Form1.cs:
+using System;
+using System.W...
+        
+
+=== Run 1 of 3 ===
+
+===gemini-2.5-flash===
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+        gemini-2.5-flash                        tokens=1788692, cost=$0.555176, time=13.16s,    accuracy=96%,   errors=0/28
+
+===gemini-2.5-pro===
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: TimeoutError()
+Error: TimeoutError()
+Error: TimeoutError()
+        gemini-2.5-pro                          tokens=773105,  cost=$1.055483, time=86.74s,    accuracy=43%,   errors=16/28
+
+===gpt-5-nano===
+        gpt-5-nano                              tokens=1558508, cost=$0.091820, time=43.21s,    accuracy=76%,   errors=0/28
+
+===gpt-5-mini===
+        gpt-5-mini                              tokens=1529653, cost=$0.401390, time=25.26s,    accuracy=96%,   errors=0/28
+
+===gpt-5===
+        gpt-5                                   tokens=1530678, cost=$2.017201, time=25.84s,    accuracy=100%,  errors=0/28
+
+===gpt-5-codex===
+        gpt-5-codex                             tokens=1525110, cost=$1.961521, time=34.68s,    accuracy=100%,  errors=0/28
+
+=== Run 2 of 3 ===
+
+===gemini-2.5-flash===
+        gemini-2.5-flash                        tokens=1789741, cost=$0.557798, time=12.64s,    accuracy=96%,   errors=0/28
+
+===gemini-2.5-pro===
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+        gemini-2.5-pro                          tokens=970806,  cost=$1.363299, time=57.65s,    accuracy=54%,   errors=13/28
+
+===gpt-5-nano===
+        gpt-5-nano                              tokens=1559239, cost=$0.092112, time=26.51s,    accuracy=80%,   errors=0/28
+
+===gpt-5-mini===
+        gpt-5-mini                              tokens=1529718, cost=$0.401520, time=16.85s,    accuracy=100%,  errors=0/28
+
+===gpt-5===
+        gpt-5                                   tokens=1530934, cost=$2.019761, time=23.70s,    accuracy=100%,  errors=0/28
+
+===gpt-5-codex===
+        gpt-5-codex                             tokens=1524918, cost=$1.959601, time=46.59s,    accuracy=100%,  errors=0/28
+
+=== Run 3 of 3 ===
+
+===gemini-2.5-flash===
+        gemini-2.5-flash                        tokens=1788935, cost=$0.555783, time=11.89s,    accuracy=93%,   errors=0/28
+
+===gemini-2.5-pro===
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Error: ClientError("429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status': 'RESOURCE_EXHAUSTED'}}")
+Retrying because of exception: TimeoutError()
+Retrying because of exception: TimeoutError()
+Error: TimeoutError()
+        gemini-2.5-pro                          tokens=908339,  cost=$1.294770, time=120.16s,   accuracy=46%,   errors=14/28
+
+===gpt-5-nano===
+        gpt-5-nano                              tokens=1557987, cost=$0.091612, time=23.96s,    accuracy=76%,   errors=0/28
+
+===gpt-5-mini===
+        gpt-5-mini                              tokens=1528373, cost=$0.398830, time=11.48s,    accuracy=96%,   errors=0/28
+
+===gpt-5===
+        gpt-5                                   tokens=1530230, cost=$2.012721, time=40.37s,    accuracy=100%,  errors=0/28
+
+===gpt-5-codex===
+        gpt-5-codex                             tokens=1524918, cost=$1.959601, time=29.72s,    accuracy=100%,  errors=0/28
+
+=== SUMMARY OF: Context + medium reasoning ===
+        gemini-2.5-flash                        tokens=5367368, cost=$1.668757, time=37.70s,    accuracy=95%,   errors=0/84
+        gemini-2.5-pro                          tokens=2652250, cost=$3.713551, time=264.55s,   accuracy=48%,   errors=43/84
+        gpt-5-nano                              tokens=4675734, cost=$0.275544, time=93.67s,    accuracy=77%,   errors=0/84
+        gpt-5-mini                              tokens=4587744, cost=$1.201741, time=53.58s,    accuracy=98%,   errors=0/84
+        gpt-5                                   tokens=4591842, cost=$6.049684, time=89.92s,    accuracy=100%,  errors=0/84
+        gpt-5-codex                             tokens=4574946, cost=$5.880724, time=110.99s,   accuracy=100%,  errors=0/84
+
+=== SUMMARY OF ALL TESTS ===
+        Plain call + low reasoning              tokens=575239,  cost=$2.133831, time=903.34s,   accuracy=70%,   errors=15/504
+        Web search + medium reasoning           tokens=4880134, cost=$5.273750, time=1260.32s,  accuracy=90%,   errors=3/504
+        Context + medium reasoning              tokens=26449884,        cost=$18.790000,        time=650.42s,   accuracy=86%,   errors=43/504
+
+ ~/LO/CODE-2025/GemBox-benchmark/3-benchmark-direct  main !1                                                                                     ok  46m 56s 

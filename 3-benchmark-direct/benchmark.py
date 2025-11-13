@@ -1,6 +1,9 @@
 import asyncio
 import dataclasses as dc
+import datetime
+import os
 import pathlib
+import sys
 import textwrap
 import time
 from collections.abc import Collection
@@ -193,7 +196,7 @@ async def main_test():
     print("===== benchmark.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[20:25]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
@@ -203,10 +206,14 @@ async def main_test():
     print(f"PROMPT:\n{bc._DEFAULT_SYSTEM_PROMPT}\n")
 
     # Filter models.
-    # models = bc.Models().by_web_search(True).by_tags(exclude={'old'})
-    # models = bc.Models().by_min_context_length(context_approx_tokens).by_max_price(0.25, 2.0).by_tags(exclude={'prompt'})
-    # models = bc.Models().by_names(['gemini-2.5-flash-lite']) 
-    models = bc.Models().by_names(['gpt-5-mini', 'gemini-2.5-flash']) # Good long context models.
+    models = (
+        bc.Models()
+        .by_web_search(True)
+        .by_min_context_length(context_approx_tokens)
+        .by_tags(exclude={'prompt', 'old'})
+        # .by_names(['gpt-5-mini', 'gemini-2.5-flash']) 
+    )
+
     print(f"Filtered models ({len(models)}): {models}")
     
     # Create starting context.
@@ -218,7 +225,7 @@ async def main_test():
         max_parallel_questions=30, 
         retry_failures=True, 
         use_open_router=False,
-        benchmark_n_times=1, 
+        benchmark_n_times=3, 
         reasoning_effort="medium", 
         web_search=True, 
         context="")
@@ -226,8 +233,8 @@ async def main_test():
     # Create testing contents.
     bench_contexts = [
         ("Plain call + low reasoning", False, "low", 30, ""),
-        ("Web search + medium reasoning", True, "medium", 60, ""),
-        ("Context + medium reasoning", False, "medium", 60, context_txt),
+        # ("Web search + medium reasoning", True, "medium", 60, ""),
+        # ("Context + medium reasoning", False, "medium", 60, context_txt),
         ]
     
     # Benchmark models.
@@ -248,9 +255,19 @@ async def main_test():
     print(f"\n=== SUMMARY OF ALL TESTS ===")
     mt.print_metrics(perf_data)
 
+def start_logging(log_dir="logs"):
+    os.makedirs(log_dir, exist_ok=True)
+    ts = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    path = os.path.join(log_dir, f"run_{ts}.log")
+    log = open(path, "w")
+    sys.stdout = sys.stderr = log
+    print(f"Logging started: {ts} → {path}")
+    return log
+
 if __name__ == "__main__":
     # Load environment variables from parent directory .env.
     if not dotenv.load_dotenv():
         raise FileExistsError(".env file not found or empty")
-            
-    asyncio.run(main_test())
+    
+    with start_logging():
+        asyncio.run(main_test())
