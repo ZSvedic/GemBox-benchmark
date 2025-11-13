@@ -44,4 +44,4 @@ def print_metrics(metrics: list[Metrics]) -> None:
     """Print a list of Metrics entries."""
     for m in metrics:
         acc_str = f"{m.accuracy:.0%}" if m.accuracy is not None else "N/A"
-        print(f"\t{m.name:32.32}\ttokens={m.tokens},\tcost=${m.cost:.6f},\ttime={m.time:.2f}s,\taccuracy={acc_str},\terrors={m.error_count}/{m.api_calls}")
+        print(f"\t{m.name:32.32},\ttokens={m.tokens},\tcost=${m.cost:.6f},\ttime={m.time:.2f}s,\taccuracy={acc_str},\terrors={m.error_count}/{m.api_calls}")
