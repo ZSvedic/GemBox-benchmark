@@ -31,6 +31,11 @@
     prompt-GBS-examples-GPT5mini,           tokens=1604146, cost=$0.507688, time=165.33s,   accuracy=92%,   errors=0/84
     prompt-GBS-examples-GPT5,               tokens=839029,  cost=$1.703523, time=348.87s,   accuracy=93%,   errors=0/84
 
+=== SUMMARY OF: Google's RAG + medium reasoning ===
+    rag-default-gemini-2.5-flash,           tokens=79374,   cost=$0.127577, time=89.70s,    accuracy=69%,   errors=0/84
+    rag-default-gemini-2.5-pro,             tokens=141832,  cost=$1.146466, time=357.28s,   accuracy=76%,   errors=3/84
+    rag-llmparser-gemini-2.5-flash,         tokens=78347,   cost=$0.125010, time=82.81s,    accuracy=68%,   errors=0/84
+    rag-llmparser-gemini-2.5-pro,           tokens=119690,  cost=$0.979130, time=222.00s,   accuracy=64%,   errors=19/84
 
 === SUMMARY OF ALL TESTS ===
 	Plain call + low reasoning,      	     tokens=601069,	    cost=$2.000385,	    time=867.61s,	accuracy=70%,	errors=16/504
@@ -38,3 +43,4 @@
     Context + medium reasoning,              tokens=26449884,   cost=$18.790000,    time=650.42s,   accuracy=86%,   errors=43/504
     OpenAI's prompts + low reasoning,        tokens=1743603,    cost=$1.100383,     time=349.71s,   accuracy=79%,   errors=26/168
     OpenAI's prompt + medium reasoning,      tokens=2443175,    cost=$2.211211,     time=514.19s,   accuracy=93%,   errors=0/168
+    Google's RAG + medium reasoning,         tokens=419243,     cost=$2.378184,     time=751.79s,   accuracy=69%,   errors=22/336

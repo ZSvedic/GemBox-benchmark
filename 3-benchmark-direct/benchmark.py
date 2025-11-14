@@ -208,8 +208,8 @@ async def main_test():
         bc.Models()
         # .by_web_search(True)
         # .by_min_context_length(context_approx_tokens)
-        # .by_tags(exclude={'prompt', 'old', 'rag'})
-        .by_names(['prompt-GBS-examples-GPT5mini', 'prompt-GBS-examples-GPT5']) 
+        # .by_tags(exclude={'prompt', 'old'})
+        .by_names(['rag-default-gemini-2.5-flash', 'rag-default-gemini-2.5-pro', 'rag-llmparser-gemini-2.5-flash', 'rag-llmparser-gemini-2.5-pro']) 
     )
 
     print(f"Filtered models ({len(models)}): {models}")
@@ -230,7 +230,7 @@ async def main_test():
     
     # Create testing contents.
     bench_contexts = [
-        ("OpenAI's prompt + medium reasoning", False, "medium", 60, ""),
+        ("Google's RAG + medium reasoning", False, "medium", 60, ""),
         # ("Plain call + low reasoning", False, "low", 30, ""),
         # ("Web search + medium reasoning", True, "medium", 60, ""),
         # ("Context + medium reasoning", False, "medium", 60, context_txt),
