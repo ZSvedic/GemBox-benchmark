@@ -55,6 +55,12 @@
     deepseek/deepseek-chat,                 tokens=158515,  cost=$0.022379, time=12.39s,    accuracy=57%,   errors=0/84
     deepseek/deepseek-r1,                   tokens=264613,  cost=$0.341593, time=360.42s,   accuracy=64%,   errors=6/84
 
+=== SUMMARY OF: OpenRouter Context + medium ===
+    anthropic/claude-3-5-haiku,             tokens=5909106, cost=$1.478842, time=48.23s,    accuracy=38%,   errors=1/84
+    mistralai/codestral-2508,               tokens=4871147, cost=$1.462301, time=19.02s,    accuracy=37%,   errors=0/84
+    mistralai/devstral-medium,              tokens=4813276, cost=$1.928030, time=175.52s,   accuracy=22%,   errors=1/84
+    mistralai/mistral-large,                tokens=4871219, cost=$9.749106, time=73.87s,    accuracy=79%,   errors=0/84
+
 === SUMMARY OF ALL TESTS ===
 	Plain call + low reasoning,      	     tokens=601069,	    cost=$2.000385,	    time=867.61s,	accuracy=70%,	errors=16/504
     Web search + medium reasoning,           tokens=4880134,    cost=$5.273750,     time=1260.32s,  accuracy=90%,   errors=3/504
