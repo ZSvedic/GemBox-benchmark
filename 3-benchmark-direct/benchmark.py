@@ -208,7 +208,7 @@ async def main_test():
         bc.Models()
         # .by_web_search(True)
         # .by_min_context_length(context_approx_tokens)
-        # .by_tags(exclude={'prompt', 'old'})
+        # .by_tags(exclude={'prompt', 'old', 'rag'})
         .by_names(['prompt-GBS-examples-GPT5mini', 'prompt-GBS-examples-GPT5']) 
     )
 

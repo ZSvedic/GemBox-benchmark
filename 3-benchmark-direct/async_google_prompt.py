@@ -13,12 +13,16 @@ import base_classes as bc
 _LOCATION = "europe-west4"
 _PROJECT_ID = "gen-lang-client-0658217610"
 _RAG_CORPUS_PATH = f"projects/{_PROJECT_ID}/locations/{_LOCATION}/ragCorpora/"
+# Default:           projects/gen-lang-client-0658217610/locations/europe-west4/ragCorpora/7991637538768945152
+# LLM Parser:        projects/gen-lang-client-0658217610/locations/europe-west4/ragCorpora/4532873024948404224
+# 
 
 # GoogleHandler.
 
 class GoogleHandler(bc.LLMHandler):
-    # Client is a singleton that requires close() is protected by a lock:
+    # Client is a singleton that requires close()...
     _client = None
+    # ...and is protected by a lock.
     _lock = threading.Lock()
 
     @classmethod
@@ -111,10 +115,14 @@ _GOOGLE_MODELS = [
     bc.ModelInfo('gemini-2.5-pro', None,1.25, 10.00, 1_050_000, GoogleHandler, True, {'google', 'accurate'}),
     # Google Vertex AI models: 
     # "googlevertexai" models are handled directly.
-    bc.ModelInfo('rag-gemini-2.5-flash', '6917529027641081856', 
-                 0.30, 2.50, 1_050_000, GoogleHandler, False, {'google', 'prompt'}),
-    bc.ModelInfo('rag-gemini-2.5-pro', '6917529027641081856', 
-                 1.25, 10.00, 1_050_000, GoogleHandler, False, {'google', 'prompt'}),
+    bc.ModelInfo('gemini-2.5-flash', '7991637538768945152', 
+                 0.30, 2.50, 1_050_000, GoogleHandler, False, {'google', 'rag', 'rag-default'}),
+    bc.ModelInfo('gemini-2.5-pro', '7991637538768945152', 
+                 1.25, 10.00, 1_050_000, GoogleHandler, False, {'google', 'rag', 'rag-default'}),
+    bc.ModelInfo('gemini-2.5-flash', '4532873024948404224', 
+                 0.30, 2.50, 1_050_000, GoogleHandler, False, {'google', 'rag', 'rag-default'}),
+    bc.ModelInfo('gemini-2.5-pro', '4532873024948404224', 
+                 1.25, 10.00, 1_050_000, GoogleHandler, False, {'google', 'rag', 'rag-default'}),
 ]
 
 bc.Models._MODEL_REGISTRY += _GOOGLE_MODELS
@@ -124,19 +132,25 @@ bc.Models._MODEL_REGISTRY += _GOOGLE_MODELS
 async def main_test():
     print("===== async_google_prompt.main_test() =====")
 
-    # Test web search.
+    # # Test web search.
+    # for model in _GOOGLE_MODELS:
+    #     if model.web_search:
+    #         print(f"\n--- Testing model: {model.name} (web_search=True) ---")
+    #         handler = bc.Models().by_name(model.name).create_handler(web_search=True)
+    #         await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
+
+    # # Test with model default system prompt and web search.
+    # handler = bc.Models().by_name('gemini-2.5-flash').create_handler(
+    #     system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)
+    # await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
+
+    # Test prompts.
     for model in _GOOGLE_MODELS:
-        if model.web_search:
-            print(f"\n--- Testing model: {model.name} (web_search=True) ---")
-            handler = bc.Models().by_name(model.name).create_handler(web_search=True)
-            await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
-
-    # Test with model default system prompt and web search.
-    handler = bc.Models().by_name('gemini-2.5-flash').create_handler(
-        system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)
-    await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
-
-    # TODO: Test with prompt_id.
+        if model.prompt_id:
+            print(f"\n--- Testing prompt: {model.name} (rag_id={model.prompt_id}, tags={model.tags}) ---")
+            handler = model.create_handler(
+                system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=False, parse_type=bc.ListOfStrings, verbose=True)
+            await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
 
 if __name__ == "__main__":
     if not dotenv.load_dotenv():
