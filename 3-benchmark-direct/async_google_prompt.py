@@ -66,7 +66,7 @@ class GoogleHandler(bc.LLMHandler):
         )
 
         candidate = response.candidates[0]
-        text = GoogleHandler.strip_code_fences(candidate.content.parts[0].text.strip())
+        text = bc.LLMHandler.strip_code_fences(candidate.content.parts[0].text.strip())
         result = self.parse_type.model_validate_json(text) if self.parse_type else text
         links = self.get_web_search_links(candidate)
         usage = response.usage_metadata
@@ -94,14 +94,6 @@ class GoogleHandler(bc.LLMHandler):
             print(f"WARNING: web_search is True but no links were returned.")
 
         return links
-
-    @staticmethod
-    def strip_code_fences(text: str) -> str:
-        if text.startswith("```") and text.endswith("```"):
-            lines = text.splitlines()
-            if lines and lines[0].startswith("```") and lines[-1].strip() == "```":
-                return "\n".join(lines[1:-1])
-        return text
 
 # Google models registry.
 

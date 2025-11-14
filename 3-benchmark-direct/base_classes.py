@@ -32,6 +32,16 @@ class LLMHandler(ABC):
     @abstractmethod
     async def call(self, input: str) -> tuple[Any, CallDetailsType, UsageType]: 
         ...
+
+    @staticmethod
+    def strip_code_fences(text: str) -> str:
+        '''Models that output text sometimes wrap it in triple backtick code fences.'''
+        if text.startswith("```") and text.endswith("```"):
+            lines = text.splitlines()
+            if lines and lines[0].startswith("```") and lines[-1].strip() == "```":
+                return "\n".join(lines[1:-1])
+        return text
+    
     @classmethod
     @abstractmethod
     async def close(cls):

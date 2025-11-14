@@ -9,8 +9,9 @@ from openai import AsyncOpenAI, omit
 import base_classes as bc
 
 class OpenAIHandler(bc.LLMHandler):
-    # Client is a singleton that requires close() is protected by a lock:
+    # Client is a singleton that requires close()...
     _client = None
+    # ... and is protected by a lock.
     _lock = threading.Lock()
 
     @classmethod

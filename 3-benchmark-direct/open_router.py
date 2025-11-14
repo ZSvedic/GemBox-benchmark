@@ -1,5 +1,6 @@
 import asyncio
 import threading
+import os
 from typing import Any, override
 
 import dotenv
@@ -8,8 +9,9 @@ from openai import AsyncOpenAI
 import base_classes as bc
 
 class OpenRouterHandler(bc.LLMHandler):
-    # Client is a singleton that requires close() is protected by a lock:
+    # Client is a singleton that requires close()...
     _client = None
+    # ... and is protected by a lock.
     _lock = threading.Lock()
 
     @classmethod
@@ -18,7 +20,7 @@ class OpenRouterHandler(bc.LLMHandler):
             if cls._client is None:
                 cls._client = AsyncOpenAI(
                     base_url="https://openrouter.ai/api/v1",
-                    api_key=dotenv.get_key('.env', 'OPENROUTER_API_KEY') or dotenv.get_key('../.env', 'OPENROUTER_API_KEY')
+                    api_key=os.environ.get("OPENROUTER_API_KEY")
                 )
             return cls._client
 
@@ -54,6 +56,7 @@ class OpenRouterHandler(bc.LLMHandler):
         
         # Parse JSON if parse_type is specified
         if self.parse_type:
+            result_text = bc.LLMHandler.strip_code_fences(result_text)
             result = self.parse_type.model_validate_json(result_text)
         else:
             result = result_text
