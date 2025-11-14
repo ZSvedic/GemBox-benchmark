@@ -193,7 +193,7 @@ async def main_test():
     print("===== benchmark.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:5]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
@@ -207,8 +207,8 @@ async def main_test():
         bc.Models()
         # .by_web_search(True)
         # .by_min_context_length(context_approx_tokens)
-        # .by_tags(exclude={'prompt', 'old'})
-        .by_names(['anthropic/claude-3-5-haiku', 'mistralai/codestral-2508', 'meta-llama/llama-3.3-70b-instruct', 'deepseek/deepseek-chat']) 
+        # .by_tags(include={'openrouter'})
+        .by_names(['anthropic/claude-sonnet-4.5', 'anthropic/claude-opus-4.1', 'mistralai/mistral-large']) 
     )
 
     print(f"Filtered models ({len(models)}): {models}")
@@ -222,7 +222,7 @@ async def main_test():
         max_parallel_questions=30, 
         retry_failures=True, 
         use_open_router=False,
-        benchmark_n_times=1, 
+        benchmark_n_times=3, 
         reasoning_effort="medium", 
         web_search=True, 
         context="")

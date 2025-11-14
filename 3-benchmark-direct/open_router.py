@@ -93,7 +93,7 @@ _OPENROUTER_MODELS = [
     bc.ModelInfo('mistralai/mistral-large', None, 2.0, 6.0, 128_000, OpenRouterHandler, False, {'mistral', 'openrouter'}),
     
     # DeepSeek models: https://openrouter.ai/provider/deepseek
-    bc.ModelInfo('deepseek/deepseek-chat', None, 0.14, 0.28, 64_000, OpenRouterHandler, False, {'deepseek', 'fast', 'openrouter'}),
+    bc.ModelInfo('deepseek/deepseek-chat', None, 0.14, 0.28, 64_000, OpenRouterHandler, False, {'deepseek', 'openrouter'}),
     bc.ModelInfo('deepseek/deepseek-r1', None, 0.55, 2.19, 64_000, OpenRouterHandler, False, {'deepseek', 'openrouter'}),
 ]
 

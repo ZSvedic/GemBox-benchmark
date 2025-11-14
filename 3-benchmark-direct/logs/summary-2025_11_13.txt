@@ -37,6 +37,16 @@
     rag-llmparser-gemini-2.5-flash,         tokens=78347,   cost=$0.125010, time=82.81s,    accuracy=68%,   errors=0/84
     rag-llmparser-gemini-2.5-pro,           tokens=119690,  cost=$0.979130, time=222.00s,   accuracy=64%,   errors=19/84
 
+=== SUMMARY OF: OpenRouter + low reasoning ===
+    anthropic/claude-3-5-haiku,             tokens=36244,   cost=$0.010603, time=13.48s,    accuracy=46%,   errors=1/84
+    mistralai/codestral-2508,               tokens=35234,   cost=$0.011381, time=2.73s,     accuracy=54%,   errors=0/84
+    mistralai/devstral-medium,              tokens=35213,   cost=$0.016215, time=2.86s,     accuracy=60%,   errors=0/84
+    deepseek/deepseek-chat,                 tokens=33975,   cost=$0.004940, time=10.37s,    accuracy=46%,   errors=0/84
+    deepseek/deepseek-r1,                   tokens=70109,   cost=$0.102295, time=155.80s,   accuracy=65%,   errors=4/84
+    anthropic/claude-sonnet-4.5,            tokens=36950,   cost=$0.135990, time=16.06s,    accuracy=75%,   errors=1/84
+    anthropic/claude-opus-4.1,              tokens=36865,   cost=$0.648435, time=10.87s,    accuracy=87%,   errors=0/84
+    mistralai/mistral-large,                tokens=36089,   cost=$0.081006, time=6.78s,     accuracy=52%,   errors=0/84
+
 === SUMMARY OF ALL TESTS ===
 	Plain call + low reasoning,      	     tokens=601069,	    cost=$2.000385,	    time=867.61s,	accuracy=70%,	errors=16/504
     Web search + medium reasoning,           tokens=4880134,    cost=$5.273750,     time=1260.32s,  accuracy=90%,   errors=3/504
