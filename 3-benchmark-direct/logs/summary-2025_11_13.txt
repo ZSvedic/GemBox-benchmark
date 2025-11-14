@@ -47,6 +47,14 @@
     anthropic/claude-opus-4.1,              tokens=36865,   cost=$0.648435, time=10.87s,    accuracy=87%,   errors=0/84
     mistralai/mistral-large,                tokens=36089,   cost=$0.081006, time=6.78s,     accuracy=52%,   errors=0/84
 
+=== SUMMARY OF: OpenRouter Web search + medium ===
+    anthropic/claude-3-5-haiku,             tokens=634173,  cost=$0.161873, time=68.27s,    accuracy=19%,   errors=47/84
+    mistralai/codestral-2508,               tokens=163863,  cost=$0.049972, time=9.25s,     accuracy=67%,   errors=0/84
+    mistralai/devstral-medium,              tokens=163929,  cost=$0.067703, time=11.68s,    accuracy=56%,   errors=0/84
+    mistralai/mistral-large,                tokens=164768,  cost=$0.337584, time=14.50s,    accuracy=58%,   errors=0/84
+    deepseek/deepseek-chat,                 tokens=158515,  cost=$0.022379, time=12.39s,    accuracy=57%,   errors=0/84
+    deepseek/deepseek-r1,                   tokens=264613,  cost=$0.341593, time=360.42s,   accuracy=64%,   errors=6/84
+
 === SUMMARY OF ALL TESTS ===
 	Plain call + low reasoning,      	     tokens=601069,	    cost=$2.000385,	    time=867.61s,	accuracy=70%,	errors=16/504
     Web search + medium reasoning,           tokens=4880134,    cost=$5.273750,     time=1260.32s,  accuracy=90%,   errors=3/504

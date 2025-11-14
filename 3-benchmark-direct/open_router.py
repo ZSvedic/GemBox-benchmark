@@ -35,6 +35,7 @@ class OpenRouterHandler(bc.LLMHandler):
     @override
     async def call(self, input: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]:
         messages = []
+        model_name = self.model_info.name + (":online" if self.web_search else "")
         
         if self.system_prompt:
             messages.append({"role": "system", "content": self.system_prompt})
@@ -42,14 +43,11 @@ class OpenRouterHandler(bc.LLMHandler):
         messages.append({"role": "user", "content": input})
 
         if self.verbose:
-            print(f"Calling model: {self.model_info.name}")
+            print(f"Calling model: {model_name}")
             print(f"Messages: {messages}")
 
         # Call OpenRouter API
-        response = await OpenRouterHandler.get_client().chat.completions.create(
-            model=self.model_info.name,
-            messages=messages,
-        )
+        response = await OpenRouterHandler.get_client().chat.completions.create(model=model_name, messages=messages)
 
         # Extract response
         result_text = response.choices[0].message.content.strip()
@@ -84,8 +82,8 @@ _OPENROUTER_MODELS = [
     
     # Anthropic models: https://openrouter.ai/provider/anthropic
     bc.ModelInfo('anthropic/claude-3-5-haiku', None, 0.25, 1.35, 200_000, OpenRouterHandler, False, {'anthropic', 'openrouter'}),
-    bc.ModelInfo('anthropic/claude-sonnet-4.5', None, 3.0, 15.00, 1_000_000, OpenRouterHandler, False, {'anthropic', 'openrouter'}),
-    bc.ModelInfo('anthropic/claude-opus-4.1', None, 15.00, 75.00, 200_000, OpenRouterHandler, False, {'anthropic', 'openrouter'}),
+    # bc.ModelInfo('anthropic/claude-sonnet-4.5', None, 3.0, 15.00, 1_000_000, OpenRouterHandler, False, {'anthropic', 'openrouter'}), # Too expensive.
+    # bc.ModelInfo('anthropic/claude-opus-4.1', None, 15.00, 75.00, 200_000, OpenRouterHandler, False, {'anthropic', 'openrouter'}), # Too expensive.
     
     # Mistral models: https://openrouter.ai/provider/mistral
     bc.ModelInfo('mistralai/codestral-2508', None, 0.30, 0.90, 256_000, OpenRouterHandler, False, {'mistral', 'openrouter'}),

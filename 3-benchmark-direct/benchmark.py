@@ -206,9 +206,9 @@ async def main_test():
     models = (
         bc.Models()
         # .by_web_search(True)
-        # .by_min_context_length(context_approx_tokens)
-        # .by_tags(include={'openrouter'})
-        .by_names(['anthropic/claude-sonnet-4.5', 'anthropic/claude-opus-4.1', 'mistralai/mistral-large']) 
+        .by_min_context_length(context_approx_tokens)
+        .by_tags(include={'openrouter'})
+        # .by_names(['']) 
     )
 
     print(f"Filtered models ({len(models)}): {models}")
@@ -229,10 +229,9 @@ async def main_test():
     
     # Create testing contents.
     bench_contexts = [
-        ("OpenRouter", False, "low", 30, ""),
-        # ("Plain call + low reasoning", False, "low", 30, ""),
-        # ("Web search + medium reasoning", True, "medium", 60, ""),
-        # ("Context + medium reasoning", False, "medium", 60, context_txt),
+        # ("OpenRouter call + low", False, "low", 30, ""),
+        # ("OpenRouter Web + medium", True, "medium", 60, ""),
+        ("OpenRouter Context + medium", False, "medium", 60, context_txt),
         ]
     
     # Benchmark models.
