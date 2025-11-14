@@ -88,12 +88,9 @@ _OPENROUTER_MODELS = [
     bc.ModelInfo('anthropic/claude-opus-4.1', None, 15.00, 75.00, 200_000, OpenRouterHandler, False, {'anthropic', 'openrouter'}),
     
     # Mistral models: https://openrouter.ai/provider/mistral
-    bc.ModelInfo('mistralai/codestral-2508', None, 0.30, 0.90, 256_000, OpenRouterHandler, False, {'mistral', 'fast', 'accurate', 'openrouter'}),
+    bc.ModelInfo('mistralai/codestral-2508', None, 0.30, 0.90, 256_000, OpenRouterHandler, False, {'mistral', 'openrouter'}),
     bc.ModelInfo('mistralai/devstral-medium', None, 0.40, 2.00, 131_000, OpenRouterHandler, False, {'mistral', 'openrouter'}),
     bc.ModelInfo('mistralai/mistral-large', None, 2.0, 6.0, 128_000, OpenRouterHandler, False, {'mistral', 'openrouter'}),
-    
-    # Meta models: https://openrouter.ai/provider/meta
-    bc.ModelInfo('meta-llama/llama-3.3-70b-instruct', None, 0.35, 0.40, 128_000, OpenRouterHandler, False, {'meta', 'fast', 'openrouter'}),
     
     # DeepSeek models: https://openrouter.ai/provider/deepseek
     bc.ModelInfo('deepseek/deepseek-chat', None, 0.14, 0.28, 64_000, OpenRouterHandler, False, {'deepseek', 'fast', 'openrouter'}),

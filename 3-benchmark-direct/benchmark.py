@@ -7,8 +7,7 @@ from collections.abc import Collection
 
 import dotenv
 
-import async_google_prompt  # Required to populate bc.Models._MODEL_REGISTRY.
-import async_openai_prompts  # Required to populate bc.Models._MODEL_REGISTRY.
+import async_google_prompt, async_openai_prompts, open_router  # Required to populate bc.Models._MODEL_REGISTRY.
 import base_classes as bc
 import metrics as mt
 import questions as qs
@@ -194,7 +193,7 @@ async def main_test():
     print("===== benchmark.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:5]
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
@@ -209,7 +208,7 @@ async def main_test():
         # .by_web_search(True)
         # .by_min_context_length(context_approx_tokens)
         # .by_tags(exclude={'prompt', 'old'})
-        .by_names(['rag-default-gemini-2.5-flash', 'rag-default-gemini-2.5-pro', 'rag-llmparser-gemini-2.5-flash', 'rag-llmparser-gemini-2.5-pro']) 
+        .by_names(['anthropic/claude-3-5-haiku', 'mistralai/codestral-2508', 'meta-llama/llama-3.3-70b-instruct', 'deepseek/deepseek-chat']) 
     )
 
     print(f"Filtered models ({len(models)}): {models}")
@@ -223,14 +222,14 @@ async def main_test():
         max_parallel_questions=30, 
         retry_failures=True, 
         use_open_router=False,
-        benchmark_n_times=3, 
+        benchmark_n_times=1, 
         reasoning_effort="medium", 
         web_search=True, 
         context="")
     
     # Create testing contents.
     bench_contexts = [
-        ("Google's RAG + medium reasoning", False, "medium", 60, ""),
+        ("OpenRouter", False, "low", 30, ""),
         # ("Plain call + low reasoning", False, "low", 30, ""),
         # ("Web search + medium reasoning", True, "medium", 60, ""),
         # ("Context + medium reasoning", False, "medium", 60, context_txt),

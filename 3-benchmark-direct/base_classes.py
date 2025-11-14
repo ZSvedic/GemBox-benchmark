@@ -94,7 +94,9 @@ class Models(Collection[ModelInfo]):
     _MODEL_REGISTRY = []
 
     def __init__(self, models: Optional[list[ModelInfo]] = None):
-        self.models = models or Models._MODEL_REGISTRY
+        self.models = (
+            models if models is not None 
+            else Models._MODEL_REGISTRY)
 
     def filter(self, condition: Callable) -> Models:
         """Filter models using a condition function."""
@@ -150,7 +152,7 @@ class Models(Collection[ModelInfo]):
             print(f"{tag} ({len(models)}): {Models(models)}")    
 
     def __contains__(self, x: object) -> bool:
-        return self._MODEL_REGISTRY.__contains__(x)
+        return x in self.models
 
 # Constants.
 
