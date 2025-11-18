@@ -206,9 +206,9 @@ async def main_test():
     models = (
         bc.Models()
         # .by_web_search(True)
-        .by_min_context_length(context_approx_tokens)
-        .by_tags(include={'openrouter'})
-        # .by_names(['']) 
+        # .by_min_context_length(context_approx_tokens)
+        # .by_tags(include={'openrouter'})
+        .by_names(['moonshotai/kimi-k2']) 
     )
 
     print(f"Filtered models ({len(models)}): {models}")
@@ -229,8 +229,8 @@ async def main_test():
     
     # Create testing contents.
     bench_contexts = [
-        # ("OpenRouter call + low", False, "low", 30, ""),
-        # ("OpenRouter Web + medium", True, "medium", 60, ""),
+        ("OpenRouter call + low", False, "low", 30, ""),
+        ("OpenRouter Web + medium", True, "medium", 60, ""),
         ("OpenRouter Context + medium", False, "medium", 60, context_txt),
         ]
     

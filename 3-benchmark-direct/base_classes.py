@@ -76,7 +76,7 @@ class ModelInfo:
     output_cost: float
     context_length: int
     direct_class: type[LLMHandler]
-    web_search: bool
+    has_web_search: bool
     tags: set[str]
 
     def __str__(self) -> str:

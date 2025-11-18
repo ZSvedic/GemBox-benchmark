@@ -124,7 +124,7 @@ async def main_test():
     # Test web search.
     for _ in range(3):
         for model in _OPENAI_MODELS:
-            if model.name == 'gpt-5-codex':
+            if model.has_web_search:
                 print(f"\n--- Testing model: {model.name} (web_search=True) ---")
                 handler = bc.Models().by_name(model.name).create_handler(web_search=True)
                 await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])

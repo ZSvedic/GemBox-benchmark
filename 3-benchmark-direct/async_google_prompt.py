@@ -127,7 +127,7 @@ async def main_test():
 
     # Test web search.
     for model in _GOOGLE_MODELS:
-        if model.web_search:
+        if model.has_web_search:
             print(f"\n--- Testing model: {model.name} (web_search=True) ---")
             handler = bc.Models().by_name(model.name).create_handler(web_search=True)
             await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
