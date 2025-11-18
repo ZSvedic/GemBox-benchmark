@@ -5,18 +5,27 @@
      4	 , Plain call + low reasoning, gpt-5-mini,                      	tokens=77960,	cost=$0.094598,	time=98.74s,	accuracy=72%,	errors=1/84
      5	 , Plain call + low reasoning, gpt-5,                           	tokens=84086,	cost=$0.557211,	time=178.28s,	accuracy=81%,	errors=7/84
      6	 , Plain call + low reasoning, gpt-5-codex,                     	tokens=68759,	cost=$0.377263,	time=162.72s,	accuracy=87%,	errors=0/84
+    47     , Plain call + low reasoning, gpt-5.1,                        	tokens=37755,	cost=$0.067222,	time=8.36s,	accuracy=67%,	errors=0/84
+    48     , Plain call + low reasoning, gpt-5.1-codex,                  	tokens=54634,	cost=$0.251159,	time=164.84s,	accuracy=84%,	errors=4/84
+    49     , Plain call + low reasoning, gpt-5.1-codex-mini,             	tokens=69859,	cost=$0.077652,	time=89.69s,	accuracy=70%,	errors=0/84
      7	 , Web search + medium reasoning, gemini-2.5-flash,                        tokens=64454,   cost=$0.090277, time=39.40s,    accuracy=84%,   errors=0/84
      8	 , Web search + medium reasoning, gemini-2.5-pro,                          tokens=122781,  cost=$0.945990, time=185.41s,   accuracy=93%,   errors=0/84
      9	 , Web search + medium reasoning, gpt-5-nano,                              tokens=1339744, cost=$0.133538, time=282.95s,   accuracy=75%,   errors=1/84
     10	 , Web search + medium reasoning, gpt-5-mini,                              tokens=1165475, cost=$0.378013, time=184.91s,   accuracy=96%,   errors=0/84
     11	 , Web search + medium reasoning, gpt-5,                                   tokens=1114771, cost=$2.033894, time=284.07s,   accuracy=99%,   errors=0/84
     12	 , Web search + medium reasoning, gpt-5-codex,                             tokens=1072909, cost=$1.692038, time=283.59s,   accuracy=93%,   errors=2/84
+    50     , Web search + medium reasoning, gpt-5.1,                        	tokens=413518,	cost=$0.549141,	time=13.09s,	accuracy=67%,	errors=0/84
+    51     , Web search + medium reasoning, gpt-5.1-codex,                  	tokens=905364,	cost=$1.516731,	time=194.93s,	accuracy=92%,	errors=1/84
+    52     , Web search + medium reasoning, gpt-5.1-codex-mini,             	tokens=1320329,	cost=$0.445322,	time=170.70s,	accuracy=94%,	errors=0/84    
     13	 , Context + medium reasoning, gemini-2.5-flash,                        tokens=5367368, cost=$1.668757, time=37.70s,    accuracy=95%,   errors=0/84
     14	 , Context + medium reasoning, gemini-2.5-pro,                          tokens=2652250, cost=$3.713551, time=264.55s,   accuracy=48%,   errors=43/84
     15	 , Context + medium reasoning, gpt-5-nano,                              tokens=4675734, cost=$0.275544, time=93.67s,    accuracy=77%,   errors=0/84
     16	 , Context + medium reasoning, gpt-5-mini,                              tokens=4587744, cost=$1.201741, time=53.58s,    accuracy=98%,   errors=0/84
     17	 , Context + medium reasoning, gpt-5,                                   tokens=4591842, cost=$6.049684, time=89.92s,    accuracy=100%,  errors=0/84
     18	 , Context + medium reasoning, gpt-5-codex,                             tokens=4574946, cost=$5.880724, time=110.99s,   accuracy=100%,  errors=0/84
+    53	 , Context + medium reasoning, gpt-5.1,                        	tokens=1356797,	cost=$1.702095,	time=37.89s,	accuracy=29%,	errors=59/84
+    54	 , Context + medium reasoning, gpt-5.1-codex,                  	tokens=4571873,	cost=$5.849994,	time=58.33s,	accuracy=99%,	errors=0/84
+    55	 , Context + medium reasoning, gpt-5.1-codex-mini,             	tokens=4582259,	cost=$1.190771,	time=39.28s,	accuracy=93%,	errors=0/84    
     19	 , OpenAI's prompts + low reasoning, prompt-GBS-examples-GPT5mini,       tokens=1522406, cost=$0.476267, time=169.24s,   accuracy=91%,   errors=2/84
     20	 , OpenAI's prompts + low reasoning, prompt-GBS-examples-GPT5,           tokens=221197,  cost=$0.624116, time=180.48s,   accuracy=67%,   errors=24/84
     21	 , OpenAI's prompt + medium reasoning, prompt-GBS-examples-GPT5mini,           tokens=1604146, cost=$0.507688, time=165.33s,   accuracy=92%,   errors=0/84

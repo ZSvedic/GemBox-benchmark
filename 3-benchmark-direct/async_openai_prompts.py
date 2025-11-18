@@ -103,8 +103,11 @@ _OPENAI_MODELS = [
     bc.ModelInfo('gpt-4o-mini', None, 0.15, 0.60, 128_000, OpenAIHandler, True, {'openai', 'fast', 'old'}), 
     bc.ModelInfo('gpt-5-nano', None, 0.05, 0.40, 400_000, OpenAIHandler, True, {'openai', 'fast'}),            
     bc.ModelInfo('gpt-5-mini', None, 0.25, 2.00, 400_000, OpenAIHandler, True, {'openai', 'fast',}), 
-    bc.ModelInfo('gpt-5', None, 1.25, 10.00, 400_000, OpenAIHandler, True, {'openai', 'accurate'}),  
-    bc.ModelInfo('gpt-5-codex', None, 1.25, 10.0, 400_000, OpenAIHandler, True, {'openai'}),      
+    bc.ModelInfo('gpt-5', None, 1.25, 10.00, 400_000, OpenAIHandler, True, {'openai'}),  
+    bc.ModelInfo('gpt-5-codex', None, 1.25, 10.0, 400_000, OpenAIHandler, True, {'openai'}),  
+    bc.ModelInfo('gpt-5.1', None, 1.25, 10.00, 400_000, OpenAIHandler, True, {'openai'}), 
+    bc.ModelInfo('gpt-5.1-codex', None, 1.25, 10.00, 400_000, OpenAIHandler, True, {'openai'}),
+    bc.ModelInfo('gpt-5.1-codex-mini', None, 0.25, 2.00, 400_000, OpenAIHandler, True, {'openai'}),   
     # OpenAIPrompt models (Zel's private account): 
     # https://platform.openai.com/chat/edit?prompt=pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2&version=4
     # Prompt version 4 uses gpt-5-mini.

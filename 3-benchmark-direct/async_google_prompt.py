@@ -105,7 +105,9 @@ _GOOGLE_MODELS = [
     bc.ModelInfo('gemini-2.0-flash-001', None, 0.10, 0.40, 1_050_000, GoogleHandler, False, {'google', 'fast', 'old'}),
     bc.ModelInfo('gemini-2.5-flash-lite', None, 0.10, 0.40, 1_050_000, GoogleHandler, False, {'google', 'fast'}), 
     bc.ModelInfo('gemini-2.5-flash', None, 0.30, 2.50, 1_050_000, GoogleHandler, True, {'google', 'fast'}),
-    bc.ModelInfo('gemini-2.5-pro', None,1.25, 10.00, 1_050_000, GoogleHandler, True, {'google', 'accurate'}),
+    bc.ModelInfo('gemini-2.5-pro', None,1.25, 10.00, 1_050_000, GoogleHandler, True, {'google'}),
+    bc.ModelInfo('gemini-3.0-flash', None, 0.50, 4.00, 1_050_000, GoogleHandler, True, {'google', 'fast'}), # ?
+    bc.ModelInfo('gemini-3.0-pro', None, 2.50, 12.00, 1_050_000, GoogleHandler, True, {'google'}), # ?
     # Google Vertex AI models: 
     # "googlevertexai" models are handled directly.
     bc.ModelInfo('rag-default-gemini-2.5-flash', 'gemini-2.5-flash:7991637538768945152', 
