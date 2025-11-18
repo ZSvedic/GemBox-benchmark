@@ -43,6 +43,7 @@
     33	 , OpenRouter + low reasoning, anthropic/claude-opus-4.1,              tokens=36865,   cost=$0.648435, time=10.87s,    accuracy=87%,   errors=0/84
     34	 , OpenRouter + low reasoning, mistralai/mistral-large,                tokens=36089,   cost=$0.081006, time=6.78s,     accuracy=52%,   errors=0/84
     45     , OpenRouter + low reasoning, moonshotai/kimi-k2,             	      tokens=33155,	  cost=$0.022336, time=54.66s,    accuracy=54%,	errors=0/84
+    55     , OpenRouter + low reasoning, google/gemini-3-pro-preview,            tokens=109068,  cost=$1.017626, time=180.68s,   accuracy=81%,   errors=10/84
     35	 , OpenRouter Web search + medium, anthropic/claude-3-5-haiku,             tokens=634173,  cost=$0.161873, time=68.27s,    accuracy=19%,   errors=47/84
     36	 , OpenRouter Web search + medium, mistralai/codestral-2508,               tokens=163863,  cost=$0.049972, time=9.25s,     accuracy=67%,   errors=0/84
     37	 , OpenRouter Web search + medium, mistralai/devstral-medium,              tokens=163929,  cost=$0.067703, time=11.68s,    accuracy=56%,   errors=0/84
@@ -50,8 +51,10 @@
     39	 , OpenRouter Web search + medium, deepseek/deepseek-chat,                 tokens=158515,  cost=$0.022379, time=12.39s,    accuracy=57%,   errors=0/84
     40	 , OpenRouter Web search + medium, deepseek/deepseek-r1,                   tokens=264613,  cost=$0.341593, time=360.42s,   accuracy=64%,   errors=6/84
     46     , OpenRouter Web search + medium, moonshotai/kimi-k2,             	     tokens=149630,	 cost=$0.092180, time=26.05s,	   accuracy=66%,   errors=0/84
+    56     , OpenRouter Web search + medium, google/gemini-3-pro-preview,            tokens=292628,  cost=$1.864016, time=342.45s,   accuracy=88%,   errors=5/84
     41	 , OpenRouter Context + medium, anthropic/claude-3-5-haiku,             tokens=5909106, cost=$1.478842, time=48.23s,    accuracy=38%,   errors=1/84
     42	 , OpenRouter Context + medium, mistralai/codestral-2508,               tokens=4871147, cost=$1.462301, time=19.02s,    accuracy=37%,   errors=0/84
     43	 , OpenRouter Context + medium, mistralai/devstral-medium,              tokens=4813276, cost=$1.928030, time=175.52s,   accuracy=22%,   errors=1/84
     44	 , OpenRouter Context + medium, mistralai/mistral-large,                tokens=4871219, cost=$9.749106, time=73.87s,    accuracy=79%,   errors=0/84
     47     , OpenRouter Context + medium, moonshotai/kimi-k2,             	       tokens=4614671, cost=$2.771149, time=194.99s,	accuracy=90%,	 errors=0/84
+    57     , OpenRouter Context + medium, google/gemini-3-pro-preview,            tokens=4720035, cost=$10.952810, time=360.48s,   accuracy=85%,   errors=13/84

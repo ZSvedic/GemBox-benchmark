@@ -193,7 +193,7 @@ async def main_test():
     print("===== benchmark.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:2]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
@@ -208,7 +208,7 @@ async def main_test():
         # .by_web_search(True)
         # .by_min_context_length(context_approx_tokens)
         # .by_tags(include={'openrouter'})
-        .by_names(['gemini-3.0-flash', 'gemini-3.0-pro']) 
+        .by_names(['google/gemini-3-pro-preview']) # 'gemini-3-flash-preview', 'gemini-3-pro-preview']) 
     )
 
     print(f"Filtered models ({len(models)}): {models}")
@@ -222,16 +222,16 @@ async def main_test():
         max_parallel_questions=30, 
         retry_failures=True, 
         use_open_router=False,
-        benchmark_n_times=1, 
+        benchmark_n_times=3, 
         reasoning_effort="medium", 
         web_search=True, 
         context="")
     
     # Create testing contents.
     bench_contexts = [
-        ("Plain call + low", False, "low", 30, ""),
-        # ("Web + medium", True, "medium", 60, ""),
-        # ("Context + medium", False, "medium", 60, context_txt),
+        # ("Plain call + low", False, "low", 30, ""),
+        ("Web + medium", True, "medium", 60, ""),
+        ("Context + medium", False, "medium", 60, context_txt),
         ]
     
     # Benchmark models.

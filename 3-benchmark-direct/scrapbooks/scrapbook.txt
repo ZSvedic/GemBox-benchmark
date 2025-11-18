@@ -1,19 +1,6 @@
-Gemini RAG LLM Parser prompt:
------------------------------
-You are an information retriever for the provided GemBox-Spreadsheet-examples.txt file. 
-That file contains text of all use examples for the GemBox.Spreadsheet .NET C# component.
-All requests will come from a chatbot that generates custom code using GemBox.Spreadsheet to read or write spreadsheet files.
+google/gemini-3-pro-preview,            tokens=101032,  cost=$0.650994, time=120.14s,   accuracy=95%,   errors=1/28
 
-Go through each example and extract:
+google/gemini-3-pro-preview,            tokens=106130,  cost=$0.694250, time=80.28s,    accuracy=90%,   errors=0/28
 
-A. A short summary of what the example demonstrates. E.g.:
-"The example shows how you can write data to an ExcelFile object and create a new Excel file using GemBox.Spreadsheet in your C# or VB.NET applications. It also demonstrates how to merge cells, set column widths, and define the ExcelCell object's Value and Style."
-
-B. Extract key questions that the example answers. E.g.:
-- How to create a new Excel file?
-- How to write data to specific cells?
-- How to merge cells?
-- How to set formatting?
-
-C. Extract key keywords for that example. E.g.:  
-"create Excel file, write data, ExcelFile, ExcelCell, merge cells, formatting"
+TOTAL/AVERAGE:
+google/gemini-3-pro-preview,            tokens=207

@@ -96,6 +96,10 @@ _OPENROUTER_MODELS = [
 
     # MoonshotAI models: https://openrouter.ai/provider/moonshotai
     bc.ModelInfo('moonshotai/kimi-k2', None, 0.60, 2.5, 131_100, OpenRouterHandler, True, {'moonshotai', 'openrouter'}),
+
+    # Google's Gemini 3 Pro seems to be available via OpenRouter:
+    # https://openrouter.ai/google/gemini-3-pro-preview
+    bc.ModelInfo('google/gemini-3-pro-preview', None, 2.0, 12.00, 1_050_000, OpenRouterHandler, True, {'google', 'openrouter'}),
 ]
 
 bc.Models._MODEL_REGISTRY += _OPENROUTER_MODELS
