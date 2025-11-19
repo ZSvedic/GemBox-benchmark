@@ -1,60 +1,60 @@
      ID    , Run name,                  Model name,    Tokens,        Cost,          Time,     Accuraccy, Errors
-     1	 , Plain call + low reasoning, gemini-2.5-flash,                	tokens=67936,	cost=$0.098982,	time=85.03s,	accuracy=69%,	errors=0/84
-     2	 , Plain call + low reasoning, gemini-2.5-pro,                  	tokens=106430,	cost=$0.806227,	time=180.51s,	accuracy=69%,	errors=7/84
-     3	 , Plain call + low reasoning, gpt-5-nano,                      	tokens=195898,	cost=$0.066103,	time=162.33s,	accuracy=43%,	errors=1/84
-     4	 , Plain call + low reasoning, gpt-5-mini,                      	tokens=77960,	cost=$0.094598,	time=98.74s,	accuracy=72%,	errors=1/84
-     5	 , Plain call + low reasoning, gpt-5,                           	tokens=84086,	cost=$0.557211,	time=178.28s,	accuracy=81%,	errors=7/84
-     6	 , Plain call + low reasoning, gpt-5-codex,                     	tokens=68759,	cost=$0.377263,	time=162.72s,	accuracy=87%,	errors=0/84
-    47     , Plain call + low reasoning, gpt-5.1,                        	tokens=37755,	cost=$0.067222,	time=8.36s,	accuracy=67%,	errors=0/84
-    48     , Plain call + low reasoning, gpt-5.1-codex,                  	tokens=54634,	cost=$0.251159,	time=164.84s,	accuracy=84%,	errors=4/84
-    49     , Plain call + low reasoning, gpt-5.1-codex-mini,             	tokens=69859,	cost=$0.077652,	time=89.69s,	accuracy=70%,	errors=0/84
-     7	 , Web search + medium reasoning, gemini-2.5-flash,                        tokens=64454,   cost=$0.090277, time=39.40s,    accuracy=84%,   errors=0/84
-     8	 , Web search + medium reasoning, gemini-2.5-pro,                          tokens=122781,  cost=$0.945990, time=185.41s,   accuracy=93%,   errors=0/84
-     9	 , Web search + medium reasoning, gpt-5-nano,                              tokens=1339744, cost=$0.133538, time=282.95s,   accuracy=75%,   errors=1/84
-    10	 , Web search + medium reasoning, gpt-5-mini,                              tokens=1165475, cost=$0.378013, time=184.91s,   accuracy=96%,   errors=0/84
-    11	 , Web search + medium reasoning, gpt-5,                                   tokens=1114771, cost=$2.033894, time=284.07s,   accuracy=99%,   errors=0/84
-    12	 , Web search + medium reasoning, gpt-5-codex,                             tokens=1072909, cost=$1.692038, time=283.59s,   accuracy=93%,   errors=2/84
-    50     , Web search + medium reasoning, gpt-5.1,                        	tokens=413518,	cost=$0.549141,	time=13.09s,	accuracy=67%,	errors=0/84
-    51     , Web search + medium reasoning, gpt-5.1-codex,                  	tokens=905364,	cost=$1.516731,	time=194.93s,	accuracy=92%,	errors=1/84
-    52     , Web search + medium reasoning, gpt-5.1-codex-mini,             	tokens=1320329,	cost=$0.445322,	time=170.70s,	accuracy=94%,	errors=0/84    
-    13	 , Context + medium reasoning, gemini-2.5-flash,                        tokens=5367368, cost=$1.668757, time=37.70s,    accuracy=95%,   errors=0/84
-    14	 , Context + medium reasoning, gemini-2.5-pro,                          tokens=2652250, cost=$3.713551, time=264.55s,   accuracy=48%,   errors=43/84
-    15	 , Context + medium reasoning, gpt-5-nano,                              tokens=4675734, cost=$0.275544, time=93.67s,    accuracy=77%,   errors=0/84
-    16	 , Context + medium reasoning, gpt-5-mini,                              tokens=4587744, cost=$1.201741, time=53.58s,    accuracy=98%,   errors=0/84
-    17	 , Context + medium reasoning, gpt-5,                                   tokens=4591842, cost=$6.049684, time=89.92s,    accuracy=100%,  errors=0/84
-    18	 , Context + medium reasoning, gpt-5-codex,                             tokens=4574946, cost=$5.880724, time=110.99s,   accuracy=100%,  errors=0/84
-    53	 , Context + medium reasoning, gpt-5.1,                        	tokens=1356797,	cost=$1.702095,	time=37.89s,	accuracy=29%,	errors=59/84
-    54	 , Context + medium reasoning, gpt-5.1-codex,                  	tokens=4571873,	cost=$5.849994,	time=58.33s,	accuracy=99%,	errors=0/84
-    55	 , Context + medium reasoning, gpt-5.1-codex-mini,             	tokens=4582259,	cost=$1.190771,	time=39.28s,	accuracy=93%,	errors=0/84    
-    19	 , OpenAI's prompts + low reasoning, prompt-GBS-examples-GPT5mini,       tokens=1522406, cost=$0.476267, time=169.24s,   accuracy=91%,   errors=2/84
-    20	 , OpenAI's prompts + low reasoning, prompt-GBS-examples-GPT5,           tokens=221197,  cost=$0.624116, time=180.48s,   accuracy=67%,   errors=24/84
-    21	 , OpenAI's prompt + medium reasoning, prompt-GBS-examples-GPT5mini,           tokens=1604146, cost=$0.507688, time=165.33s,   accuracy=92%,   errors=0/84
-    22	 , OpenAI's prompt + medium reasoning, prompt-GBS-examples-GPT5,               tokens=839029,  cost=$1.703523, time=348.87s,   accuracy=93%,   errors=0/84
-    23	 , Google's RAG + medium reasoning, rag-default-gemini-2.5-flash,           tokens=79374,   cost=$0.127577, time=89.70s,    accuracy=69%,   errors=0/84
-    24	 , Google's RAG + medium reasoning, rag-default-gemini-2.5-pro,             tokens=141832,  cost=$1.146466, time=357.28s,   accuracy=76%,   errors=3/84
-    25	 , Google's RAG + medium reasoning, rag-llmparser-gemini-2.5-flash,         tokens=78347,   cost=$0.125010, time=82.81s,    accuracy=68%,   errors=0/84
-    26	 , Google's RAG + medium reasoning, rag-llmparser-gemini-2.5-pro,           tokens=119690,  cost=$0.979130, time=222.00s,   accuracy=64%,   errors=19/84
-    27	 , OpenRouter + low reasoning, anthropic/claude-3-5-haiku,             tokens=36244,   cost=$0.010603, time=13.48s,    accuracy=46%,   errors=1/84
-    28	 , OpenRouter + low reasoning, mistralai/codestral-2508,               tokens=35234,   cost=$0.011381, time=2.73s,     accuracy=54%,   errors=0/84
-    29	 , OpenRouter + low reasoning, mistralai/devstral-medium,              tokens=35213,   cost=$0.016215, time=2.86s,     accuracy=60%,   errors=0/84
-    30	 , OpenRouter + low reasoning, deepseek/deepseek-chat,                 tokens=33975,   cost=$0.004940, time=10.37s,    accuracy=46%,   errors=0/84
-    31	 , OpenRouter + low reasoning, deepseek/deepseek-r1,                   tokens=70109,   cost=$0.102295, time=155.80s,   accuracy=65%,   errors=4/84
-    32	 , OpenRouter + low reasoning, anthropic/claude-sonnet-4.5,            tokens=36950,   cost=$0.135990, time=16.06s,    accuracy=75%,   errors=1/84
-    33	 , OpenRouter + low reasoning, anthropic/claude-opus-4.1,              tokens=36865,   cost=$0.648435, time=10.87s,    accuracy=87%,   errors=0/84
-    34	 , OpenRouter + low reasoning, mistralai/mistral-large,                tokens=36089,   cost=$0.081006, time=6.78s,     accuracy=52%,   errors=0/84
-    45     , OpenRouter + low reasoning, moonshotai/kimi-k2,             	      tokens=33155,	  cost=$0.022336, time=54.66s,    accuracy=54%,	errors=0/84
-    55     , OpenRouter + low reasoning, google/gemini-3-pro-preview,            tokens=109068,  cost=$1.017626, time=180.68s,   accuracy=81%,   errors=10/84
-    35	 , OpenRouter Web search + medium, anthropic/claude-3-5-haiku,             tokens=634173,  cost=$0.161873, time=68.27s,    accuracy=19%,   errors=47/84
-    36	 , OpenRouter Web search + medium, mistralai/codestral-2508,               tokens=163863,  cost=$0.049972, time=9.25s,     accuracy=67%,   errors=0/84
-    37	 , OpenRouter Web search + medium, mistralai/devstral-medium,              tokens=163929,  cost=$0.067703, time=11.68s,    accuracy=56%,   errors=0/84
-    38	 , OpenRouter Web search + medium, mistralai/mistral-large,                tokens=164768,  cost=$0.337584, time=14.50s,    accuracy=58%,   errors=0/84
-    39	 , OpenRouter Web search + medium, deepseek/deepseek-chat,                 tokens=158515,  cost=$0.022379, time=12.39s,    accuracy=57%,   errors=0/84
-    40	 , OpenRouter Web search + medium, deepseek/deepseek-r1,                   tokens=264613,  cost=$0.341593, time=360.42s,   accuracy=64%,   errors=6/84
-    46     , OpenRouter Web search + medium, moonshotai/kimi-k2,             	     tokens=149630,	 cost=$0.092180, time=26.05s,	   accuracy=66%,   errors=0/84
-    56     , OpenRouter Web search + medium, google/gemini-3-pro-preview,            tokens=292628,  cost=$1.864016, time=342.45s,   accuracy=88%,   errors=5/84
-    41	 , OpenRouter Context + medium, anthropic/claude-3-5-haiku,             tokens=5909106, cost=$1.478842, time=48.23s,    accuracy=38%,   errors=1/84
-    42	 , OpenRouter Context + medium, mistralai/codestral-2508,               tokens=4871147, cost=$1.462301, time=19.02s,    accuracy=37%,   errors=0/84
-    43	 , OpenRouter Context + medium, mistralai/devstral-medium,              tokens=4813276, cost=$1.928030, time=175.52s,   accuracy=22%,   errors=1/84
-    44	 , OpenRouter Context + medium, mistralai/mistral-large,                tokens=4871219, cost=$9.749106, time=73.87s,    accuracy=79%,   errors=0/84
-    47     , OpenRouter Context + medium, moonshotai/kimi-k2,             	       tokens=4614671, cost=$2.771149, time=194.99s,	accuracy=90%,	 errors=0/84
-    57     , OpenRouter Context + medium, google/gemini-3-pro-preview,            tokens=4720035, cost=$10.952810, time=360.48s,   accuracy=85%,   errors=13/84
+     1	 , Plain call + low reasoning, gemini-2.5-flash,                	67936,	$0.098982,	85.03s,	69%,	0/84
+     2	 , Plain call + low reasoning, gemini-2.5-pro,                  	106430,	$0.806227,	180.51s,	69%,	7/84
+     3	 , Plain call + low reasoning, gpt-5-nano,                      	195898,	$0.066103,	162.33s,	43%,	1/84
+     4	 , Plain call + low reasoning, gpt-5-mini,                      	77960,	$0.094598,	98.74s,	72%,	1/84
+     5	 , Plain call + low reasoning, gpt-5,                           	84086,	$0.557211,	178.28s,	81%,	7/84
+     6	 , Plain call + low reasoning, gpt-5-codex,                     	68759,	$0.377263,	162.72s,	87%,	0/84
+    47     , Plain call + low reasoning, gpt-5.1,                        	37755,	$0.067222,	8.36s,	67%,	0/84
+    48     , Plain call + low reasoning, gpt-5.1-codex,                  	54634,	$0.251159,	164.84s,	84%,	4/84
+    49     , Plain call + low reasoning, gpt-5.1-codex-mini,             	69859,	$0.077652,	89.69s,	70%,	0/84
+     7	 , Web search + medium reasoning, gemini-2.5-flash,                        64454,   $0.090277, 39.40s,    84%,   0/84
+     8	 , Web search + medium reasoning, gemini-2.5-pro,                          122781,  $0.945990, 185.41s,   93%,   0/84
+     9	 , Web search + medium reasoning, gpt-5-nano,                              1339744, $0.133538, 282.95s,   75%,   1/84
+    10	 , Web search + medium reasoning, gpt-5-mini,                              1165475, $0.378013, 184.91s,   96%,   0/84
+    11	 , Web search + medium reasoning, gpt-5,                                   1114771, $2.033894, 284.07s,   99%,   0/84
+    12	 , Web search + medium reasoning, gpt-5-codex,                             1072909, $1.692038, 283.59s,   93%,   2/84
+    50     , Web search + medium reasoning, gpt-5.1,                        	413518,	$0.549141,	13.09s,	67%,	0/84
+    51     , Web search + medium reasoning, gpt-5.1-codex,                  	905364,	$1.516731,	194.93s,	92%,	1/84
+    52     , Web search + medium reasoning, gpt-5.1-codex-mini,             	1320329,	$0.445322,	170.70s,	94%,	0/84    
+    13	 , Context + medium reasoning, gemini-2.5-flash,                        5367368, $1.668757, 37.70s,    95%,   0/84
+    14	 , Context + medium reasoning, gemini-2.5-pro,                          2652250, $3.713551, 264.55s,   48%,   43/84
+    15	 , Context + medium reasoning, gpt-5-nano,                              4675734, $0.275544, 93.67s,    77%,   0/84
+    16	 , Context + medium reasoning, gpt-5-mini,                              4587744, $1.201741, 53.58s,    98%,   0/84
+    17	 , Context + medium reasoning, gpt-5,                                   4591842, $6.049684, 89.92s,    100%,  0/84
+    18	 , Context + medium reasoning, gpt-5-codex,                             4574946, $5.880724, 110.99s,   100%,  0/84
+    53	 , Context + medium reasoning, gpt-5.1,                        	1356797,	$1.702095,	37.89s,	29%,	59/84
+    54	 , Context + medium reasoning, gpt-5.1-codex,                  	4571873,	$5.849994,	58.33s,	99%,	0/84
+    55	 , Context + medium reasoning, gpt-5.1-codex-mini,             	4582259,	$1.190771,	39.28s,	93%,	0/84    
+    19	 , OpenAI's prompts + low reasoning, prompt-GBS-examples-GPT5mini,       1522406, $0.476267, 169.24s,   91%,   2/84
+    20	 , OpenAI's prompts + low reasoning, prompt-GBS-examples-GPT5,           221197,  $0.624116, 180.48s,   67%,   24/84
+    21	 , OpenAI's prompt + medium reasoning, prompt-GBS-examples-GPT5mini,           1604146, $0.507688, 165.33s,   92%,   0/84
+    22	 , OpenAI's prompt + medium reasoning, prompt-GBS-examples-GPT5,               839029,  $1.703523, 348.87s,   93%,   0/84
+    23	 , Google's RAG + medium reasoning, rag-default-gemini-2.5-flash,           79374,   $0.127577, 89.70s,    69%,   0/84
+    24	 , Google's RAG + medium reasoning, rag-default-gemini-2.5-pro,             141832,  $1.146466, 357.28s,   76%,   3/84
+    25	 , Google's RAG + medium reasoning, rag-llmparser-gemini-2.5-flash,         78347,   $0.125010, 82.81s,    68%,   0/84
+    26	 , Google's RAG + medium reasoning, rag-llmparser-gemini-2.5-pro,           119690,  $0.979130, 222.00s,   64%,   19/84
+    27	 , OpenRouter + low reasoning, anthropic/claude-3-5-haiku,             36244,   $0.010603, 13.48s,    46%,   1/84
+    28	 , OpenRouter + low reasoning, mistralai/codestral-2508,               35234,   $0.011381, 2.73s,     54%,   0/84
+    29	 , OpenRouter + low reasoning, mistralai/devstral-medium,              35213,   $0.016215, 2.86s,     60%,   0/84
+    30	 , OpenRouter + low reasoning, deepseek/deepseek-chat,                 33975,   $0.004940, 10.37s,    46%,   0/84
+    31	 , OpenRouter + low reasoning, deepseek/deepseek-r1,                   70109,   $0.102295, 155.80s,   65%,   4/84
+    32	 , OpenRouter + low reasoning, anthropic/claude-sonnet-4.5,            36950,   $0.135990, 16.06s,    75%,   1/84
+    33	 , OpenRouter + low reasoning, anthropic/claude-opus-4.1,              36865,   $0.648435, 10.87s,    87%,   0/84
+    34	 , OpenRouter + low reasoning, mistralai/mistral-large,                36089,   $0.081006, 6.78s,     52%,   0/84
+    45     , OpenRouter + low reasoning, moonshotai/kimi-k2,             	      33155,	  $0.022336, 54.66s,    54%,	0/84
+    55     , OpenRouter + low reasoning, google/gemini-3-pro-preview,            109068,  $1.017626, 180.68s,   81%,   10/84
+    35	 , OpenRouter Web search + medium, anthropic/claude-3-5-haiku,             634173,  $0.161873, 68.27s,    19%,   47/84
+    36	 , OpenRouter Web search + medium, mistralai/codestral-2508,               163863,  $0.049972, 9.25s,     67%,   0/84
+    37	 , OpenRouter Web search + medium, mistralai/devstral-medium,              163929,  $0.067703, 11.68s,    56%,   0/84
+    38	 , OpenRouter Web search + medium, mistralai/mistral-large,                164768,  $0.337584, 14.50s,    58%,   0/84
+    39	 , OpenRouter Web search + medium, deepseek/deepseek-chat,                 158515,  $0.022379, 12.39s,    57%,   0/84
+    40	 , OpenRouter Web search + medium, deepseek/deepseek-r1,                   264613,  $0.341593, 360.42s,   64%,   6/84
+    46     , OpenRouter Web search + medium, moonshotai/kimi-k2,             	     149630,	 $0.092180, 26.05s,	   66%,   0/84
+    56     , OpenRouter Web search + medium, google/gemini-3-pro-preview,            292628,  $1.864016, 342.45s,   88%,   5/84
+    41	 , OpenRouter Context + medium, anthropic/claude-3-5-haiku,             5909106, $1.478842, 48.23s,    38%,   1/84
+    42	 , OpenRouter Context + medium, mistralai/codestral-2508,               4871147, $1.462301, 19.02s,    37%,   0/84
+    43	 , OpenRouter Context + medium, mistralai/devstral-medium,              4813276, $1.928030, 175.52s,   22%,   1/84
+    44	 , OpenRouter Context + medium, mistralai/mistral-large,                4871219, $9.749106, 73.87s,    79%,   0/84
+    47     , OpenRouter Context + medium, moonshotai/kimi-k2,             	       4614671, $2.771149, 194.99s,	90%,	 0/84
+    57     , OpenRouter Context + medium, google/gemini-3-pro-preview,            4720035, $10.952810, 360.48s,   85%,   13/84
