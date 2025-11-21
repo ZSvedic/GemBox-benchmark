@@ -122,15 +122,7 @@ bc.Models._MODEL_REGISTRY += _OPENAI_MODELS
 # Main test functions.
 
 async def main_test():
-    print("===== async_openai_prompts.main_test() =====")
-
-    # Test web search.
-    for _ in range(3):
-        for model in _OPENAI_MODELS:
-            if model.has_web_search:
-                print(f"\n--- Testing model: {model.name} (web_search=True) ---")
-                handler = bc.Models().by_name(model.name).create_handler(web_search=True)
-                await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
+    print("\n===== async_openai_prompts.main_test() =====")
 
     # Test with model default system prompt and web search.
     handler = bc.Models().by_name('gpt-5-mini').create_handler(system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)

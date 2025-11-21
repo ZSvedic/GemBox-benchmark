@@ -7,7 +7,7 @@ from collections.abc import Collection
 
 import dotenv
 
-import async_google_prompt, async_openai_prompts, open_router  # Required to populate bc.Models._MODEL_REGISTRY.
+import google_handler, openai_handler, openrouter_handler  # Required to populate bc.Models._MODEL_REGISTRY.
 import base_classes as bc
 import metrics as mt
 import questions as qs
@@ -89,29 +89,29 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
                     continue
                 raise
         
-        los, links, (input_tokens, output_tokens) = response
-        results = los.completions
+        str_list, links, (input_tokens, output_tokens) = response
+        results = str_list.completions
 
         # Calculate tokens, cost, and accuracy.
         cost = model.calculate_cost(input_tokens, output_tokens)
-        accuracy = mt.get_accuracy(f"Q{question_num}", results, question.answers)
+        error_rate = mt.get_error_rate(f"Q{question_num}", results, question.answers)
         
         # Display results.  
         if ctx.verbose:
             print(f"A{question_num}: {textwrap.shorten(str(results), ctx.truncate_length)}")
-            if accuracy == 1.0:
+            if error_rate == 0.0:
                 print("✓ CORRECT")
-            elif accuracy > 0:
-                print(f"✗ PARTIAL ({accuracy:.1%}), expected: {question.answers}")
+            elif error_rate < 1.0:
+                print(f"✗ PARTIAL (error:{error_rate:.1%}), expected:{question.answers}")
             else:
                 print(f"✗ INCORRECT, expected: {question.answers}")
         
         # Return metrics.
-        return mt.Metrics(f"Q{question_num}", cost, input_tokens+output_tokens, 0, accuracy, 0, 1)
+        return mt.Metrics(f"Q{question_num}", cost, input_tokens+output_tokens, 0, error_rate, 0, 1)
 
     except Exception as e:
         print(f"Error: {repr(e)}")
-        return mt.Metrics("Error", 0.0, 0, 0, 0.0, 1, 1)
+        return mt.Metrics("Error", 0.0, 0, 0, 1.0, 1, 1) 
 
 async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, questions: list, run_index: int = 0) -> mt.Metrics:
     """Run benchmark for a single model on all questions in parallel."""
@@ -125,7 +125,7 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
             verbose=False)
     except Exception as e:
         print(f"\n--- Can't get model handler: {repr(e)}")
-        return mt.Metrics(f"ERROR-{model_info.name}", 0.0, 0, 0, 0.0, len(questions))
+        return mt.Metrics(f"ERROR-{model_info.name}", 0.0, 0, 0.0, 1.0, len(questions), 1)
     
     # Create tasks for all questions to run in parallel.
     question_tasks = [
@@ -146,7 +146,7 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
                 raise r   # Let cancellation terminate everything.
             else:
                 print(f"Unexpected task error: {repr(r)}")
-                task_metrics.append(mt.Metrics("Error", 0.0, 0, 0.0, 0.0, 1, 1))
+                task_metrics.append(mt.Metrics("Error", 0.0, 0, 0.0, 1.0, 1, 1))
     model_time = time.time() - model_start_time
     # Hack: last task metric has the model time, others have 0. That way summation works in summarize_metrics().
     task_metrics[-1].time = model_time
@@ -190,10 +190,10 @@ async def benchmark_models_n_times(name: str, ctx: BenchmarkContext, models: Col
 # Main test functions.
 
 async def main_test():
-    print("===== benchmark.main_test() =====")
+    print("\n===== benchmark.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:3]
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
@@ -208,7 +208,7 @@ async def main_test():
         # .by_web_search(True)
         # .by_min_context_length(context_approx_tokens)
         # .by_tags(include={'openrouter'})
-        .by_names(['google/gemini-3-pro-preview']) # 'gemini-3-flash-preview', 'gemini-3-pro-preview']) 
+        .by_names(['gemini-2.5-flash-lite', 'gemini-2.5-flash']) 
     )
 
     print(f"Filtered models ({len(models)}): {models}")
@@ -222,16 +222,16 @@ async def main_test():
         max_parallel_questions=30, 
         retry_failures=True, 
         use_open_router=False,
-        benchmark_n_times=3, 
+        benchmark_n_times=1, 
         reasoning_effort="medium", 
         web_search=True, 
         context="")
     
     # Create testing contents.
     bench_contexts = [
-        # ("Plain call + low", False, "low", 30, ""),
-        ("Web + medium", True, "medium", 60, ""),
-        ("Context + medium", False, "medium", 60, context_txt),
+        ("Plain call + low", False, "low", 2, ""),
+        # ("Web + medium", True, "medium", 60, ""),
+        # ("Context + medium", False, "medium", 60, context_txt),
         ]
     
     # Benchmark models.
@@ -250,7 +250,7 @@ async def main_test():
 
     # Print summary.
     print(f"\n=== SUMMARY OF ALL TESTS ===")
-    mt.print_metrics(perf_data)
+    mt.print_metrics(perf_data, True)
 
 if __name__ == "__main__":
     # Load environment variables from parent directory .env.

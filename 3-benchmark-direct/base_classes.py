@@ -201,7 +201,7 @@ async def _test_call_handler(handler: LLMHandler, questions: list[str]):
         print(f"\nQuestion: {question}\nResults: {result}\nLinks: {links}\nInput tokens: {input_tokens}\nOutput tokens: {output_tokens}\n")
 
 async def main_test():
-    print("===== base_classes.main_test() =====")
+    print("\n===== base_classes.main_test() =====")
 
     # Create test models.
     test_models = Models(_TEST_MODEL_REGISTRY)
@@ -215,22 +215,27 @@ async def main_test():
     print(f"\n=== test_models.by_names({names}) ===")
     models = test_models.by_names(names)
     print(*models, sep="\n")
+    assert len(models) == len(names), "FAIL: wrong number of models."
     
     # Filter models by tags.
     tags = {'acme'}
     print(f"\n=== test_models.by_tags(include={tags}) ===")
     models = test_models.by_tags(include=tags)
     print(*models, sep="\n")
+    assert all(tags.issubset(m.tags) for m in models), "FAIL: some models missing required tags."
 
     # Filter models by max price.
     print(f"\n=== test_models.by_max_price(input_cost=0.05, output_cost=0.15) ===")
     models = test_models.by_max_price(input_cost=0.05, output_cost=0.15)
     print(*models, sep="\n")
+    assert all(m.input_cost <= 0.05 and m.output_cost <= 0.15 
+               for m in models), "FAIL: some models exceed max price."
 
     # Chain filters.
     print(f"\n=== test_models.by_tags(exclude={tags}).by_max_price(input_cost=0.05, output_cost=0.15) ===")
     models = test_models.by_tags(exclude=tags).by_max_price(input_cost=0.05, output_cost=0.15)
     print(*models, sep="\n")
+    assert len(models)==2, "FAIL: wrong chained filter result."
 
     # Demonstrate __str__().
     print("\n=== str(models[0]) ===")

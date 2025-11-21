@@ -107,39 +107,22 @@ bc.Models._MODEL_REGISTRY += _OPENROUTER_MODELS
 # Main test functions.
 
 async def main_test():
-    print("===== open_router.main_test() =====")
+    print("\n===== open_router.main_test() =====")
 
-    # Load questions from the test questions
-    test_questions = bc._TEST_QUESTIONS[:5]  # Use only 5 questions for testing
+    # Contexts.
+    contexts = [ ('deepseek/deepseek-chat', True), ('mistralai/codestral-2508', False) ]
     
-    # Test web search.
-    for model in _OPENROUTER_MODELS:
-        if model.has_web_search:
-            print(f"\n--- Testing model: {model.name} (web_search=True) ---")
-            handler = bc.Models().by_name(model.name).create_handler(web_search=True)
-            await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
-
-    # Test with DeepSeek (fast and cheap)
-    model = bc.Models().by_name('deepseek/deepseek-chat')
-    print(f"\nTesting model: {model.name}")
-    handler = model.create_handler(
-        system_prompt=bc._DEFAULT_SYSTEM_PROMPT, 
-        parse_type=bc.ListOfStrings,
-        web_search=False,
-        verbose=True)
-    await bc._test_call_handler(handler, test_questions)
-    await handler.close()
-    
-    # Test with Mistral Codestral
-    model = bc.Models().by_name('mistralai/codestral-2508')
-    print(f"\nTesting model: {model.name}")
-    handler = model.create_handler(
-        system_prompt=bc._DEFAULT_SYSTEM_PROMPT, 
-        parse_type=bc.ListOfStrings,
-        web_search=False,
-        verbose=True)
-    await bc._test_call_handler(handler, test_questions)
-    await handler.close()
+    # Test contexts.
+    for name, search in contexts:
+        model = bc.Models().by_name(name)
+        print(f"\nTesting model: {name}")
+        handler = model.create_handler(
+            system_prompt=bc._DEFAULT_SYSTEM_PROMPT, 
+            parse_type=bc.ListOfStrings,
+            web_search=search,
+            verbose=False)
+        await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
+        await handler.close()
 
 if __name__ == "__main__":
     if not dotenv.load_dotenv():

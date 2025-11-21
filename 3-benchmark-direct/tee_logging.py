@@ -1,4 +1,8 @@
-import sys, os, datetime
+import sys
+import os
+import datetime
+import tempfile
+
 from contextlib import contextmanager, redirect_stdout, redirect_stderr
 
 class Tee:
@@ -27,3 +31,25 @@ def logging_context(log_dir="logs"):
         finally:
             print(f"Logging finished: {path}")
             log.close()
+
+def main_test():
+    print("\n===== tee_logging.main_test() =====")
+
+    with tempfile.TemporaryDirectory() as d:
+        with logging_context(d):
+            print("hello tee")
+
+        files = [f for f in os.listdir(d) if f.endswith(".log")]
+        assert len(files)==1, "FAIL: Wrong number of log files."
+        
+        p = os.path.join(d, files[0])
+        with open(p, "r", encoding="utf-8") as f:
+            txt = f.read()
+            assert ("Logging started:" in txt and 
+                    "hello tee" in txt and 
+                    "Logging finished:" in txt), "FAIL: Log file content incorrect."
+        
+        print("PASS: Tee logging works correctly.")
+
+if __name__ == "__main__":
+    main_test()

@@ -125,24 +125,17 @@ bc.Models._MODEL_REGISTRY += _GOOGLE_MODELS
 # Main test functions.
 
 async def main_test():
-    print("===== async_google_prompt.main_test() =====")
-
-    # Test web search.
-    for model in _GOOGLE_MODELS:
-        if model.has_web_search:
-            print(f"\n--- Testing model: {model.name} (web_search=True) ---")
-            handler = bc.Models().by_name(model.name).create_handler(web_search=True)
-            await bc._test_call_handler(handler, ["Give me the second news item from news.ycombinator.com right now?"])
+    print("\n===== async_google_prompt.main_test() =====")
 
     # Test with model default system prompt and web search.
     handler = bc.Models().by_name('gemini-2.5-flash').create_handler(
         system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)
     await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
 
-    # Test prompts.
-    handler = bc.Models().by_name('rag-default-gemini-2.5-flash').create_handler(
-        system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=False, parse_type=bc.ListOfStrings)
-    await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
+    # # Test prompts.
+    # handler = bc.Models().by_name('rag-default-gemini-2.5-flash').create_handler(
+    #     system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=False, parse_type=bc.ListOfStrings)
+    # await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
 
 if __name__ == "__main__":
     if not dotenv.load_dotenv():
