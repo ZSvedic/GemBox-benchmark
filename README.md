@@ -4,7 +4,7 @@ This repository contains three sub-projects that create a benchmark dataset for 
 
 + *Project 1: Inputs (C#)* - Contains raw question-answer pairs about common GemBox usage tasks (e.g. printing options, reading Excel files, etc.).
 + *Project 2: Bench Filter (Python)* - Filters "1-inputs" into a benchmark dataset (JSON format), see example: [GBS-benchmark at HuggingFace](https://huggingface.co/datasets/ZSvedic/GBS-benchmark)
-+ *Project 3: Benchmark LLM (Python)* - Uses the dataset to evaluate LLMs on accuracy, speed and cost when answering GemBox API questions.
++ *Project 3: Benchmark Direct (Python)* - Uses the dataset to evaluate LLMs on accuracy, speed and cost when answering GemBox API questions.
 
 ## Installation & Setup
 
@@ -84,23 +84,25 @@ Simply execute [run.sh](2-bench-filter/run.sh) to use default input path and to 
 ...
 ```
 
-## Project "3-benchmark-llm"
+## Project "3-benchmark-direct"
 
-This Python project uses the dataset to run LLM evaluations. It supports OpenAI, Google, Anthropic, and many other providers via [OpenRouter](https://openrouter.ai/). Each model is asked to fill in `???` placeholders, and the outputs are validated. The evaluation measures *accuracy*, *speed*, and *cost*.
+This Python project uses the dataset to run LLM evaluations. It supports OpenAI, Google, and many other providers via [OpenRouter](https://openrouter.ai/). Each model is asked to fill in `???` placeholders, and the outputs are validated. The evaluation measures *error rate*, *speed*, and *cost*.
 
 ### Example output and results
 
 ```console
 ...
-Context(timeout_seconds=30,
-        delay_ms=50,
-        verbose=True,
-        truncate_length=150,
-        max_parallel_questions=30,
-        retry_failures=True,
-        use_caching=True,
-        use_open_router=True,
-        benchmark_n_times=3)
+BenchmarkContext:
+    timeout_seconds: 2
+    delay_ms: 50
+    verbose: False
+    truncate_length: 150
+    max_parallel_questions: 30
+    retry_failures: True
+    benchmark_n_times: 1
+    reasoning_effort: low
+    web_search: False
+    context:  
 
 Benchmarking 4 model(s) on 28 question(s) 3 times.
 
@@ -117,32 +119,9 @@ A3: ['PrintOptions.PrintHeadings', 'true']
 A4: ['PrintOptions.Orientation', 'Orientation.Landscape']
 ✗ INCORRECT, expected: ['PrintOptions.Portrait', 'false']
 ...
-=== OVERALL BENCHMARK SUMMARY ===
-
-  Model Summary: openai/gpt-5-mini
-  Total Tokens: 48671
-  Total Cost: $0.067764
-  Total Time: 86.70s
-  Overall Accuracy: 65.4%
-  Errors: 0 out of 84 API calls
-
-...
-
-Total Cost: $0.219338
-Total Time: 341.45s
-Total Errors: 3 out of 336 API calls = 0.9% error rate
-
-Accuracy Ranking (highest accuracy first):
-1. openai/gpt-5-mini: 65.4%
-2. google/gemini-2.5-flash: 60.5%
-3. mistralai/codestral-2508: 39.3%
-4. google/gemini-2.5-flash-lite: 38.7%
-
-Error Rate Ranking (lowest error rate first):
-1. openai/gpt-5-mini: 0.0%
-2. google/gemini-2.5-flash: 0.0%
-3. mistralai/codestral-2508: 0.0%
-4. google/gemini-2.5-flash-lite: 10.7%
+=== SUMMARY OF: Plain call + low ===
+    gemini-2.5-flash-lite,                  tokens_mdn=395, cost_mdn=$0.000044,     time_mdn=0.00s, error_rate_mdn=50%,     api_issues_count=0/1
+    gemini-2.5-flash,                       tokens_mdn=584, cost_mdn=$0.000639,     time_mdn=0.00s, error_rate_mdn=50%,     api_issues_count=0/1
 ```
 
 

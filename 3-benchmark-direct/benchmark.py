@@ -23,7 +23,6 @@ class BenchmarkContext:
     truncate_length: int = 150          # Display text truncation.
     max_parallel_questions: int = 30    # Limit parallel question execution.
     retry_failures: bool = True         # Retry failed requests?
-    use_open_router: bool = True        # Use OpenRouter or direct calls?
     benchmark_n_times: int = 1          # Benchmark n times?
     reasoning_effort: str = "low"       # Reasoning effort.
     web_search: bool = False            # Use web search?
@@ -37,7 +36,6 @@ class BenchmarkContext:
         truncate_length: {self.truncate_length}
         max_parallel_questions: {self.max_parallel_questions}
         retry_failures: {self.retry_failures}
-        use_open_router: {self.use_open_router}
         benchmark_n_times: {self.benchmark_n_times}
         reasoning_effort: {self.reasoning_effort}
         web_search: {self.web_search}
@@ -221,7 +219,6 @@ async def main_test():
         truncate_length=150, 
         max_parallel_questions=30, 
         retry_failures=True, 
-        use_open_router=False,
         benchmark_n_times=1, 
         reasoning_effort="medium", 
         web_search=True, 
