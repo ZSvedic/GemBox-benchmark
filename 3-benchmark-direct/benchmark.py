@@ -105,11 +105,19 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
                 print(f"✗ INCORRECT, expected: {question.answers}")
         
         # Return metrics.
-        return mt.Metrics(f"Q{question_num}", cost, input_tokens+output_tokens, 0, error_rate, 0, 1)
+        return mt.Metrics(
+            name=f"Q{question_num}", 
+            provider_name=agent.provider_name(),
+            cost_mdn=cost, 
+            tokens_mdn=input_tokens+output_tokens, 
+            time_mdn=0.0, 
+            error_rate_mdn=error_rate, 
+            api_issues=0, 
+            api_calls=1 )
 
     except Exception as e:
         print(f"Error: {repr(e)}")
-        return mt.Metrics("Error", 0.0, 0, 0, 1.0, 1, 1) 
+        return mt.Metrics.get_error(agent.provider_name()) 
 
 async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, questions: list, run_index: int = 0) -> mt.Metrics:
     """Run benchmark for a single model on all questions in parallel."""
@@ -123,7 +131,15 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
             verbose=False)
     except Exception as e:
         print(f"\n--- Can't get model handler: {repr(e)}")
-        return mt.Metrics(f"ERROR-{model_info.name}", 0.0, 0, 0.0, 1.0, len(questions), 1)
+        return mt.Metrics(
+            name=f"ERROR-{model_info.name}", 
+            provider_name=model_info.provider_name(),
+            cost_mdn=0.0, 
+            tokens_mdn=0, 
+            time_mdn=0.0, 
+            error_rate_mdn=1.0, 
+            api_issues=len(questions), 
+            api_calls=len(questions) )
     
     # Create tasks for all questions to run in parallel.
     question_tasks = [
@@ -144,7 +160,7 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
                 raise r   # Let cancellation terminate everything.
             else:
                 print(f"Unexpected task error: {repr(r)}")
-                task_metrics.append(mt.Metrics("Error", 0.0, 0, 0.0, 1.0, 1, 1))
+                task_metrics.append(mt.Metrics.get_error(model_info.provider_name()))
     model_time = time.time() - model_start_time
     # Hack: last task metric has the model time, others have 0. That way summation works in summarize_metrics().
     task_metrics[-1].time = model_time
@@ -161,7 +177,11 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
 
     return sum_metrics
 
-async def benchmark_models_n_times(name: str, ctx: BenchmarkContext, models: Collection[bc.ModelInfo], questions: list[qs.QuestionData]) -> mt.Metrics:
+async def benchmark_models_n_times(
+        name: str, 
+        ctx: BenchmarkContext, 
+        models: Collection[bc.ModelInfo], 
+        questions: list[qs.QuestionData] ) -> mt.Metrics:
     """Benchmark models N times."""
     print(f"\n===== Benchmarking {len(models)} model(s) on {len(questions)} question(s) {ctx.benchmark_n_times} times. =====\n")
     print(ctx)
@@ -180,7 +200,7 @@ async def benchmark_models_n_times(name: str, ctx: BenchmarkContext, models: Col
 
     if len(all_metrics) > 1: # If more than one measure, calculate averages.
         print(f"\n=== SUMMARY OF: {name} ===")
-        mt.print_metrics(all_metrics)
+        mt.print_metrics(all_metrics, csv_format=True, run_name=name)
         return mt.summarize_metrics(name, all_metrics)
     else: # If only one measure, return it.
         return all_metrics[0]
@@ -191,7 +211,7 @@ async def main_test():
     print("\n===== benchmark.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:3]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:2]
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.

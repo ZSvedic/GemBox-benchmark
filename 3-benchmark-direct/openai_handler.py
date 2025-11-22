@@ -14,6 +14,7 @@ class OpenAIHandler(bc.LLMHandler):
     # ... and is protected by a lock.
     _lock = threading.Lock()
 
+    @override
     @classmethod
     def get_client(cls):
         with cls._lock:
@@ -28,6 +29,11 @@ class OpenAIHandler(bc.LLMHandler):
             if cls._client:
                 await cls._client.close()
                 cls._client = None
+
+    @override
+    @classmethod
+    def provider_name(cls) -> str:
+        return "OpenAI"
 
     @override
     async def call(self, input: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]: 

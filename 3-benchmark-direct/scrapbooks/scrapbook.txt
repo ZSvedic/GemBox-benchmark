@@ -1,6 +1,22 @@
-google/gemini-3-pro-preview,            tokens=101032,  cost=$0.650994, time=120.14s,   accuracy=95%,   errors=1/28
+                task_metrics.append(mt.Metrics(
+                    name="Error", 
+                    provider_name=model_info.provider_name(),
+                    cost_mdn=0.0, 
+                    tokens_mdn=0, 
+                    time_mdn=0.0, 
+                    error_rate_mdn=1.0, 
+                    api_issues=1, 
+                    api_calls=1 ))
 
-google/gemini-3-pro-preview,            tokens=106130,  cost=$0.694250, time=80.28s,    accuracy=90%,   errors=0/28
 
-TOTAL/AVERAGE:
-google/gemini-3-pro-preview,            tokens=207
+    except Exception as e:
+        print(f"Error: {repr(e)}")
+        return mt.Metrics(
+            name="Error", 
+            provider_name=agent.provider_name(),
+            cost_mdn=0.0, 
+            tokens_mdn=0, 
+            time_mdn=0.0, 
+            error_rate_mdn=1.0, 
+            api_issues=1, 
+            api_calls=1 ) 

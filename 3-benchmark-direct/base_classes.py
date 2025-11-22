@@ -28,6 +28,22 @@ class LLMHandler(ABC):
         self.parse_type = parse_type
         self.web_search = web_search
         self.verbose = verbose
+    
+    @classmethod
+    @abstractmethod
+    def get_client(cls):
+        '''Return the LLM client instance.'''
+        ...
+
+    @classmethod
+    @abstractmethod
+    async def close(cls):
+        '''Implement if the handler needs to release resources.'''
+        ...
+    @classmethod
+    @abstractmethod
+    def provider_name(cls) -> str:
+        ...
 
     @abstractmethod
     async def call(self, input: str) -> tuple[Any, CallDetailsType, UsageType]: 
@@ -41,12 +57,6 @@ class LLMHandler(ABC):
             if lines and lines[0].startswith("```") and lines[-1].strip() == "```":
                 return "\n".join(lines[1:-1])
         return text
-    
-    @classmethod
-    @abstractmethod
-    async def close(cls):
-        '''Implement if the handler needs to release resources.'''
-        ...
 
 @dataclass(frozen=True)
 class ListOfStrings(BaseModel):
@@ -87,6 +97,9 @@ class ModelInfo:
 
     def create_handler(self, *args, **kwargs) -> LLMHandler:
         return self.direct_class(self, *args, **kwargs)
+    
+    def provider_name(self) -> str:
+        return self.direct_class.provider_name()
 
 class Models(Collection[ModelInfo]):
     '''Fluent query object for model filtering.'''

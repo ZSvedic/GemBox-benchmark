@@ -22,6 +22,7 @@ class GoogleHandler(bc.LLMHandler):
     # ...and is protected by a lock.
     _lock = threading.Lock()
 
+    @override
     @classmethod
     def get_client(cls):
         with cls._lock:
@@ -36,6 +37,11 @@ class GoogleHandler(bc.LLMHandler):
             if cls._client:
                 cls._client.close()
                 cls._client = None
+
+    @override
+    @classmethod
+    def provider_name(cls) -> str:
+        return "Google"
 
     @override
     async def call(self, input_text: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]:
