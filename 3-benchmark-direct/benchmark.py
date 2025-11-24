@@ -111,7 +111,7 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
             cost_mdn=cost, 
             tokens_mdn=input_tokens+output_tokens, 
             time=0.0, 
-            error_rate_mdn=error_rate, 
+            error_rate_avg=error_rate, 
             api_issues=0, 
             api_calls=1 )
 
@@ -137,7 +137,7 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
             cost_mdn=0.0, 
             tokens_mdn=0, 
             time=0.0, 
-            error_rate_mdn=1.0, 
+            error_rate_avg=1.0, 
             api_issues=len(questions), 
             api_calls=len(questions) )
     
@@ -211,7 +211,7 @@ async def main_test():
     print("\n===== benchmark.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:10]
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
@@ -235,7 +235,7 @@ async def main_test():
     start_bench_ctx = BenchmarkContext(
         timeout_seconds=60, 
         delay_ms=50, 
-        verbose=False, 
+        verbose=True, 
         truncate_length=150, 
         max_parallel_questions=14, 
         retry_failures=True, 
@@ -247,8 +247,8 @@ async def main_test():
     # Create testing contents.
     bench_contexts = [
         ("Plain call + low", False, "low", 30, ""),
-        ("Web + medium", True, "medium", 60, ""),
-        ("Context + medium", False, "medium", 60, context_txt),
+        # ("Web + medium", True, "medium", 60, ""),
+        # ("Context + medium", False, "medium", 60, context_txt),
         ]
     
     # Benchmark models.

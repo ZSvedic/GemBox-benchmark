@@ -1,15 +1,15 @@
 from dataclasses import dataclass
-from statistics import median
+from statistics import median, mean
 from datetime import datetime
 
 @dataclass
 class Metrics:
     name: str               # Model or run name.
     provider_name: str      # Provider name.
-    cost_mdn: float         # Median cost per API call.
-    tokens_mdn: int         # Median token count per API call.
-    time: float             # Median time per API call.
-    error_rate_mdn: float   # Median of error rates per API call.
+    cost_mdn: float         # Median cost per API call, because of outliers.
+    tokens_mdn: int         # Median token count per API call, because of outliers.
+    time: float             # Total time.
+    error_rate_avg: float   # Average of error rate.
     api_issues: int = 0     # Total count of API issues (e.g., timeouts, quota errors).
     api_calls: int = 1      # Total count of API calls.
 
@@ -21,7 +21,7 @@ class Metrics:
             cost_mdn=0.0,
             tokens_mdn=0,
             time=0.0,
-            error_rate_mdn=1.0,
+            error_rate_avg=1.0,
             api_issues=1,
             api_calls=1
         )
@@ -50,7 +50,7 @@ def summarize_metrics(name: str, metrics: list[Metrics]) -> Metrics:
         cost = median(m.cost_mdn for m in valid_metrics)
         tokens = int(median(float(m.tokens_mdn) for m in valid_metrics))
         time = sum(m.time for m in valid_metrics)
-        error_rate = median(m.error_rate_mdn for m in valid_metrics)
+        error_rate = mean(m.error_rate_avg for m in valid_metrics)
     else:
         cost = time = error_rate = 0.0
         tokens = 0
@@ -62,32 +62,33 @@ def summarize_metrics(name: str, metrics: list[Metrics]) -> Metrics:
 
     return Metrics(name=name, provider_name=provider_name, 
                    cost_mdn=cost, tokens_mdn=tokens, time=time,
-                   error_rate_mdn=error_rate, api_issues=api_issues, api_calls=api_calls)
+                   error_rate_avg=error_rate, api_issues=api_issues, api_calls=api_calls)
 
 def print_metrics(metrics: list[Metrics], csv_format: bool = False, run_name: str = '?') -> None:
     """Print a list of Metrics entries."""
     for m in metrics:
-        error_rate_str = f"{m.error_rate_mdn:.0%}"
+        error_rate_str = f"{m.error_rate_avg:.0%}"
         name = f"{m.name},"
         if csv_format:
             id = datetime.now().strftime("%y%m%d%H%M%f")
-            print(f"{id}, {run_name}, {m.provider_name}, {name} {m.tokens_mdn}, ${m.cost_mdn:.6f}, {m.time:.2f}, {error_rate_str}, {m.api_issues}")
+            api_issue_rate = m.api_issues / m.api_calls if m.api_calls > 0 else 0.0
+            print(f"{id}, {run_name}, {m.provider_name}, {name} {m.tokens_mdn}, ${m.cost_mdn:.6f}, {m.time:.2f}, {error_rate_str}, {m.api_issues:.0%}")
         else:
-            print(f"\t{name:32.32}\ttokens_mdn={m.tokens_mdn},\tcost_mdn=${m.cost_mdn:.6f},\ttime_mdn={m.time:.2f}s,\terror_rate_mdn={error_rate_str},\tapi_issues={m.api_issues}/{m.api_calls}")
+            print(f"\t{name:32.32}\ttokens_mdn={m.tokens_mdn},\tcost_mdn=${m.cost_mdn:.6f},\ttime={m.time:.2f}s,\terror_rate_avg={error_rate_str},\tapi_issues={m.api_issues}/{m.api_calls}")
 
 def main_test():
     print("\n===== metrics.main_test() =====")
 
     # Create 3 valid metrics:
-    v1 = Metrics(name="v1", provider_name="ACME", cost_mdn=0.010, tokens_mdn=100, time=0.20, error_rate_mdn=0.20)
-    v2 = Metrics(name="v2", provider_name="ACME", cost_mdn=0.015, tokens_mdn=120, time=0.30, error_rate_mdn=0.10)
-    v3 = Metrics(name="v3", provider_name="ACME", cost_mdn=0.020, tokens_mdn=150, time=0.50, error_rate_mdn=0.00)
+    v1 = Metrics(name="v1", provider_name="ACME", cost_mdn=0.010, tokens_mdn=100, time=0.20, error_rate_avg=0.20)
+    v2 = Metrics(name="v2", provider_name="ACME", cost_mdn=0.015, tokens_mdn=120, time=0.30, error_rate_avg=0.10)
+    v3 = Metrics(name="v3", provider_name="ACME", cost_mdn=0.020, tokens_mdn=150, time=0.50, error_rate_avg=0.00)
     expected = Metrics(name="valid-only", provider_name="ACME", cost_mdn=0.015, tokens_mdn=120, time=0.30, 
-                       error_rate_mdn=0.10, api_issues=0, api_calls=3)
+                       error_rate_avg=0.10, api_issues=0, api_calls=3)
 
     # Create 2 invalid metrics:
-    i1 = Metrics(name="i1", provider_name="BAD_ACME", cost_mdn=9.999, tokens_mdn=9999, time=9.99, error_rate_mdn=1.00, api_issues=1)
-    i2 = Metrics(name="i2", provider_name="BAD_ACME", cost_mdn=8.888, tokens_mdn=8888, time=8.88, error_rate_mdn=0.90, api_issues=1)
+    i1 = Metrics(name="i1", provider_name="BAD_ACME", cost_mdn=9.999, tokens_mdn=9999, time=9.99, error_rate_avg=1.00, api_issues=1)
+    i2 = Metrics(name="i2", provider_name="BAD_ACME", cost_mdn=8.888, tokens_mdn=8888, time=8.88, error_rate_avg=0.90, api_issues=1)
 
     # Test 3 valid metrics:
     s_valid = summarize_metrics(expected.name, [v1, v2, v3])
