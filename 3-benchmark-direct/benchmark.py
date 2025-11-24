@@ -210,7 +210,7 @@ async def main_test():
     print("\n===== benchmark.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:3]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
@@ -220,21 +220,21 @@ async def main_test():
     print(f"PROMPT:\n{bc._DEFAULT_SYSTEM_PROMPT}\n")
 
     # Filter models.
-    models = (
+    models_all = (
         bc.Models()
         # .by_web_search(True)
         # .by_min_context_length(context_approx_tokens)
         # .by_tags(include={'openrouter'})
         # .by_names(['gemini-2.5-pro', 'google/gemini-3-pro-preview']) 
-        .by_names(['gpt-5-nano', 'gpt-5-mini']) 
+        # .by_names(['gpt-5-nano', 'gpt-5-mini']) 
     )
 
-    print(f"Filtered models ({len(models)}): {models}")
+    print(f"Filtered models ({len(models_all)}): {models_all}")
     
     # Create starting context.
     start_bench_ctx = BenchmarkContext(
         timeout_sec=60, 
-        delay_sec=0.080, 
+        delay_sec=0.070, 
         verbose=True, 
         truncate_length=150, 
         max_parallel_questions=14, 
@@ -246,9 +246,18 @@ async def main_test():
     
     # Create testing contents.
     bench_contexts = [
-        ("Plain call + low reasoning", False, "low", 30, ""),
-        ("Web + medium reasoning", True, "medium", 60, ""),
-        # ("Context + medium reasoning", False, "medium", 60, context_txt),
+        ('Plain call + low reasoning', False, 'low', 30, '', 
+         models_all.by_names(['gpt-5', 'gpt-5.1-codex'])),
+        ('Web search + medium reasoning', True, 'medium', 60, '',
+         models_all.by_names(['gpt-5-codex'])),
+        ('Context + medium reasoning', False, 'medium', 60, context_txt,
+         models_all.by_names(['gpt-5.1'])),
+        ('OpenAI prompts + low reasoning', False, 'low', 60, '',
+         models_all.by_names(['prompt-GBS-examples-GPT5mini', 'prompt-GBS-examples-GPT5'])),
+        ('OpenRouter + low reasoning', False, 'low', 30, '',
+         models_all.by_names(['deepseek/deepseek-r1'])),
+        ('OpenRouter Web search + medium reasoning', True, 'medium', 60, '',
+         models_all.by_names(['anthropic/claude-3-5-haiku', 'deepseek/deepseek-r1'])),
         ]
     
     # Benchmark models.
@@ -262,7 +271,7 @@ async def main_test():
                 context=context),
             models, 
             questions)
-        for text, web, reasoning, timeout, context, in bench_contexts
+        for text, web, reasoning, timeout, context, models in bench_contexts
         ]
 
     # Print summary.
