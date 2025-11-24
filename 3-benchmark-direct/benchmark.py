@@ -17,8 +17,8 @@ from tee_logging import logging_context
 
 @dc.dataclass(frozen=True)
 class BenchmarkContext:
-    timeout_seconds: int = 20           # Timeout for each question.
-    delay_ms: int = 10                  # Delay between question calls.
+    timeout_sec: int = 20               # Timeout for each question.
+    delay_sec: int = 0.010              # Delay between question calls.
     verbose: bool = True                # Verbose or quiet output?
     truncate_length: int = 150          # Display text truncation.
     max_parallel_questions: int = 30    # Limit parallel question execution.
@@ -30,8 +30,8 @@ class BenchmarkContext:
 
     def __str__(self):
         return f'''BenchmarkContext:
-        timeout_seconds: {self.timeout_seconds}
-        delay_ms: {self.delay_ms}
+        timeout_sec: {self.timeout_sec}
+        delay_sec: {self.delay_sec}
         verbose: {self.verbose}
         truncate_length: {self.truncate_length}
         max_parallel_questions: {self.max_parallel_questions}
@@ -74,12 +74,14 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
         print(f"Q{question_num}: {textwrap.shorten(question_text, ctx.truncate_length)}")
     
     try:
+        delay, t0 = 0.0, time.perf_counter()
         # Run the async call and retry if needed.
         for attempt in range(1+ctx.retry_failures):  # First try + one retry.
             try:
-                if ctx.delay_ms:
-                    await asyncio.sleep(ctx.delay_ms / 1000)
-                response = await asyncio.wait_for(agent.call(full_prompt), timeout=ctx.timeout_seconds)
+                if ctx.delay_sec:
+                    await asyncio.sleep(ctx.delay_sec)
+                    delay += ctx.delay_sec
+                response = await asyncio.wait_for(agent.call(full_prompt), timeout=ctx.timeout_sec)
                 break
             except Exception as e:
                 if attempt == 0:  # First failure.
@@ -87,6 +89,7 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
                     continue
                 raise
         
+        dt = time.perf_counter() - t0 - delay
         str_list, links, (input_tokens, output_tokens) = response
         results = str_list.completions
 
@@ -110,7 +113,7 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
             provider_name=agent.provider_name(),
             cost_mdn=cost, 
             tokens_mdn=input_tokens+output_tokens, 
-            time=0.0, 
+            time_avg=dt, 
             error_rate_avg=error_rate, 
             api_issues=0, 
             api_calls=1 )
@@ -136,7 +139,7 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
             provider_name=model_info.provider_name(),
             cost_mdn=0.0, 
             tokens_mdn=0, 
-            time=0.0, 
+            time_avg=0.0, 
             error_rate_avg=1.0, 
             api_issues=len(questions), 
             api_calls=len(questions) )
@@ -148,7 +151,6 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
     ]
     
     # Process in batches, with timing and error handling.
-    model_start_time = time.time()
     task_metrics = []
     for i in range(0, len(question_tasks), ctx.max_parallel_questions):
         batch = question_tasks[i:i + ctx.max_parallel_questions]
@@ -161,9 +163,6 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, q
             else:
                 print(f"Unexpected task error: {repr(r)}")
                 task_metrics.append(mt.Metrics.get_error(model_info.provider_name()))
-    model_time = time.time() - model_start_time
-    # Hack: last task metric has the model time, others have 0. That way summation works in summarize_metrics().
-    task_metrics[-1].time = model_time
     
     # Summarize model metrics, print, and return data.
     sum_metrics = mt.summarize_metrics(model_info.name, task_metrics)
@@ -200,7 +199,7 @@ async def benchmark_models_n_times(
 
     if len(all_metrics) > 1: # If more than one measure, calculate averages.
         print(f"\n=== SUMMARY OF: {name} ===")
-        mt.print_metrics(all_metrics, csv_format=True, run_name=name)
+        mt.print_metrics(all_metrics, csv_format=True)
         return mt.summarize_metrics(name, all_metrics)
     else: # If only one measure, return it.
         return all_metrics[0]
@@ -211,7 +210,7 @@ async def main_test():
     print("\n===== benchmark.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:10]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:3]
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
@@ -226,15 +225,16 @@ async def main_test():
         # .by_web_search(True)
         # .by_min_context_length(context_approx_tokens)
         # .by_tags(include={'openrouter'})
-        .by_names(['gemini-2.5-pro', 'google/gemini-3-pro-preview']) 
+        # .by_names(['gemini-2.5-pro', 'google/gemini-3-pro-preview']) 
+        .by_names(['gpt-5-nano', 'gpt-5-mini']) 
     )
 
     print(f"Filtered models ({len(models)}): {models}")
     
     # Create starting context.
     start_bench_ctx = BenchmarkContext(
-        timeout_seconds=60, 
-        delay_ms=50, 
+        timeout_sec=60, 
+        delay_sec=0.080, 
         verbose=True, 
         truncate_length=150, 
         max_parallel_questions=14, 
@@ -246,9 +246,9 @@ async def main_test():
     
     # Create testing contents.
     bench_contexts = [
-        ("Plain call + low", False, "low", 30, ""),
-        # ("Web + medium", True, "medium", 60, ""),
-        # ("Context + medium", False, "medium", 60, context_txt),
+        ("Plain call + low reasoning", False, "low", 30, ""),
+        ("Web + medium reasoning", True, "medium", 60, ""),
+        # ("Context + medium reasoning", False, "medium", 60, context_txt),
         ]
     
     # Benchmark models.
@@ -258,7 +258,7 @@ async def main_test():
             start_bench_ctx.with_changes(
                 web_search=web, 
                 reasoning_effort=reasoning,
-                timeout_seconds=timeout,
+                timeout_sec=timeout,
                 context=context),
             models, 
             questions)
