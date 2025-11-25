@@ -131,7 +131,7 @@ bc.Models._MODEL_REGISTRY += _GOOGLE_MODELS
 # Main test functions.
 
 async def main_test():
-    print("\n===== async_google_prompt.main_test() =====")
+    print("\n===== google_handler.main_test() =====")
 
     # Test with model default system prompt and web search.
     handler = bc.Models().by_name('gemini-2.5-flash').create_handler(

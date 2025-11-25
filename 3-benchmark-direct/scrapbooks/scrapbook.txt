@@ -1,7 +1,1 @@
-2511251220947003, B. Web search + medium reasoning, gpt-5-mini, OpenAI, 11694, $0.004226, 17.63, 1%, 0%
-2511251220947079, B. Web search + medium reasoning, gpt-5, OpenAI, 15115, $0.028580, 27.58, 0%, 0%
-2511251223226340, C. Context + medium reasoning, gemini-2.5-flash, Google, 63883, $0.019833, 3.80, 4%, 0%
-2511251223226397, C. Context + medium reasoning, gpt-5-mini, OpenAI, 54579, $0.014247, 10.20, 0%, 0%
-2511251223226429, C. Context + medium reasoning, gpt-5, OpenAI, 54597, $0.071291, 13.34, 0%, 0%
-2511251223226454, C. Context + medium reasoning, gpt-5-codex, OpenAI, 54459, $0.069961, 9.90, 0%, 0%
-2511251223226482, C. Context + medium reasoning, gpt-5.1-codex, OpenAI, 54389, $0.069314, 10.07, 0%, 0%
+2511251937200734, D. RAG OpenAI + medium reasoning, prompt-web-search-GPT-5-mini, OpenAI, 9608, $0.003610, 22.62, 1%, 0%

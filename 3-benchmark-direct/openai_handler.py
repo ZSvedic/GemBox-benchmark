@@ -37,6 +37,9 @@ class OpenAIHandler(bc.LLMHandler):
 
     @override
     async def call(self, input: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]: 
+        input_dict = [{"role": "user", "content": input}]
+        tools_dict = include_list = omit
+
         if self.model_info.prompt_id: # OpenAI prompt.
             model = omit
             prompt_dict = {"id": self.model_info.prompt_id}
@@ -44,16 +47,12 @@ class OpenAIHandler(bc.LLMHandler):
             model = self.model_info.name
             prompt_dict = omit
 
-        input_dict = [{"role": "user", "content": input}]
+            if self.system_prompt:
+                input_dict = [{"role": "system", "content": self.system_prompt}] + input_dict
 
-        if self.system_prompt:
-            input_dict = [{"role": "system", "content": self.system_prompt}] + input_dict
-
-        if self.web_search:
-            tools_dict = [{"type": "web_search"}]
-            include_list = ["web_search_call.action.sources"]
-        else:
-            tools_dict = include_list = omit
+            if self.web_search:
+                tools_dict = [{"type": "web_search"}]
+                include_list = ["web_search_call.action.sources"]
 
         if self.verbose:
             pprint(input_dict)
@@ -121,6 +120,8 @@ _OPENAI_MODELS = [
                  0.25, 2.00, 400_000, OpenAIHandler, False, {'openai', 'prompt'}),
     bc.ModelInfo('prompt-GBS-examples-GPT5', 'pmpt_68ee4f81f8d4819786ff5301af701ced0843964564bf8684', 
                  1.25, 10.00, 400_000, OpenAIHandler, False, {'openai', 'prompt'}),
+    bc.ModelInfo('prompt-web-search-GPT-5-mini', 'pmpt_6925f3a9ab3c81948b94c2528a16da620b3e3169c57b2f60', 
+                 0.25, 2.00, 400_000, OpenAIHandler, True, {'openai', 'prompt'}),
 ]
     
 bc.Models._MODEL_REGISTRY += _OPENAI_MODELS
@@ -128,7 +129,7 @@ bc.Models._MODEL_REGISTRY += _OPENAI_MODELS
 # Main test functions.
 
 async def main_test():
-    print("\n===== async_openai_prompts.main_test() =====")
+    print("\n===== openai_handler.main_test() =====")
 
     # Test with model default system prompt and web search.
     handler = bc.Models().by_name('gpt-5-mini').create_handler(system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)

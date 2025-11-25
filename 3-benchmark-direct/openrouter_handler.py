@@ -90,7 +90,7 @@ _OPENROUTER_MODELS = [
     bc.ModelInfo('anthropic/claude-3-5-haiku', None, 0.25, 1.35, 200_000, OpenRouterHandler, False, {'anthropic', 'openrouter'}),
     # bc.ModelInfo('anthropic/claude-sonnet-4.5', None, 3.0, 15.00, 1_000_000, OpenRouterHandler, True, {'anthropic', 'openrouter'}), # Too expensive.
     # bc.ModelInfo('anthropic/claude-opus-4.1', None, 15.00, 75.00, 200_000, OpenRouterHandler, True, {'anthropic', 'openrouter'}), # Too expensive.
-    bc.ModelInfo('anthropic/claude-opus-4.5', None, 5.0, 25.00, 200_000, OpenRouterHandler, True, {'anthropic', 'openrouter'}),
+    # bc.ModelInfo('anthropic/claude-opus-4.5', None, 5.0, 25.00, 200_000, OpenRouterHandler, True, {'anthropic', 'openrouter'}), # Too expensive.
     
     # Mistral models: https://openrouter.ai/provider/mistral
     bc.ModelInfo('mistralai/codestral-2508', None, 0.30, 0.90, 256_000, OpenRouterHandler, False, {'mistral', 'openrouter'}),
@@ -117,7 +117,7 @@ bc.Models._MODEL_REGISTRY += _OPENROUTER_MODELS
 # Main test functions.
 
 async def main_test():
-    print("\n===== open_router.main_test() =====")
+    print("\n===== openrouter_handler.main_test() =====")
 
     # Contexts.
     contexts = [ ('deepseek/deepseek-chat', True), ('mistralai/codestral-2508', False) ]

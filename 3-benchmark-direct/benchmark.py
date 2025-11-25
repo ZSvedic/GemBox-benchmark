@@ -244,13 +244,14 @@ async def main_test():
     
     # Create testing contents.
     bench_contexts = [
-        ('A. Plain call + low reasoning', False, 'low', 30, '', 
-         models_all.by_names(['gemini-2.5-flash', 'gpt-5-nano', 'gpt-5-mini', 'gpt-5.1','gpt-5.1-codex-mini', 'gpt-5-codex'])),
+        # ('A. Plain call + low reasoning', False, 'low', 30, '', 
+        #  models_all.by_names(['gemini-2.5-flash', 'gpt-5-nano', 'gpt-5-mini', 'gpt-5.1','gpt-5.1-codex-mini', 'gpt-5-codex'])),
         # ('B. Web search + medium reasoning', True, 'medium', 60, '', 
-        #  models_all.by_names(['gpt-5-mini', 'gpt-5'])),
+        #  models_all.by_names(['gpt-5.1', 'gpt-5.1-codex'])),
         # ('C. Context + medium reasoning', False, 'medium', 60, context_txt, 
         #  models_all.by_names(['gemini-2.5-flash', 'gpt-5-mini', 'gpt-5', 'gpt-5-codex', 'gpt-5.1-codex'])),
-        # ('D. RAG OpenAI + low reasoning', False, 'low', 60, '', models_all),
+        ('D. RAG OpenAI + medium reasoning', False, 'medium', 60, '', 
+         models_all.by_names(['prompt-web-search-GPT-5-mini'])),
         ]
     
     # Benchmark models.
