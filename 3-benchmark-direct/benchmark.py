@@ -224,7 +224,7 @@ async def main_test():
         # .by_web_search(True)
         # .by_min_context_length(context_approx_tokens)
         # .by_tags(include={'openrouter'})
-        .by_names(['anthropic/claude-opus-4.5', 'x-ai/grok-4.1-fast']) 
+        # .by_names(['prompt-GBS-examples-GPT5mini', 'prompt-GBS-examples-GPT5']) 
     )
 
     print(f"Filtered models ({len(models_all)}): {models_all}")
@@ -244,9 +244,13 @@ async def main_test():
     
     # Create testing contents.
     bench_contexts = [
-        ('OpenRouter + low reasoning', False, 'low', 30, '', models_all),
-        ('OpenRouter Web search + medium reasoning', True, 'medium', 60, '', models_all),
-        # ('Context + medium reasoning', False, 'medium', 60, context_txt, models_all),
+        ('A. Plain call + low reasoning', False, 'low', 30, '', 
+         models_all.by_names(['gemini-2.5-flash', 'gpt-5-nano', 'gpt-5-mini', 'gpt-5.1','gpt-5.1-codex-mini', 'gpt-5-codex'])),
+        # ('B. Web search + medium reasoning', True, 'medium', 60, '', 
+        #  models_all.by_names(['gpt-5-mini', 'gpt-5'])),
+        # ('C. Context + medium reasoning', False, 'medium', 60, context_txt, 
+        #  models_all.by_names(['gemini-2.5-flash', 'gpt-5-mini', 'gpt-5', 'gpt-5-codex', 'gpt-5.1-codex'])),
+        # ('D. RAG OpenAI + low reasoning', False, 'low', 60, '', models_all),
         ]
     
     # Benchmark models.
