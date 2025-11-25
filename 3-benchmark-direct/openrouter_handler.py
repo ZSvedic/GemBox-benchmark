@@ -90,6 +90,7 @@ _OPENROUTER_MODELS = [
     bc.ModelInfo('anthropic/claude-3-5-haiku', None, 0.25, 1.35, 200_000, OpenRouterHandler, False, {'anthropic', 'openrouter'}),
     # bc.ModelInfo('anthropic/claude-sonnet-4.5', None, 3.0, 15.00, 1_000_000, OpenRouterHandler, True, {'anthropic', 'openrouter'}), # Too expensive.
     # bc.ModelInfo('anthropic/claude-opus-4.1', None, 15.00, 75.00, 200_000, OpenRouterHandler, True, {'anthropic', 'openrouter'}), # Too expensive.
+    bc.ModelInfo('anthropic/claude-opus-4.5', None, 5.0, 25.00, 200_000, OpenRouterHandler, True, {'anthropic', 'openrouter'}),
     
     # Mistral models: https://openrouter.ai/provider/mistral
     bc.ModelInfo('mistralai/codestral-2508', None, 0.30, 0.90, 256_000, OpenRouterHandler, False, {'mistral', 'openrouter'}),
@@ -106,6 +107,9 @@ _OPENROUTER_MODELS = [
     # Google's Gemini 3 Pro seems to be available via OpenRouter:
     # https://openrouter.ai/google/gemini-3-pro-preview
     bc.ModelInfo('google/gemini-3-pro-preview', None, 2.0, 12.00, 1_050_000, OpenRouterHandler, True, {'google', 'openrouter'}),
+
+    # xAI models: https://openrouter.ai/provider/xai
+    bc.ModelInfo('x-ai/grok-4.1-fast', None, 0.0, 0.0, 2_000_000, OpenRouterHandler, True, {'xai', 'openrouter'}),
 ]
 
 bc.Models._MODEL_REGISTRY += _OPENROUTER_MODELS

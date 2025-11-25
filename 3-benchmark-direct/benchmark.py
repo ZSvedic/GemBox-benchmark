@@ -197,12 +197,11 @@ async def benchmark_models_n_times(
         mt.summarize_metrics(model_name, model_metrics) 
         for model_name, model_metrics in perf_data.items()]
 
-    if len(all_metrics) > 1: # If more than one measure, calculate averages.
-        print(f"\n=== SUMMARY OF: {name} ===")
-        mt.print_metrics(all_metrics, csv_format=True)
-        return mt.summarize_metrics(name, all_metrics)
-    else: # If only one measure, return it.
-        return all_metrics[0]
+    print(f"\n=== SUMMARY OF: {name} ===")
+    mt.print_metrics(all_metrics, csv_format=True)
+    
+    return (mt.summarize_metrics(name, all_metrics) if len(all_metrics) > 1 
+            else all_metrics[0])
 
 # Main test functions.
 
@@ -225,8 +224,7 @@ async def main_test():
         # .by_web_search(True)
         # .by_min_context_length(context_approx_tokens)
         # .by_tags(include={'openrouter'})
-        # .by_names(['gemini-2.5-pro', 'google/gemini-3-pro-preview']) 
-        # .by_names(['gpt-5-nano', 'gpt-5-mini']) 
+        .by_names(['anthropic/claude-opus-4.5', 'x-ai/grok-4.1-fast']) 
     )
 
     print(f"Filtered models ({len(models_all)}): {models_all}")
@@ -246,18 +244,9 @@ async def main_test():
     
     # Create testing contents.
     bench_contexts = [
-        ('Plain call + low reasoning', False, 'low', 30, '', 
-         models_all.by_names(['gpt-5', 'gpt-5.1-codex'])),
-        ('Web search + medium reasoning', True, 'medium', 60, '',
-         models_all.by_names(['gpt-5-codex'])),
-        ('Context + medium reasoning', False, 'medium', 60, context_txt,
-         models_all.by_names(['gpt-5.1'])),
-        ('OpenAI prompts + low reasoning', False, 'low', 60, '',
-         models_all.by_names(['prompt-GBS-examples-GPT5mini', 'prompt-GBS-examples-GPT5'])),
-        ('OpenRouter + low reasoning', False, 'low', 30, '',
-         models_all.by_names(['deepseek/deepseek-r1'])),
-        ('OpenRouter Web search + medium reasoning', True, 'medium', 60, '',
-         models_all.by_names(['anthropic/claude-3-5-haiku', 'deepseek/deepseek-r1'])),
+        ('OpenRouter + low reasoning', False, 'low', 30, '', models_all),
+        ('OpenRouter Web search + medium reasoning', True, 'medium', 60, '', models_all),
+        # ('Context + medium reasoning', False, 'medium', 60, context_txt, models_all),
         ]
     
     # Benchmark models.

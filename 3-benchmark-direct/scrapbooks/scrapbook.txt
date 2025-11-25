@@ -1,22 +1,4 @@
-                task_metrics.append(mt.Metrics(
-                    name="Error", 
-                    provider_name=model_info.provider_name(),
-                    cost_mdn=0.0, 
-                    tokens_mdn=0, 
-                    time_mdn=0.0, 
-                    error_rate_mdn=1.0, 
-                    api_issues=1, 
-                    api_calls=1 ))
-
-
-    except Exception as e:
-        print(f"Error: {repr(e)}")
-        return mt.Metrics(
-            name="Error", 
-            provider_name=agent.provider_name(),
-            cost_mdn=0.0, 
-            tokens_mdn=0, 
-            time_mdn=0.0, 
-            error_rate_mdn=1.0, 
-            api_issues=1, 
-            api_calls=1 ) 
+2511251045661385, OpenRouter + low reasoning, anthropic/claude-opus-4.5, OpenRouter, 436, $0.002508, 3.52, 10%, 0%
+2511251045661473, OpenRouter + low reasoning, x-ai/grok-4.1-fast, OpenRouter, 1032, $0.000000, 16.39, 38%, 14%
+2511251052092958, OpenRouter Web search + medium reasoning, anthropic/claude-opus-4.5, OpenRouter, 9317, $0.047557, 6.97, 0%, 86%
+2511251052093040, OpenRouter Web search + medium reasoning, x-ai/grok-4.1-fast, OpenRouter, 12018, $0.000000, 36.56, 5%, 4%
