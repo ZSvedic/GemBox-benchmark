@@ -135,7 +135,7 @@ async def main_test():
 
     # Test with model default system prompt and web search.
     handler = bc.Models().by_name('gemini-2.5-flash').create_handler(
-        system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)
+        system_prompt=bc._DEFAULT_SYSTEM_INS, web_search=True, parse_type=bc.ListOfStrings)
     await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
 
     # # Test prompts.

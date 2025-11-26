@@ -46,13 +46,12 @@ class OpenAIHandler(bc.LLMHandler):
         else: # OpenAI model.
             model = self.model_info.name
             prompt_dict = omit
-
             if self.system_prompt:
                 input_dict = [{"role": "system", "content": self.system_prompt}] + input_dict
 
-            if self.web_search:
-                tools_dict = [{"type": "web_search"}]
-                include_list = ["web_search_call.action.sources"]
+        if self.web_search:
+            tools_dict = [{"type": "web_search"}]
+            include_list = ["web_search_call.action.sources"]
 
         if self.verbose:
             pprint(input_dict)
@@ -90,7 +89,7 @@ class OpenAIHandler(bc.LLMHandler):
                     case other:
                         print(f"WARNING: Unexpected web_search_call action type: {other}")
 
-        print(f"DEBUG: Found {sum(len(v) for v in links.values())} web search links."
+        pprint(f"DEBUG: Found {sum(len(v) for v in links.values())} web search links: {links}"
               if links else f"WARNING: web_search True but no links were returned.")
         
         return links
@@ -132,7 +131,7 @@ async def main_test():
     print("\n===== openai_handler.main_test() =====")
 
     # Test with model default system prompt and web search.
-    handler = bc.Models().by_name('gpt-5-mini').create_handler(system_prompt=bc._DEFAULT_SYSTEM_PROMPT, web_search=True, parse_type=bc.ListOfStrings)
+    handler = bc.Models().by_name('gpt-5-mini').create_handler(system_prompt=bc._DEFAULT_SYSTEM_INS, web_search=True, parse_type=bc.ListOfStrings)
     await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
 
     # Test with prompt_id.

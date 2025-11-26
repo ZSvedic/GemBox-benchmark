@@ -126,7 +126,7 @@ class Models(Collection[ModelInfo]):
         return self.filter(lambda m: m.context_length >= min_context_length)
     
     def by_web_search(self, web_search: bool) -> Models:
-        return self.filter(lambda m: m.web_search == web_search)
+        return self.filter(lambda m: m.has_web_search == web_search)
 
     def by_names(self, names: list[str]) -> Models:
         filtered = self.filter(lambda m: str(m) in names)
@@ -169,7 +169,7 @@ class Models(Collection[ModelInfo]):
 
 # Constants.
 
-_DEFAULT_SYSTEM_PROMPT = """Answer a coding question related to GemBox Software .NET components.
+_DEFAULT_SYSTEM_INS = """Answer a coding question related to GemBox Software .NET components.
 Return a JSON object with a "completions" array containing only the code strings that should replace the ??? marks, in order. 
 Completions array should not contain any extra whitespace as results will be used for string comparison.
 If needed and available, use web search to find the most recent version of the GemBox API help pages.

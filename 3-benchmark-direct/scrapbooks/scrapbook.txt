@@ -1,1 +1,0 @@
-2511251937200734, D. RAG OpenAI + medium reasoning, prompt-web-search-GPT-5-mini, OpenAI, 9608, $0.003610, 22.62, 1%, 0%

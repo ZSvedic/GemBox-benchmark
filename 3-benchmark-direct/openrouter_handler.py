@@ -127,7 +127,7 @@ async def main_test():
         model = bc.Models().by_name(name)
         print(f"\nTesting model: {name}")
         handler = model.create_handler(
-            system_prompt=bc._DEFAULT_SYSTEM_PROMPT, 
+            system_prompt=bc._DEFAULT_SYSTEM_INS, 
             parse_type=bc.ListOfStrings,
             web_search=search,
             verbose=False)

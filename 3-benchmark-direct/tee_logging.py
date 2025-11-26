@@ -18,10 +18,10 @@ class Tee:
         self.log.flush()
 
 @contextmanager
-def logging_context(log_dir="logs"):
+def logging_context(prefix: str, log_dir: str = "logs"):
     os.makedirs(log_dir, exist_ok=True)
     ts = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    path = os.path.join(log_dir, f"run_{ts}.log")
+    path = os.path.join(log_dir, f"{prefix}_{ts}.log")
     log = open(path, "w")
     tee = Tee(log)
     with redirect_stdout(tee), redirect_stderr(tee):
