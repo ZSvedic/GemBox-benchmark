@@ -23,7 +23,7 @@ async def main_test():
 
     # Starting context.
     s_ctx = benchmark.BenchmarkContext(
-        models=bc.Models().by_names(['gpt-5-mini']), 
+        models=bc.Models().by_names(['gemini-2.5-flash', 'deepseek/deepseek-chat']), #['gpt-5-mini']), 
         system_ins=bc.DEFAULT_SYSTEM_INS,
         questions=questions )
 

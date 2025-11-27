@@ -50,6 +50,8 @@ class OpenRouterHandler(bc.LLMHandler):
         if self.web:
             if self.model_info.web is False:
                 raise ValueError(f"Model {model_name} does not support web search")
+            elif self.include_domains:
+                raise NotImplementedError("Domain search is not supported in OpenRouterHandler.")
             else:
                 model_name += ':online'
         
