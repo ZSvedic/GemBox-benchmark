@@ -59,11 +59,7 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
     """Run a single question and return performance metrics."""
     # Prepare question and prompt.
     question_text = f"{question.question}\n{question.masked_code}"
-    full_prompt = f"{bc.DEFAULT_SYSTEM_INS}\n\n{question_text}"
-
-    if ctx.system_doc:
-        full_prompt += f"\n--- END OF QUESTION AND MASKED CODE ---\nBelow '--- DOCUMENTATION:' line is the documentation, which are all GemBox Software .NET components examples.\n--- DOCUMENTATION: \n{ctx.system_doc}\n--- END OF DOCUMENTATION ---\n Answer the question based on the documentation, return only the JSON object with no explanations, comments, or additional text.\n"
-
+ 
     if ctx.verbose:
         print(f"Q{question_num}: {tw.shorten(question_text, TRUNCATE_LENGTH)}")
     
@@ -75,7 +71,7 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
                 if ctx.delay_sec:
                     await asyncio.sleep(ctx.delay_sec)
                     delay += ctx.delay_sec
-                response = await asyncio.wait_for(agent.call(full_prompt), timeout=ctx.timeout_sec)
+                response = await asyncio.wait_for(agent.call(question_text), timeout=ctx.timeout_sec)
                 break
             except Exception as e:
                 if attempt == 0:  # First failure.
@@ -119,13 +115,20 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
 async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, run_index: int = 0) -> mt.Metrics:
     """Run benchmark for a single model on all questions in parallel."""
     print(f"\n==={model_info.name}===")
+
+    # Append system documentation if any.
+    instructions = ctx.system_ins
+    if ctx.system_doc:
+        # TODO: split the next LOC into multiple.
+        instructions += f"\nBelow '--- DOCUMENTATION:' line is the documentation, which are all GemBox Software .NET components examples.\n--- DOCUMENTATION: \n{ctx.system_doc}\n--- END OF DOCUMENTATION ---\n Answer the question based on the documentation, return only the JSON object with no explanations, comments, or additional text.\n"
+
     # Initialize model and agent.
     try:
         handler = model_info.create_handler(
-            system_ins=ctx.system_ins, 
-            parse_type=bc.ListOfStrings,
             web=ctx.web, 
-            verbose=False)
+            include_domains=ctx.include_domains,
+            system_ins=instructions, 
+            parse_type=bc.ListOfStrings)
     except Exception as e:
         print(f"\n--- Can't get model handler: {repr(e)}")
         return mt.Metrics(

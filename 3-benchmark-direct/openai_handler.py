@@ -63,7 +63,7 @@ class OpenAIHandler(bc.LLMHandler):
             else:
                 tools = [{"type": "web_search"}]
                 if self.include_domains:
-                    tools.append({"allowed_domains": [self.include_domains]})
+                    tools[0]["filters"] = {"allowed_domains": [self.include_domains]}
                 include_list = ["web_search_call.action.sources"]
 
         if self.verbose:

@@ -164,9 +164,8 @@ worksheet.Cells[???].??? = ???;
 Your response:
 {"completions": ["\\"A1\\"", "Value", "\\"Hello\\""]}
 
-Below '--- QUESTION AND MASKED CODE:' line is the question and masked code. Return only the JSON object with no explanations, comments, or additional text.
-
---- QUESTION AND MASKED CODE: """
+Return only the JSON object with no explanations, comments, or additional text.
+"""
 
 TEST_QUESTIONS = [
     "How to set value of A1 to 'Abracadabra'?\nworksheet.Cells[???].??? = ???;",
