@@ -1,6 +1,10 @@
+# Python stdlib.
 import asyncio
+
+# Third-party.
 import dotenv
 
+# Local modules.
 import metrics
 import questions
 import tee_logging
@@ -9,6 +13,8 @@ import openai_handler
 import google_handler
 import openrouter_handler
 import benchmark
+
+# Main test.
 
 async def main_test():
     # Plain calls.

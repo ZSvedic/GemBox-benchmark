@@ -1,12 +1,18 @@
+# Python stdlib.
 import asyncio
-import threading
+import dataclasses as dc
 from pprint import pprint
+import threading
 from typing import Any, override
 
+# Third-party.
 import dotenv
 from openai import AsyncOpenAI, omit
 
+# Local modules.
 import base_classes as bc
+
+# OpenAI LLM handler.
 
 class OpenAIHandler(bc.LLMHandler):
     # Client is a singleton that requires close()...
@@ -37,8 +43,8 @@ class OpenAIHandler(bc.LLMHandler):
 
     @override
     async def call(self, input: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]: 
-        input_dict = [{"role": "user", "content": input}]
-        tools_dict = include_list = omit
+        inputs = []
+        tools = include_list = omit
 
         if self.model_info.prompt_id: # OpenAI prompt.
             model = omit
@@ -46,15 +52,22 @@ class OpenAIHandler(bc.LLMHandler):
         else: # OpenAI model.
             model = self.model_info.name
             prompt_dict = omit
-            if self.system_prompt:
-                input_dict = [{"role": "system", "content": self.system_prompt}] + input_dict
+            if self.system_ins:
+                inputs.append({"role": "system", "content": self.system_ins})
 
-        if self.web_search:
-            tools_dict = [{"type": "web_search"}]
-            include_list = ["web_search_call.action.sources"]
+        inputs.append({"role": "user", "content": input})
+
+        if self.web:
+            if self.model_info.web is False:
+                raise ValueError(f"Model {model} does not support web search")
+            else:
+                tools = [{"type": "web_search"}]
+                if self.include_domains:
+                    tools.append({"allowed_domains": [self.include_domains]})
+                include_list = ["web_search_call.action.sources"]
 
         if self.verbose:
-            pprint(input_dict)
+            print(f"=== PROMPT DICT:\n{prompt_dict}\n\n=== TOOLS:\n{tools}\n\n=== INCLUDE LIST:\n{include_list}\n\n=== INPUTS:\n{inputs}")
 
         if self.parse_type:
             format = self.parse_type
@@ -62,7 +75,9 @@ class OpenAIHandler(bc.LLMHandler):
             format = omit
 
         response = await OpenAIHandler.get_client().responses.parse(
-            model=model, prompt=prompt_dict, input=input_dict, tools=tools_dict, include=include_list, text_format=format)
+            model=model, prompt=prompt_dict, input=inputs, 
+            tools=tools, include=include_list, text_format=format,
+            )
 
         result = response.output_parsed if self.parse_type else response.output_text
         links = self.get_web_search_links(response)
@@ -74,7 +89,7 @@ class OpenAIHandler(bc.LLMHandler):
         return result, links, (usage.input_tokens, usage.output_tokens)
 
     def get_web_search_links(self, response) -> bc.CallDetailsType:
-        if not self.web_search:
+        if not self.web:
             return None
 
         links = {}
@@ -96,47 +111,46 @@ class OpenAIHandler(bc.LLMHandler):
 
 # OpenAI models.
 
+_base = bc.ModelInfo(handler=OpenAIHandler, tags={'openai'})
+_base_prompt = bc.ModelInfo(handler=OpenAIHandler, tags={'openai', 'prompt'})
+
 _OPENAI_MODELS = [
-    # ModelInfo('name', prompt_id, input_cost, output_cost, context_length, direct_class, tags),
-    # TEMPLATE:
-    # ModelInfo('', None, 0.0, 0.0, 0, None, {''}),
     # OpenAI models: https://openrouter.ai/provider/openai
-    bc.ModelInfo('gpt-3.5-turbo', None, 0.50, 1.50, 16_385, OpenAIHandler, False, {'openai', 'fast', 'old'}),
-    bc.ModelInfo('gpt-4.1', None, 2.0, 8.0, 1_050_000, OpenAIHandler, False, {'openai', 'fast', 'old'}),
-    bc.ModelInfo('gpt-4o-2024-11-20', None, 2.5, 10.0, 128_000, OpenAIHandler, False, {'openai', 'old'}),
-    bc.ModelInfo('gpt-4o-mini', None, 0.15, 0.60, 128_000, OpenAIHandler, True, {'openai', 'fast', 'old'}), 
-    bc.ModelInfo('gpt-5-nano', None, 0.05, 0.40, 400_000, OpenAIHandler, True, {'openai', 'fast'}),            
-    bc.ModelInfo('gpt-5-mini', None, 0.25, 2.00, 400_000, OpenAIHandler, True, {'openai', 'fast',}), 
-    bc.ModelInfo('gpt-5', None, 1.25, 10.00, 400_000, OpenAIHandler, True, {'openai'}),  
-    bc.ModelInfo('gpt-5-codex', None, 1.25, 10.0, 400_000, OpenAIHandler, True, {'openai'}),  
-    bc.ModelInfo('gpt-5.1', None, 1.25, 10.00, 400_000, OpenAIHandler, True, {'openai'}), 
-    bc.ModelInfo('gpt-5.1-codex', None, 1.25, 10.00, 400_000, OpenAIHandler, True, {'openai'}),
-    bc.ModelInfo('gpt-5.1-codex-mini', None, 0.25, 2.00, 400_000, OpenAIHandler, True, {'openai'}),   
+    dc.replace(_base, name='gpt-4.1',           in_usd=2.00, out_usd= 8.00, context_len=1_050_000, web=False),
+    dc.replace(_base, name='gpt-4o-mini',       in_usd=0.15, out_usd= 0.60, context_len=  128_000, web=True), 
+    dc.replace(_base, name='gpt-5-nano',        in_usd=0.05, out_usd= 0.40, context_len=  400_000, web=True),
+    dc.replace(_base, name='gpt-5-mini',        in_usd=0.25, out_usd= 2.00, context_len=  400_000, web=True),
+    dc.replace(_base, name='gpt-5',             in_usd=1.25, out_usd=10.00, context_len=  400_000, web=True),
+    dc.replace(_base, name='gpt-5-codex',       in_usd=1.25, out_usd=10.00, context_len=  400_000, web=True),
+    dc.replace(_base, name='gpt-5.1',           in_usd=1.25, out_usd=10.00, context_len=  400_000, web=True),
+    dc.replace(_base, name='gpt-5.1-codex',     in_usd=1.25, out_usd=10.00, context_len=  400_000, web=True),
+    dc.replace(_base, name='gpt-5.1-codex-mini',in_usd=0.25, out_usd= 2.00, context_len=  400_000, web=True),
     # OpenAIPrompt models (Zel's private account): 
     # https://platform.openai.com/chat/edit?prompt=pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2&version=4
     # Prompt version 4 uses gpt-5-mini.
-    bc.ModelInfo('prompt-GBS-examples-GPT5mini', 'pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2', 
-                 0.25, 2.00, 400_000, OpenAIHandler, False, {'openai', 'prompt'}),
-    bc.ModelInfo('prompt-GBS-examples-GPT5', 'pmpt_68ee4f81f8d4819786ff5301af701ced0843964564bf8684', 
-                 1.25, 10.00, 400_000, OpenAIHandler, False, {'openai', 'prompt'}),
-    bc.ModelInfo('prompt-web-search-GPT-5-mini', 'pmpt_6925f3a9ab3c81948b94c2528a16da620b3e3169c57b2f60', 
-                 0.25, 2.00, 400_000, OpenAIHandler, True, {'openai', 'prompt'}),
+    dc.replace(_base_prompt, name='prompt-GBS-examples-GPT5mini', prompt_id='pmpt_68d2af2e837c81939eeaf15bba79e95e0d72a7a17d0ec9e2',
+               in_usd=0.25, out_usd= 2.00, context_len=400_000, web=False),
+    dc.replace(_base_prompt, name='prompt-GBS-examples-GPT5', prompt_id='pmpt_68ee4f81f8d4819786ff5301af701ced0843964564bf8684',
+               in_usd=1.25, out_usd=10.00, context_len=400_000, web=False),
+    dc.replace(_base_prompt, name='prompt-web-search-GPT-5-mini', prompt_id='pmpt_6925f3a9ab3c81948b94c2528a16da620b3e3169c57b2f60',
+               in_usd=0.25, out_usd= 2.00, context_len=400_000, web=True),
 ]
     
 bc.Models._MODEL_REGISTRY += _OPENAI_MODELS
 
-# Main test functions.
+# Main test.
 
 async def main_test():
     print("\n===== openai_handler.main_test() =====")
 
-    # Test with model default system prompt and web search.
-    handler = bc.Models().by_name('gpt-5-mini').create_handler(system_prompt=bc._DEFAULT_SYSTEM_INS, web_search=True, parse_type=bc.ListOfStrings)
-    await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
+    # Test with model default system instructions and web search.
+    handler = bc.Models().by_name('gpt-5-mini').create_handler(
+        system_ins=bc.DEFAULT_SYSTEM_INS, web=True, parse_type=bc.ListOfStrings, verbose=True)
+    await bc._test_call_handler(handler, bc.TEST_QUESTIONS)
 
     # Test with prompt_id.
     handler = bc.Models().by_name('prompt-GBS-examples-GPT5mini').create_handler(parse_type=bc.ListOfStrings)
-    await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
+    await bc._test_call_handler(handler, bc.TEST_QUESTIONS)
 
 if __name__ == "__main__":
     if not dotenv.load_dotenv():

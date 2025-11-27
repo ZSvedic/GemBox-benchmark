@@ -1,15 +1,21 @@
+# Python stdlib.
+import dataclasses as dc
 import json
 import os
 import tempfile
 
+# Third-party.
 from pydantic import BaseModel
 
 # Data structure for JSONL questions.
+@dc.dataclass(frozen=True)
 class QuestionData(BaseModel):
     category: str
     question: str
     masked_code: str
     answers: list[str]
+
+# Helper function. 
 
 def load_questions_from_jsonl(file_path: str) -> list[QuestionData]:
     """Load questions from a JSONL file using Pydantic for automatic parsing and validation."""
@@ -19,6 +25,8 @@ def load_questions_from_jsonl(file_path: str) -> list[QuestionData]:
             for line in file
             if line.strip() 
         ]
+
+# Main test.
 
 def main_test():
     print("\n===== questions.main_test() =====")

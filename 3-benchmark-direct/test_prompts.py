@@ -1,16 +1,18 @@
-# Python stdlib:
+# Python stdlib.
 import asyncio
-from collections import namedtuple
+import dataclasses as dc
 
-# Third-party:
+# Third-party.
 import dotenv
 
-# Local modules:
+# Local modules.
 import base_classes as bc
-import questions as qs
 import metrics as mt
+import questions as qs
 import benchmark
 from tee_logging import logging_context
+
+# Main test.
 
 async def main_test():
     print("\n===== test_prompts.main_test() =====")
@@ -20,29 +22,19 @@ async def main_test():
     print(f"Using {len(questions)} questions.")
 
     # Starting context.
-    s_ctx = benchmark.BenchmarkContext().replace(
+    s_ctx = benchmark.BenchmarkContext(
         models=bc.Models().by_names(['gpt-5-mini']), 
-        system_ins=bc._DEFAULT_SYSTEM_INS,
+        system_ins=bc.DEFAULT_SYSTEM_INS,
         questions=questions )
 
     # Testing contexts.
     contexts = [
-        s_ctx.replace(
-            description='gpt-5-mini, low reasoning, no search',
-            reasoning='low',
-            web_search=False,
-        ),
-        s_ctx.replace(
-            description='gpt-5-mini, medium reasoning, web search',
-            reasoning='medium',
-            web_search=True,
-        ),
-        s_ctx.replace(
-            description='gpt-5-mini, medium reasoning, domain search',
-            reasoning='medium',
-            web_search=True,
-            include_domains='www.gemboxsoftware.com',
-        ),
+        # dc.replace(s_ctx, description='gpt-5-mini, low reasoning, no search',
+        #     reasoning='low', web=False),
+        # dc.replace(s_ctx, description='gpt-5-mini, medium reasoning, web search',
+        #     reasoning='medium', web=True),
+        dc.replace(s_ctx, description='gpt-5-mini, medium reasoning, domain search',
+            reasoning='medium', web=True, include_domains='www.gemboxsoftware.com'),
     ]
 
     # Benchmark models.

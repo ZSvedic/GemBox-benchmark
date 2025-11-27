@@ -1,45 +1,41 @@
+# Python stdlib.
 from __future__ import annotations
 from abc import ABC, abstractmethod
 import asyncio
 from collections import defaultdict
 from collections.abc import Iterator, Callable, Collection
-from dataclasses import dataclass
+import dataclasses as dc
 from typing import Any, override, Optional
 
-from pydantic import BaseModel
+# Third-party.
+from pydantic import BaseModel          
 
-# LLMHandler call result types.
+# LLMHandler class.
 
 CallDetailsType = dict[str, list[str]]
 UsageType = tuple[int, int]
 
+@dc.dataclass(frozen=True)
 class LLMHandler(ABC):
-    def __init__(
-            self, 
-            model_info: ModelInfo, 
-            *,
-            system_prompt: str | None = None, 
-            parse_type: type[BaseModel] | None = None,
-            web_search: bool = False,
-            verbose: bool = False): 
-        # Plain params:
-        self.model_info = model_info
-        self.system_prompt = system_prompt
-        self.parse_type = parse_type
-        self.web_search = web_search
-        self.verbose = verbose
+    model_info: ModelInfo                       # Model information.
+    web: bool = False                           # Use web search?
+    include_domains: str = ''                   # Domains to include in web search.
+    system_ins: str | None = None               # System instructions. 
+    parse_type: type[BaseModel] | None = None   # Pydantic model type for parsing results.
+    verbose: bool = False                       # Verbose output?
     
     @classmethod
     @abstractmethod
     def get_client(cls):
-        '''Return the LLM client instance.'''
+        '''Returns the LLM client instance.'''
         ...
 
     @classmethod
     @abstractmethod
     async def close(cls):
-        '''Implement if the handler needs to release resources.'''
+        '''Releases LLM client instance and resources.'''
         ...
+
     @classmethod
     @abstractmethod
     def provider_name(cls) -> str:
@@ -51,55 +47,43 @@ class LLMHandler(ABC):
 
     @staticmethod
     def strip_code_fences(text: str) -> str:
-        '''Models that output text sometimes wrap it in triple backtick code fences.'''
+        '''Removes triple backtick code fences that some models that output.'''
         if text.startswith("```") and text.endswith("```"):
             lines = text.splitlines()
             if lines and lines[0].startswith("```") and lines[-1].strip() == "```":
                 return "\n".join(lines[1:-1])
         return text
 
-@dataclass(frozen=True)
+# ListOfStrings class for parsing.
+
+@dc.dataclass(frozen=True)
 class ListOfStrings(BaseModel):
     completions: list[str]
 
-class _AcmeLLMHandler(LLMHandler):
-    @override
-    def __init__(self, *args, **kwargs): 
-        pass
-    
-    @override
-    async def call(self, input: str) -> tuple[Any, CallDetailsType, UsageType]:
-        return (['AcmeLLM response for input'], {'web_search': ['https://www.acme.com']}, (5, 10))
-    
-    @override
-    @classmethod
-    async def close(cls):
-        pass
-
 # ModelInfo and Models classes.
 
-@dataclass(frozen=True)
+@dc.dataclass(frozen=True)
 class ModelInfo:
-    name: str
-    prompt_id: str | None
-    input_cost: float
-    output_cost: float
-    context_length: int
-    direct_class: type[LLMHandler]
-    has_web_search: bool
-    tags: set[str]
+    name: str = '?'                             # Model name.
+    prompt_id: str = ''                         # Prompt ID (if using a prompt).
+    web: bool = False                           # Supports web search?
+    in_usd: float = 0.0                         # Input cost per 1M tokens.
+    out_usd: float = 0.0                        # Output cost per 1M tokens.
+    context_len: int = 0                        # Maximum context length in tokens.
+    handler: type[LLMHandler] | None = None     # Responsible LLMHandler class.
+    tags: frozenset[str] = frozenset()          # Tags associated with the model.
 
     def __str__(self) -> str:
         return self.name
 
     def calculate_cost(self, input_tokens: int, output_tokens: int) -> float:
-        return (input_tokens / 1_000_000) * self.input_cost + (output_tokens / 1_000_000) * self.output_cost
+        return (input_tokens / 1_000_000) * self.in_usd + (output_tokens / 1_000_000) * self.out_usd
 
     def create_handler(self, *args, **kwargs) -> LLMHandler:
-        return self.direct_class(self, *args, **kwargs)
+        return self.handler(self, *args, **kwargs)
     
     def provider_name(self) -> str:
-        return self.direct_class.provider_name()
+        return self.handler.provider_name()
 
 class Models(Collection[ModelInfo]):
     '''Fluent query object for model filtering.'''
@@ -119,14 +103,14 @@ class Models(Collection[ModelInfo]):
     def by_tags(self, include: set[str] = set[str](), exclude: set[str] = set[str]()) -> Models:
         return self.filter(lambda m: include.issubset(m.tags) and not (exclude & m.tags))
 
-    def by_max_price(self, input_cost: float, output_cost: float) -> Models:
-        return self.filter(lambda m: m.input_cost <= input_cost and m.output_cost <= output_cost)
+    def by_max_price(self, in_usd: float, out_usd: float) -> Models:
+        return self.filter(lambda m: m.in_usd <= in_usd and m.out_usd <= out_usd)
 
-    def by_min_context_length(self, min_context_length: int) -> Models:
-        return self.filter(lambda m: m.context_length >= min_context_length)
+    def by_min_context_length(self, min_context_len: int) -> Models:
+        return self.filter(lambda m: m.context_len >= min_context_len)
     
-    def by_web_search(self, web_search: bool) -> Models:
-        return self.filter(lambda m: m.has_web_search == web_search)
+    def by_web(self, web: bool) -> Models:
+        return self.filter(lambda m: m.web == web)
 
     def by_names(self, names: list[str]) -> Models:
         filtered = self.filter(lambda m: str(m) in names)
@@ -169,7 +153,7 @@ class Models(Collection[ModelInfo]):
 
 # Constants.
 
-_DEFAULT_SYSTEM_INS = """Answer a coding question related to GemBox Software .NET components.
+DEFAULT_SYSTEM_INS = """Answer a coding question related to GemBox Software .NET components.
 Return a JSON object with a "completions" array containing only the code strings that should replace the ??? marks, in order. 
 Completions array should not contain any extra whitespace as results will be used for string comparison.
 If needed and available, use web search to find the most recent version of the GemBox API help pages.
@@ -184,21 +168,43 @@ Below '--- QUESTION AND MASKED CODE:' line is the question and masked code. Retu
 
 --- QUESTION AND MASKED CODE: """
 
-_TEST_QUESTIONS = [
+TEST_QUESTIONS = [
     "How to set value of A1 to 'Abracadabra'?\nworksheet.Cells[???].??? = ???;",
     "How to format B2 to bold?\nworksheet.Cells[???].??? = ???;",
 ]
 
+# Example LLMHandler implementation for testing.
+
+class _AcmeLLMHandler(LLMHandler):
+
+    @override
+    @classmethod
+    def get_client(cls):
+        return None
+    
+    @override
+    @classmethod
+    def provider_name(cls) -> str:
+        return "Acme"
+    
+    @override
+    async def call(self, input: str) -> tuple[Any, CallDetailsType, UsageType]:
+        return (['AcmeLLM response for input'], {'web': ['https://www.acme.com']}, (5, 10))
+    
+    @override
+    @classmethod
+    async def close(cls):
+        pass
+
+_base = ModelInfo(handler=_AcmeLLMHandler)
+
 _TEST_MODEL_REGISTRY = [
-    # ModelInfo('name', prompt_id, input_cost, output_cost, context_length, direct_class, tags),
-    # TEMPLATE:
-    # ModelInfo('', None, 0.0, 0.0, 0, None, {''}),
-    ModelInfo('AcmeLLM-3', None, 0.03, 0.05, 1000, _AcmeLLMHandler, False, {'acme', 'fast'}),
-    ModelInfo('AcmeLLM-4', None, 0.05, 0.10, 2000, _AcmeLLMHandler, False, {'acme'}),
-    ModelInfo('AcmeLLM-5', None, 0.10, 0.20, 3000, _AcmeLLMHandler, True, {'acme'}),
-    ModelInfo('FooLLM-2-mini', None, 0.02, 0.10, 2000, _AcmeLLMHandler, False, {'foo', 'fast'}),
-    ModelInfo('BarLLM-1', None, 0.03, 0.15, 3000, _AcmeLLMHandler, False, {'bar', 'fast'}),
-    ModelInfo('BarLLM-2', None, 0.05, 0.20, 4000, _AcmeLLMHandler, True, {'bar'}),
+    dc.replace(_base, name='AcmeLLM-3',     in_usd=0.03, out_usd=0.05, context_len=1000, web=False, tags={'acme'}),
+    dc.replace(_base, name='AcmeLLM-4',     in_usd=0.05, out_usd=0.10, context_len=2000, web=False, tags={'acme'}),
+    dc.replace(_base, name='AcmeLLM-5',     in_usd=0.10, out_usd=0.20, context_len=3000, web=True,  tags={'acme'}),
+    dc.replace(_base, name='FooLLM-2-mini', in_usd=0.02, out_usd=0.10, context_len=2000, web=False, tags={'foo'}),
+    dc.replace(_base, name='BarLLM-1',      in_usd=0.03, out_usd=0.15, context_len=3000, web=False, tags={'bar'}),
+    dc.replace(_base, name='BarLLM-2',      in_usd=0.05, out_usd=0.20, context_len=4000, web=True,  tags={'bar'}),
 ]
 
 # Test functions.
@@ -239,14 +245,14 @@ async def main_test():
 
     # Filter models by max price.
     print(f"\n=== test_models.by_max_price(input_cost=0.05, output_cost=0.15) ===")
-    models = test_models.by_max_price(input_cost=0.05, output_cost=0.15)
+    models = test_models.by_max_price(in_usd=0.05, out_usd=0.15)
     print(*models, sep="\n")
-    assert all(m.input_cost <= 0.05 and m.output_cost <= 0.15 
+    assert all(m.in_usd <= 0.05 and m.out_usd <= 0.15 
                for m in models), "FAIL: some models exceed max price."
 
     # Chain filters.
     print(f"\n=== test_models.by_tags(exclude={tags}).by_max_price(input_cost=0.05, output_cost=0.15) ===")
-    models = test_models.by_tags(exclude=tags).by_max_price(input_cost=0.05, output_cost=0.15)
+    models = test_models.by_tags(exclude=tags).by_max_price(in_usd=0.05, out_usd=0.15)
     print(*models, sep="\n")
     assert len(models)==2, "FAIL: wrong chained filter result."
 

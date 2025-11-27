@@ -1,30 +1,37 @@
-import sys
-import os
+# Python stdlib.
+import contextlib as cl
 import datetime
+import os
+import sys
 import tempfile
 
-from contextlib import contextmanager, redirect_stdout, redirect_stderr
+# Tee class and its context manager.
 
 class Tee:
+    '''Mirrors stdout/stderr to a log file while still printing to terminal.'''
+
     def __init__(self, log_file):
         self.log = log_file
+
     def write(self, data):
         sys.__stdout__.write(data)
         sys.__stdout__.flush()
         self.log.write(data)
         self.log.flush()
+
     def flush(self):
         sys.__stdout__.flush()
         self.log.flush()
 
-@contextmanager
-def logging_context(prefix: str, log_dir: str = "logs"):
+@cl.contextmanager
+def logging_context(prefix: str = "noname", log_dir: str = "logs"):
+    '''Creates timestamped log file and tee all output inside the context.'''
     os.makedirs(log_dir, exist_ok=True)
     ts = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     path = os.path.join(log_dir, f"{prefix}_{ts}.log")
     log = open(path, "w")
     tee = Tee(log)
-    with redirect_stdout(tee), redirect_stderr(tee):
+    with cl.redirect_stdout(tee), cl.redirect_stderr(tee):
         print(f"Logging started: {ts} → {path}")
         try:
             yield
@@ -32,11 +39,13 @@ def logging_context(prefix: str, log_dir: str = "logs"):
             print(f"Logging finished: {path}")
             log.close()
 
+# Main test.
+
 def main_test():
     print("\n===== tee_logging.main_test() =====")
 
     with tempfile.TemporaryDirectory() as d:
-        with logging_context(d):
+        with logging_context("tee-test", d):
             print("hello tee")
 
         files = [f for f in os.listdir(d) if f.endswith(".log")]

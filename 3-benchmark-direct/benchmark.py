@@ -1,54 +1,49 @@
-# Python stdlib:
+# Python stdlib.
 import asyncio
 import dataclasses as dc
 import pathlib
-import textwrap
+import textwrap as tw
 import time
-from collections.abc import Collection
 
-# Third-party:
+# Third-party.
 import dotenv
 
-# Local modules:
+# Local modules.
 import google_handler, openai_handler, openrouter_handler  # Required to populate bc.Models._MODEL_REGISTRY.
 import base_classes as bc
 import metrics as mt
 import questions as qs
-from tee_logging import logging_context
 
-# Data classes:
+# Constants.
 
-@dc.dataclass(frozen=True)
+TRUNCATE_LENGTH: int = 150  
+
+# Data classes.
+
+@dc.dataclass(frozen=True)  
 class BenchmarkContext:
-    description: str = "?"                  # Description of the benchmark context.
-    models: tuple[bc.ModelInfo] = ()        # Models to benchmark.
-    reasoning: str = "low"                  # Reasoning effort.
-    web_search: bool = False                # Use web search?
-    include_domains: str = ""               # Domains to include in web search.
-    bench_n_times: int = 1                  # Benchmark n times, for better precision.
-    timeout_sec: int = 30                   # Timeout for each question.
-    delay_sec: int = 0.050                  # Delay between question calls, to avoid rate limits.
-    verbose: bool = True                    # Verbose output?
+    description: str = '?'                      # Description of the benchmark context.
+    models: tuple[bc.ModelInfo] = ()            # Models to benchmark.
+    reasoning: str = 'low'                      # Reasoning effort.
+    web: bool = False                           # Use web search?
+    include_domains: str = ''                   # Domains to include in web search.
+    bench_n_times: int = 1                      # Benchmark n times, for better precision.
+    timeout_sec: int = 30                       # Timeout for each question.
+    delay_sec: int = 0.050                      # Delay between calls, to avoid rate limits.
+    verbose: bool = True                        # Verbose output?
     max_parallel_questions: int = 14            # Limit parallel question execution.
     retry_failures: bool = True                 # Retry failed requests?
-    system_ins: str = bc._DEFAULT_SYSTEM_INS    # System instructons.
-    system_doc: str = ""                        # System documentation/examples.
+    system_ins: str = bc.DEFAULT_SYSTEM_INS    # System instructons.
+    system_doc: str = ''                        # System documentation/examples.
     questions: tuple[qs.QuestionData] = ()      # Questions to benchmark.
 
-    def replace(self, **kwargs):
-        return dc.replace(self, **kwargs)
-
     def __str__(self):
-        return "BenchmarkContext:\n" + \
-            "\n".join(f"\t{f.name}={display_text(str(getattr(self, f.name)))}" 
+        '''Indented multi-line string representation of the dataclass.'''
+        return type(self).__name__ + ":\n" + \
+            "\n".join(f"\t{f.name}={tw.shorten(str(getattr(self, f.name)), TRUNCATE_LENGTH)}" 
                       for f in dc.fields(self) )
-
-# Utility functions:
-
-TRUNCATE_LENGTH: int = 150            
-
-def display_text(text: str, max_length: int = TRUNCATE_LENGTH) -> str:
-    return text[:max_length] + "..." if len(text) > max_length else text
+    
+# Utility functions.
 
 def load_txt_file(file_path: str) -> tuple[str, int]:
     """Load a text file, then return its content and approximate number of tokens."""
@@ -57,20 +52,20 @@ def load_txt_file(file_path: str) -> tuple[str, int]:
     txt = p.read_text(encoding="utf-8")
     return txt, size_tokens
 
-# Benchmarking functions:
+# Benchmarking functions.
 
 async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: bc.LLMHandler,
     question_num: int, question: qs.QuestionData) -> mt.Metrics:
     """Run a single question and return performance metrics."""
     # Prepare question and prompt.
     question_text = f"{question.question}\n{question.masked_code}"
-    full_prompt = f"{bc._DEFAULT_SYSTEM_INS}\n\n{question_text}"
+    full_prompt = f"{bc.DEFAULT_SYSTEM_INS}\n\n{question_text}"
 
     if ctx.system_doc:
         full_prompt += f"\n--- END OF QUESTION AND MASKED CODE ---\nBelow '--- DOCUMENTATION:' line is the documentation, which are all GemBox Software .NET components examples.\n--- DOCUMENTATION: \n{ctx.system_doc}\n--- END OF DOCUMENTATION ---\n Answer the question based on the documentation, return only the JSON object with no explanations, comments, or additional text.\n"
 
     if ctx.verbose:
-        print(f"Q{question_num}: {textwrap.shorten(question_text, TRUNCATE_LENGTH)}")
+        print(f"Q{question_num}: {tw.shorten(question_text, TRUNCATE_LENGTH)}")
     
     try:
         delay, t0 = 0.0, time.perf_counter()
@@ -98,7 +93,7 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
         
         # Display results.  
         if ctx.verbose:
-            print(f"A{question_num}: {textwrap.shorten(str(results), TRUNCATE_LENGTH)}")
+            print(f"A{question_num}: {tw.shorten(str(results), TRUNCATE_LENGTH)}")
             if error_rate == 0.0:
                 print("✓ CORRECT")
             elif error_rate < 1.0:
@@ -119,7 +114,7 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
 
     except Exception as e:
         print(f"Error: {repr(e)}")
-        return mt.Metrics.get_error(agent.provider_name()) 
+        return mt.Metrics(provider_name=agent.provider_name()) 
 
 async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, run_index: int = 0) -> mt.Metrics:
     """Run benchmark for a single model on all questions in parallel."""
@@ -127,19 +122,15 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, r
     # Initialize model and agent.
     try:
         handler = model_info.create_handler(
-            system_prompt=ctx.system_ins, 
+            system_ins=ctx.system_ins, 
             parse_type=bc.ListOfStrings,
-            web_search=ctx.web_search, 
+            web=ctx.web, 
             verbose=False)
     except Exception as e:
         print(f"\n--- Can't get model handler: {repr(e)}")
         return mt.Metrics(
             name=f"ERROR-{model_info.name}", 
             provider_name=model_info.provider_name(),
-            cost_mdn=0.0, 
-            tokens_mdn=0, 
-            time_avg=0.0, 
-            error_rate_avg=1.0, 
             api_issues=len(ctx.questions), 
             api_calls=len(ctx.questions) )
     
@@ -161,7 +152,7 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, r
                 raise r   # Let cancellation terminate everything.
             else:
                 print(f"Unexpected task error: {repr(r)}")
-                task_metrics.append(mt.Metrics.get_error(model_info.provider_name()))
+                task_metrics.append(mt.Metrics(provider_name=model_info.provider_name()))
     
     # Summarize model metrics, print, and return data.
     sum_metrics = mt.summarize_metrics(model_info.name, task_metrics)
@@ -197,71 +188,31 @@ async def benchmark_context(ctx: BenchmarkContext) -> mt.Metrics:
     return (mt.summarize_metrics(ctx.description, all_metrics) if len(all_metrics) > 1 
             else all_metrics[0])
 
-# Main test functions.
+# Main test.
 
 async def main_test():
     print("\n===== benchmark.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:10]
-    print(f"Using {len(questions)} questions.")
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:5]
 
     # Load documentation.
-    context_txt, context_approx_tokens = load_txt_file("GemBox-Spreadsheet-examples.txt")
-    print(f"Documentation 1 of ~length: {context_approx_tokens} tokens, starting with: {context_txt[:100]}")
+    doc, doc_approx_tokens = load_txt_file("GemBox-Spreadsheet-examples.txt")
+    assert doc and doc_approx_tokens > 70_000, "FAIL: Documentation load."
 
-    # Filter models.
-    models = (
-        bc.Models()
-        .by_web_search(True)
-        .by_min_context_length(context_approx_tokens)
-        .by_tags(include={'openrouter'})
-        .by_max_price(0.50, 2.00)
-        # .by_names(['prompt-GBS-examples-GPT5mini', 'prompt-GBS-examples-GPT5']) 
-    )
-
-    print(f"Filtered models ({len(models)}): {models}")
+    # Testing context.
+    ctx = BenchmarkContext(
+            models=bc.Models().by_names(['gpt-5-nano']),
+            system_ins=bc.DEFAULT_SYSTEM_INS,
+            questions=questions )
     
-    # Create starting context.
-    start_bench_ctx = BenchmarkContext()
-    
-    # Create testing contexts.
-    bench_contexts = [
-        ('A. Plain call + low reasoning', False, 'low', 30, '', 
-         models),
-        # ('B. Web search + medium reasoning', True, 'medium', 60, '', 
-        #  models.by_names(['gpt-5-mini'])),
-        # ('C. Context + medium reasoning', False, 'medium', 60, context_txt, 
-        #  models.by_names(['gemini-2.5-flash', 'gpt-5-mini', 'gpt-5', 'gpt-5-codex', 'gpt-5.1-codex'])),
-        # ('D. RAG OpenAI + medium reasoning', False, 'medium', 60, '', 
-        #  models.by_names(['prompt-web-search-GPT-5-mini'])),
-        ]
-    
-    for run_name, _, _, _, _, run_models in bench_contexts:
-        print(run_name, [m.name for m in run_models]) 
-
-    # Benchmark models.
-    perf_data = [
-        await benchmark_context(
-            start_bench_ctx.replace(
-                description=text,
-                models=run_models,
-                web_search=web, 
-                reasoning=reasoning,
-                timeout_sec=timeout,
-                system_doc=context,
-                questions=questions)
-                ) for text, web, reasoning, timeout, context, run_models in bench_contexts
-        ]
-
-    # Print summary.
-    print(f"\n=== SUMMARY OF ALL TESTS ===")
-    mt.print_metrics(perf_data, True)
+    # Benchmark.
+    perf_data = await benchmark_context(ctx)
+    assert perf_data.api_calls == len(questions), "FAIL: Not all questions were processed."
 
 if __name__ == "__main__":
     # Load environment variables from parent directory .env.
     if not dotenv.load_dotenv():
         raise FileExistsError(".env file not found or empty")
     
-    with logging_context("benchmark"):
-        asyncio.run(main_test())
+    asyncio.run(main_test())

@@ -1,11 +1,15 @@
+# Python stdlib.
 import asyncio
-import threading
+import dataclasses as dc
 import os
+import threading
 from typing import Any, override
 
+# Third-party.
 import dotenv
 from openai import AsyncOpenAI
 
+# Local modules.
 import base_classes as bc
 
 class OpenRouterHandler(bc.LLMHandler):
@@ -41,10 +45,16 @@ class OpenRouterHandler(bc.LLMHandler):
     @override
     async def call(self, input: str) -> tuple[Any, bc.CallDetailsType, bc.UsageType]:
         messages = []
-        model_name = self.model_info.name + (":online" if self.web_search else "")
+        model_name = self.model_info.name 
         
-        if self.system_prompt:
-            messages.append({"role": "system", "content": self.system_prompt})
+        if self.web:
+            if self.model_info.web is False:
+                raise ValueError(f"Model {model_name} does not support web search")
+            else:
+                model_name += ':online'
+        
+        if self.system_ins:
+            messages.append({"role": "system", "content": self.system_ins})
         
         messages.append({"role": "user", "content": input})
 
@@ -53,7 +63,8 @@ class OpenRouterHandler(bc.LLMHandler):
             print(f"Messages: {messages}")
 
         # Call OpenRouter API
-        response = await OpenRouterHandler.get_client().chat.completions.create(model=model_name, messages=messages)
+        response = await OpenRouterHandler.get_client().chat.completions.create(
+            model=model_name, messages=messages)
 
         # Extract response
         result_text = response.choices[0].message.content.strip()
@@ -66,50 +77,47 @@ class OpenRouterHandler(bc.LLMHandler):
             result = result_text
         
         # Extract usage
-        usage = response.usage
-        input_tokens = usage.prompt_tokens
-        output_tokens = usage.completion_tokens
+        input_tokens = response.usage.prompt_tokens
+        output_tokens = response.usage.completion_tokens
 
         if self.verbose:
             print(f"result: {result}")
             print(f"input_tokens: {input_tokens}, output_tokens: {output_tokens}")
 
-        # OpenRouter doesn't provide web search links in the same way
+        # OpenRouter doesn't provide web web links in the same way
         links = None
 
         return result, links, (input_tokens, output_tokens)
 
-# OpenRouter models registry.
+# OpenRouter models.
+
+_base = bc.ModelInfo(handler=OpenRouterHandler)
 
 _OPENROUTER_MODELS = [
-    # ModelInfo('name', prompt_id, input_cost, output_cost, context_length, direct_class, web_search, tags),
-    # TEMPLATE:
-    # ModelInfo('', None, 0.0, 0.0, 0, None, False, {''}),
-    
     # Anthropic models: https://openrouter.ai/provider/anthropic
-    bc.ModelInfo('anthropic/claude-3-5-haiku', None, 0.25, 1.35, 200_000, OpenRouterHandler, False, {'anthropic', 'openrouter'}),
-    # bc.ModelInfo('anthropic/claude-sonnet-4.5', None, 3.0, 15.00, 1_000_000, OpenRouterHandler, True, {'anthropic', 'openrouter'}), # Too expensive.
-    # bc.ModelInfo('anthropic/claude-opus-4.1', None, 15.00, 75.00, 200_000, OpenRouterHandler, True, {'anthropic', 'openrouter'}), # Too expensive.
-    # bc.ModelInfo('anthropic/claude-opus-4.5', None, 5.0, 25.00, 200_000, OpenRouterHandler, True, {'anthropic', 'openrouter'}), # Too expensive.
-    
+    dc.replace(_base, name='anthropic/claude-3-5-haiku',    in_usd= 0.25, out_usd= 1.35, context_len=  200_000, web=False, tags={'anthropic', 'openrouter'}),
+    # dc.replace(_base, name='anthropic/claude-sonnet-4.5',   in_usd= 3.00, out_usd=15.00, context_len=1_000_000, web=True,  tags={'anthropic', 'openrouter'}), # Too expensive.
+    # dc.replace(_base, name='anthropic/claude-opus-4.1',     in_usd=15.00, out_usd=75.00, context_len=  200_000, web=True,  tags={'anthropic', 'openrouter'}), # Too expensive.
+    # dc.replace(_base, name='anthropic/claude-opus-4.5',     in_usd= 5.00, out_usd=25.00, context_len=  200_000, web=True,  tags={'anthropic', 'openrouter'}), # Too expensive.
+
     # Mistral models: https://openrouter.ai/provider/mistral
-    bc.ModelInfo('mistralai/codestral-2508', None, 0.30, 0.90, 256_000, OpenRouterHandler, False, {'mistral', 'openrouter'}),
-    bc.ModelInfo('mistralai/devstral-medium', None, 0.40, 2.00, 131_000, OpenRouterHandler, True, {'mistral', 'openrouter'}),
-    bc.ModelInfo('mistralai/mistral-large', None, 2.0, 6.0, 128_000, OpenRouterHandler, True, {'mistral', 'openrouter'}),
-    
+    dc.replace(_base, name='mistralai/codestral-2508',      in_usd= 0.30, out_usd= 0.90, context_len=  256_000, web=False, tags={'mistral', 'openrouter'}),
+    dc.replace(_base, name='mistralai/devstral-medium',     in_usd= 0.40, out_usd= 2.00, context_len=  131_000, web=True,  tags={'mistral', 'openrouter'}),
+    dc.replace(_base, name='mistralai/mistral-large',       in_usd= 2.00, out_usd= 6.00, context_len=  128_000, web=True,  tags={'mistral', 'openrouter'}),
+
     # DeepSeek models: https://openrouter.ai/provider/deepseek
-    bc.ModelInfo('deepseek/deepseek-chat', None, 0.14, 0.28, 64_000, OpenRouterHandler, True, {'deepseek', 'openrouter'}),
-    bc.ModelInfo('deepseek/deepseek-r1', None, 0.55, 2.19, 64_000, OpenRouterHandler, True, {'deepseek', 'openrouter'}),
-
+    dc.replace(_base, name='deepseek/deepseek-chat',        in_usd= 0.14, out_usd= 0.28, context_len=   64_000, web=True,  tags={'deepseek', 'openrouter'}),
+    dc.replace(_base, name='deepseek/deepseek-r1',          in_usd= 0.55, out_usd= 2.19, context_len=   64_000, web=True,  tags={'deepseek', 'openrouter'}),        
+    
     # MoonshotAI models: https://openrouter.ai/provider/moonshotai
-    bc.ModelInfo('moonshotai/kimi-k2', None, 0.60, 2.5, 131_100, OpenRouterHandler, True, {'moonshotai', 'openrouter'}),
-
+    dc.replace(_base, name='moonshotai/kimi-k2',            in_usd= 0.60, out_usd= 2.50, context_len=  131_100, web=True,  tags={'moonshotai', 'openrouter'}),
+    
     # Google's Gemini 3 Pro seems to be available via OpenRouter:
     # https://openrouter.ai/google/gemini-3-pro-preview
-    bc.ModelInfo('google/gemini-3-pro-preview', None, 2.0, 12.00, 1_050_000, OpenRouterHandler, True, {'google', 'openrouter'}),
-
+    dc.replace(_base, name='google/gemini-3-pro-preview',   in_usd= 2.00, out_usd=12.00, context_len=1_050_000, web=True,  tags={'google', 'openrouter'}),
+    
     # xAI models: https://openrouter.ai/provider/xai
-    bc.ModelInfo('x-ai/grok-4.1-fast', None, 0.0, 0.0, 2_000_000, OpenRouterHandler, True, {'xai', 'openrouter'}),
+    dc.replace(_base, name='x-ai/grok-4.1-fast',            in_usd= 0.00, out_usd= 0.00, context_len=2_000_000, web=False,  tags={'xai', 'openrouter'}),
 ]
 
 bc.Models._MODEL_REGISTRY += _OPENROUTER_MODELS
@@ -123,15 +131,12 @@ async def main_test():
     contexts = [ ('deepseek/deepseek-chat', True), ('mistralai/codestral-2508', False) ]
     
     # Test contexts.
-    for name, search in contexts:
+    for name, web in contexts:
         model = bc.Models().by_name(name)
         print(f"\nTesting model: {name}")
         handler = model.create_handler(
-            system_prompt=bc._DEFAULT_SYSTEM_INS, 
-            parse_type=bc.ListOfStrings,
-            web_search=search,
-            verbose=False)
-        await bc._test_call_handler(handler, bc._TEST_QUESTIONS)
+            system_ins=bc.DEFAULT_SYSTEM_INS, web=web, parse_type=bc.ListOfStrings, verbose=True)
+        await bc._test_call_handler(handler, bc.TEST_QUESTIONS)
         await handler.close()
 
 if __name__ == "__main__":

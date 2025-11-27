@@ -1,30 +1,22 @@
-from dataclasses import dataclass
+# Python stdlib.
+import dataclasses as dc
 from statistics import median, mean
 from datetime import datetime
 
-@dataclass
-class Metrics:
-    name: str               # Model or run name.
-    provider_name: str      # Provider name.
-    cost_mdn: float         # Median cost per API call, because of outliers.
-    tokens_mdn: int         # Median token count per API call, because of outliers.
-    time_avg: float         # Average of time.
-    error_rate_avg: float   # Average of error rate.
-    api_issues: int = 0     # Total count of API issues (e.g., timeouts, quota errors).
-    api_calls: int = 1      # Total count of API calls.
+# Data class to hold metrics results.
 
-    @classmethod
-    def get_error(cls, provider_name: str) -> 'Metrics':
-        return Metrics(
-            name="Error",
-            provider_name=provider_name,
-            cost_mdn=0.0,
-            tokens_mdn=0,
-            time_avg=0.0,
-            error_rate_avg=1.0,
-            api_issues=1,
-            api_calls=1
-        )
+@dc.dataclass(frozen=True)
+class Metrics:
+    name: str = 'ERROR'             # Model or run name.
+    provider_name: str = 'ERROR'    # Provider name.
+    cost_mdn: float = 0.0           # Median cost per API call, because of outliers.
+    tokens_mdn: int = 0             # Median token count per API call, because of outliers.
+    time_avg: float = 0.0           # Average of time.
+    error_rate_avg: float = 1.0     # Average of error rate.
+    api_issues: int = 1             # Count of API issues (e.g., timeouts, quota errors).
+    api_calls: int = 1              # Count of API calls.
+    
+# Helper functions.
 
 def get_error_rate(name: str, results: list[str], expected_answers: list[str]) -> float:
     """Validates model response against expected answers and return error rate."""
@@ -41,12 +33,12 @@ def get_error_rate(name: str, results: list[str], expected_answers: list[str]) -
 
 def summarize_metrics(name: str, metrics: list[Metrics]) -> Metrics:
     """Calculate a single summary metric from a list of Metrics."""
-    assert (len_all:=len(metrics)) > 0, "No metrics to summarize."
+    assert len(metrics) > 0, "No metrics to summarize."
 
     # 2025-11-20 Timeouts and quota errors are now ignored in calculations.
     valid_metrics = [m for m in metrics if m.api_issues < m.api_calls]
 
-    if (len_valid:=len(valid_metrics)) > 0:
+    if len(valid_metrics) > 0:
         cost = median(m.cost_mdn for m in valid_metrics)
         tokens = int(median(float(m.tokens_mdn) for m in valid_metrics))
         time = mean(m.time_avg for m in valid_metrics)
@@ -61,8 +53,9 @@ def summarize_metrics(name: str, metrics: list[Metrics]) -> Metrics:
     api_calls = sum(m.api_calls for m in metrics)
 
     return Metrics(name=name, provider_name=provider_name, 
-                   cost_mdn=cost, tokens_mdn=tokens, time_avg=time,
-                   error_rate_avg=error_rate, api_issues=api_issues, api_calls=api_calls)
+                   cost_mdn=cost, tokens_mdn=tokens, 
+                   time_avg=time, error_rate_avg=error_rate, 
+                   api_issues=api_issues, api_calls=api_calls)
 
 def print_metrics(metrics: list[Metrics], csv_format: bool = False) -> None:
     """Print a list of Metrics entries."""
@@ -75,26 +68,28 @@ def print_metrics(metrics: list[Metrics], csv_format: bool = False) -> None:
         else:
             print(f"\t{name:12.12}\ttokens_mdn={m.tokens_mdn:>6,d},\tcost_mdn=${m.cost_mdn:.6f},\ttime_avg={m.time_avg:>5.2f}s,\terror_rate_avg={m.error_rate_avg:>5.0%},\tapi_issues={m.api_issues}/{m.api_calls}")
 
+# Main test.
+
 def main_test():
     print("\n===== metrics.main_test() =====")
 
-    # Create 3 valid metrics:
-    v1 = Metrics(name="v1", provider_name="ACME", cost_mdn=0.010, tokens_mdn=100, time_avg=0.20, error_rate_avg=0.20)
-    v2 = Metrics(name="v2", provider_name="ACME", cost_mdn=0.015, tokens_mdn=120, time_avg=0.30, error_rate_avg=0.10)
-    v3 = Metrics(name="v3", provider_name="ACME", cost_mdn=0.020, tokens_mdn=150, time_avg=0.40, error_rate_avg=0.00)
-    expected = Metrics(name="valid-only", provider_name="ACME", cost_mdn=0.015, tokens_mdn=120, time_avg=0.30, 
-                       error_rate_avg=0.10, api_issues=0, api_calls=3)
-
-    # Create 2 invalid metrics:
+    # Create 3 valid, 2 invalid, and summary metrics.
+    v1 = Metrics(name="v1", provider_name="ACME", cost_mdn=0.010, tokens_mdn=100, time_avg=0.20, error_rate_avg=0.20, api_issues=0)
+    v2 = Metrics(name="v2", provider_name="ACME", cost_mdn=0.015, tokens_mdn=120, time_avg=0.30, error_rate_avg=0.10, api_issues=0)
+    v3 = Metrics(name="v3", provider_name="ACME", cost_mdn=0.020, tokens_mdn=150, time_avg=0.40, error_rate_avg=0.00, api_issues=0)
+    summary_3v = Metrics(name="valid-only", \
+                       provider_name="ACME", cost_mdn=0.015, tokens_mdn=120, time_avg=0.30, error_rate_avg=0.10, api_issues=0, api_calls=3)
     i1 = Metrics(name="i1", provider_name="BAD_ACME", cost_mdn=9.999, tokens_mdn=9999, time_avg=9.99, error_rate_avg=1.00, api_issues=1)
     i2 = Metrics(name="i2", provider_name="BAD_ACME", cost_mdn=8.888, tokens_mdn=8888, time_avg=8.88, error_rate_avg=0.90, api_issues=1)
+    summary_5m = dc.replace(summary_3v, name="mixed", provider_name="mixed", api_issues=2, api_calls=5)
+    summary_3v5m = dc.replace(summary_3v, name="calculated", provider_name="mixed", api_issues=2, api_calls=8)
 
     # Test 3 valid metrics:
-    s_valid = summarize_metrics(expected.name, [v1, v2, v3])
+    s_valid = summarize_metrics(summary_3v.name, [v1, v2, v3])
     print_metrics([s_valid])
-    assert s_valid == expected, "FAIL: Valid metrics summary mismatch."
+    assert s_valid == summary_3v, "FAIL: Valid metrics summary mismatch."
 
-    # Test empy metrics:
+    # Test empty metrics:
     try:
         summarize_metrics("empty", [])
         raise ValueError("FAIL: [] should raise AssertionError.")
@@ -102,17 +97,14 @@ def main_test():
         print(f'PASS: Raised AssertionError("{str(ex)}").')
 
     # Test 3 valid + 2 invalid metrics:
-    expected.name = expected.provider_name = "mixed"
-    expected.api_issues, expected.api_calls = 2, 5
-    s_mixed = summarize_metrics(expected.name, [v1, i1, v2, i2, v3])
+    s_mixed = summarize_metrics(summary_5m.name, [v1, i1, v2, i2, v3])
     print_metrics([s_mixed], True)
-    assert s_mixed == expected, "FAIL: Mixed metrics summary mismatch."
+    assert s_mixed == summary_5m, "FAIL: Mixed metrics summary mismatch."
 
     # Test if summarization of calculated metrics sums api_issues_count and api_calls:
-    expected.name, expected.api_calls = "calculated", 8
-    s_calc = summarize_metrics(expected.name, [s_valid, s_mixed])
+    s_calc = summarize_metrics(summary_3v5m.name, [s_valid, s_mixed])
     print_metrics([s_calc])
-    assert s_calc == expected, "FAIL: Calculated metrics summary mismatch."
+    assert s_calc == summary_3v5m, "FAIL: Calculated metrics summary mismatch."
 
 if __name__ == "__main__":
     main_test()
