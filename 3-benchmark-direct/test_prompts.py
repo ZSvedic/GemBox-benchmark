@@ -18,12 +18,12 @@ async def main_test():
     print("\n===== test_prompts.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:5]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:15]
     print(f"Using {len(questions)} questions.")
 
     # Starting context.
     s_ctx = benchmark.BenchmarkContext(
-        models=bc.Models().by_names(['gemini-2.5-flash', 'deepseek/deepseek-chat']), #['gpt-5-mini']), 
+        models=bc.Models().by_names(['gpt-5-mini']), 
         system_ins=bc.DEFAULT_SYSTEM_INS,
         questions=questions )
 

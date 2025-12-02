@@ -18,7 +18,7 @@ async def main_test():
     print("\n===== test_models.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:5]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
@@ -28,11 +28,11 @@ async def main_test():
     # Filter models.
     models = (
         bc.Models()
-        .by_web(True)
-        .by_min_context_length(doc_approx_tokens)
-        .by_tags(include={'openrouter'})
-        .by_max_price(0.50, 2.00)
-        # .by_names(['prompt-GBS-examples-GPT5mini', 'prompt-GBS-examples-GPT5']) 
+        # .by_web(True)
+        # .by_min_context_length(doc_approx_tokens)
+        # .by_tags(include={'openrouter'})
+        # .by_max_price(0.50, 2.00)
+        .by_names(['deepseek/deepseek-v3.2']) 
     )
 
     print(f"Filtered models ({len(models)}): {models}")
@@ -45,12 +45,12 @@ async def main_test():
     
     # Testing contexts.
     contexts = [
-        dc.replace(s_ctx, description='A. Plain call + low reasoning', 
-                   reasoning='low', timeout_sec=30),
+        # dc.replace(s_ctx, description='A. Plain call + low reasoning', 
+        #            reasoning='low', timeout_sec=30),
         dc.replace(s_ctx, description='B. Web search + medium reasoning', 
                    reasoning='medium', web=True, timeout_sec=60),
-        dc.replace(s_ctx, description='C. Context + medium reasoning', 
-                   reasoning='medium', timeout_sec=60, system_doc=doc),
+        # dc.replace(s_ctx, description='C. Context + medium reasoning', 
+        #            reasoning='medium', timeout_sec=60, system_doc=doc),
         # dc.replace(s_ctx, description='D. RAG OpenAI + medium reasoning', 
         #            reasoning='medium', timeout_sec=60),
     ]

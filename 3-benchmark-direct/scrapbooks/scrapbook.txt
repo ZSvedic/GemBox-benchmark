@@ -1,0 +1,2 @@
+2512021430526352, A. Plain call + low reasoning, deepseek/deepseek-v3.2, OpenRouter, 200, $0.000058, 1.70, 46%, 0%
+2512021430526406, C. Context + medium reasoning, deepseek/deepseek-v3.2, OpenRouter, 57290, $0.016043, 7.59, 28%, 0%

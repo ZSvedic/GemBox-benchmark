@@ -109,7 +109,8 @@ _OPENROUTER_MODELS = [
 
     # DeepSeek models: https://openrouter.ai/provider/deepseek
     dc.replace(_base, name='deepseek/deepseek-chat',        in_usd= 0.14, out_usd= 0.28, context_len=   64_000, web=True,  tags={'deepseek', 'openrouter'}),
-    dc.replace(_base, name='deepseek/deepseek-r1',          in_usd= 0.55, out_usd= 2.19, context_len=   64_000, web=True,  tags={'deepseek', 'openrouter'}),        
+    dc.replace(_base, name='deepseek/deepseek-r1',          in_usd= 0.55, out_usd= 2.19, context_len=   64_000, web=True,  tags={'deepseek', 'openrouter'}),       
+    dc.replace(_base, name='deepseek/deepseek-v3.2',        in_usd= 0.28, out_usd= 0.40, context_len=  163_840, web=True,  tags={'deepseek', 'openrouter'}), 
     
     # MoonshotAI models: https://openrouter.ai/provider/moonshotai
     dc.replace(_base, name='moonshotai/kimi-k2',            in_usd= 0.60, out_usd= 2.50, context_len=  131_100, web=True,  tags={'moonshotai', 'openrouter'}),
