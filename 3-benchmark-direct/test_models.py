@@ -22,7 +22,7 @@ async def main_test():
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
-    doc, doc_approx_tokens = benchmark.load_txt_file("GemBox-Spreadsheet-examples.txt")
+    doc, doc_approx_tokens = benchmark.load_txt_file("docs/GemBox-Spreadsheet-examples.txt")
     print(f"Documentation 1 of ~length: {doc_approx_tokens} tokens, starting with: {doc[:100]}")
 
     # Filter models.

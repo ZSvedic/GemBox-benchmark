@@ -21,6 +21,10 @@ async def main_test():
     questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:15]
     print(f"Using {len(questions)} questions.")
 
+    # Load documentation.
+    doc, doc_approx_tokens = benchmark.load_txt_file("docs/sitemap.txt")
+    print(f"Documentation 1 of ~length: {doc_approx_tokens} tokens, starting with: {doc[:100]}")
+
     # Starting context.
     s_ctx = benchmark.BenchmarkContext(
         models=bc.Models().by_names(['gpt-5-mini']), 
