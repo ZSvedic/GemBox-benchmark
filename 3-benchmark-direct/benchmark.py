@@ -45,11 +45,13 @@ class BenchmarkContext:
     
 # Utility functions.
 
-def load_txt_file(file_path: str) -> tuple[str, int]:
+def load_txt_file(file_path: str, verbose: bool = True) -> tuple[str, int]:
     """Load a text file, then return its content and approximate number of tokens."""
     p = pathlib.Path(file_path)
     size_tokens = p.stat().st_size // 3 # Code usually uses 3 chars per token.
     txt = p.read_text(encoding="utf-8")
+    if verbose:
+        print(f"Loaded {file_path} with approximately {size_tokens} tokens.")
     return txt, size_tokens
 
 # Benchmarking functions.
@@ -117,10 +119,11 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, r
     print(f"\n==={model_info.name}===")
 
     # Append system documentation if any.
-    instructions = ctx.system_ins
-    if ctx.system_doc:
-        # TODO: split the next LOC into multiple.
-        instructions += f"\nBelow '--- DOCUMENTATION:' line is the documentation, which are all GemBox Software .NET components examples.\n--- DOCUMENTATION: \n{ctx.system_doc}\n--- END OF DOCUMENTATION ---\n Answer the question based on the documentation, return only the JSON object with no explanations, comments, or additional text.\n"
+    instructions = (ctx.system_ins + 
+                    ctx.system_doc if ctx.system_ins else '')
+    
+    if ctx.verbose:
+        print(f"INSTRUCTIONS:\n{instructions[:1100]}\n\n...\n\n{instructions[-300:]}", )
 
     # Initialize model and agent.
     try:
@@ -200,7 +203,7 @@ async def main_test():
     questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:5]
 
     # Load documentation.
-    doc, doc_approx_tokens = load_txt_file("GemBox-Spreadsheet-examples.txt")
+    doc, doc_approx_tokens = load_txt_file("docs/GB-Spreadsheet-examples.txt")
     assert doc and doc_approx_tokens > 70_000, "FAIL: Documentation load."
 
     # Testing context.

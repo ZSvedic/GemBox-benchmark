@@ -1,3 +1,7 @@
+Below '--- DOCUMENTATION:' line is the documentation, which are all GemBox Software .NET components examples.
+
+--- DOCUMENTATION: 
+
 --- Example: ../GitHub-GB-examples/GemBox.Spreadsheet.Examples-master/C#/Platforms/DataGridView in WindowsForms/Form1.cs:
 using System;
 using System.Windows.Forms;
@@ -6383,4 +6387,8 @@ class Program
         workbook.Save("Output3.pdf", options);
     }
 }
-Total files processed: 121
+
+--- END OF DOCUMENTATION ---
+
+Answer the question based on the documentation, return only the JSON object with no explanations, comments, or additional text.
+

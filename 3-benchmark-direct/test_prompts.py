@@ -18,27 +18,38 @@ async def main_test():
     print("\n===== test_prompts.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:15]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
-    doc, doc_approx_tokens = benchmark.load_txt_file("docs/sitemap.txt")
-    print(f"Documentation 1 of ~length: {doc_approx_tokens} tokens, starting with: {doc[:100]}")
+    doc_sitemap, doc_sitemap_tokens = benchmark.load_txt_file("docs/GB-Spreadsheet-sitemap-LLM.txt")
+    doc_examples, doc_examples_tokens = benchmark.load_txt_file("docs/GB-Spreadsheet-examples.txt")
+    doc_min_tokens = max(doc_sitemap_tokens, doc_examples_tokens)
+
+    # Filter models.
+    models = (
+        bc.Models()
+        .by_web(True)
+        .by_min_context_length(doc_min_tokens)
+        .by_max_price(0.50, 3.00)
+        .by_tags(exclude={'rag', 'prompt'})
+        # .by_names(['gpt-5-mini', 'deepseek/deepseek-v3.2'])
+    )
+    print(f"Filtered models ({len(models)}): {models}")
 
     # Starting context.
     s_ctx = benchmark.BenchmarkContext(
-        models=bc.Models().by_names(['gpt-5-mini']), 
+        models=models, 
         system_ins=bc.DEFAULT_SYSTEM_INS,
-        questions=questions )
+        questions=questions,
+        verbose=False )
 
     # Testing contexts.
     contexts = [
-        # dc.replace(s_ctx, description='gpt-5-mini, low reasoning, no search',
-        #     reasoning='low', web=False),
-        # dc.replace(s_ctx, description='gpt-5-mini, medium reasoning, web search',
-        #     reasoning='medium', web=True),
-        dc.replace(s_ctx, description='gpt-5-mini, medium reasoning, domain search',
-            reasoning='medium', web=True, include_domains='www.gemboxsoftware.com'),
+        dc.replace(s_ctx, description='G. Sitemap web search + medium reasoning',
+            reasoning='medium', timeout_sec=60, web=True, system_doc=doc_sitemap), #, include_domains={'gemboxsoftware.com'}),
+        dc.replace(s_ctx, description='C. Context + medium reasoning',
+            reasoning='medium', timeout_sec=60, web=False, system_doc=doc_examples),
     ]
 
     # Benchmark models.

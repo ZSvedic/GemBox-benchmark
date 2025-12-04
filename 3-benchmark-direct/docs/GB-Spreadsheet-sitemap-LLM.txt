@@ -1,3 +1,8 @@
+Use web search tool / webpage retireval tool if you don't know the answer, but note that you should only retrieve links listed in the documentation below.       
+Below '--- DOCUMENTATION:' line is the documentation, with all GemBox Spreadsheet .NET component examples and online help files in TSV format:
+Category Summary URL  
+
+--- DOCUMENTATION:      
 Category	Summary	URL	
 Marketing	GemBox.Spreadsheet is a .NET component for reading, writing, converting, and printing various spreadsheet formats without requiring Microsoft Excel:	https://www.gemboxsoftware.com/gembox-spreadsheet	
 Blog	GemBox.Spreadsheet 3.9 release introduces AutoFilter, in-line text formatting, sorting, and embedded fonts support:	https://www.gemboxsoftware.com/news/new-gembox-spreadsheet-3-9-release-with-autofilter-and-in-line-text-formatting-support	
@@ -513,3 +518,6 @@ Marketing	The pricing page lists subscription plans for GemBox Spreadsheet, outl
 Doc	This support page lists documentation, how-to guides, API references, FAQs, and troubleshooting for GemBox Spreadsheet:	https://www.gemboxsoftware.com/spreadsheet/support	
 Example	This page demonstrates core GemBox.Spreadsheet web demo features, showing how to create and manipulate spreadsheets with code samples and UI components:	https://www.gemboxsoftware.com/spreadsheet/webdemo-core/	
 Example	GemBox.Spreadsheet Web Demo showcases exporting ASP.NET GridView data to various spreadsheet formats, including XLSX, XLS, ODS, PDF, HTML, MHTML, CSV, and TXT:	https://www.gemboxsoftware.com/spreadsheet/webdemo/	
+--- END OF DOCUMENTATION ---        
+
+Answer the question based on the documentation, return only the JSON object with no explanations, comments, or additional text.     
