@@ -1,6 +1,7 @@
 # Python stdlib.
 import asyncio
 import dataclasses as dc
+import warnings
 
 # Third-party.
 import dotenv
@@ -23,8 +24,8 @@ async def main_test():
 
     # Load documentation.
     doc_sitemap, doc_sitemap_tokens = benchmark.load_txt_file("docs/GB-Spreadsheet-sitemap-LLM.txt")
-    doc_examples, doc_examples_tokens = benchmark.load_txt_file("docs/GB-Spreadsheet-examples.txt")
-    doc_min_tokens = max(doc_sitemap_tokens, doc_examples_tokens)
+    # doc_examples, doc_examples_tokens = benchmark.load_txt_file("docs/GB-Spreadsheet-examples.txt")
+    # doc_min_tokens = max(doc_sitemap_tokens, doc_examples_tokens)
 
     # Filter models.
     models = (

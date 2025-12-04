@@ -69,17 +69,19 @@ class OpenAIHandler(bc.LLMHandler):
         if self.verbose:
             print(f"=== PROMPT DICT:\n{prompt_dict}\n\n=== TOOLS:\n{tools}\n\n=== INCLUDE LIST:\n{include_list}\n\n=== INPUTS:\n{inputs}")
 
-        if self.parse_type:
-            format = self.parse_type
-        else:
-            format = omit
+        # if self.parse_type:
+        #     format = self.parse_type
+        # else:
+        #     format = omit
 
-        response = await OpenAIHandler.get_client().responses.parse(
+        response = await OpenAIHandler.get_client().responses.create(
             model=model, prompt=prompt_dict, input=inputs, 
-            tools=tools, include=include_list, text_format=format,
+            tools=tools, include=include_list, # text_format=format,
             )
 
-        result = response.output_parsed if self.parse_type else response.output_text
+        result = (self.parse_type.model_validate_json(response.output_text) if self.parse_type 
+                  else response.output_text)
+        # result = response.output_parsed if self.parse_type else response.output_text
         links = self.get_web_search_links(response)
         usage = response.usage 
 
@@ -100,12 +102,17 @@ class OpenAIHandler(bc.LLMHandler):
                     case "search":
                         links[f"search(query={action.query})"] = [s.url for s in (action.sources or [])]
                     case "open_page":
-                        links["open_page"] = action.url
+                        links["open_page"] = [action.url]
+                    case "find_in_page":
+                        links[f"find_in_page({action.pattern})"] = [action.url]
                     case other:
                         print(f"WARNING: Unexpected web_search_call action type: {other}")
 
-        pprint(f"DEBUG: Found {sum(len(v) for v in links.values())} web search links: {links}"
-              if links else f"WARNING: web_search True but no links were returned.")
+        if links:
+            print(f"DEBUG: Found {sum(len(v) for v in links.values())} links:")
+            pprint(links, compact=True)
+        else:
+            print("WARNING: web_search True but no links were returned.")
         
         return links
 
