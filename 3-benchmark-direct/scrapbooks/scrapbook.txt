@@ -1,20 +1,13 @@
-=== SUMMARY OF: G. Sitemap web search + medium reasoning ===
-2512041756148061, gemini-2.5-flash, Google, 31461, $0.010208, 3.07, 30%, 0%
-2512041756148185, gpt-5-mini, OpenAI, 0, $0.000000, 0.00, 0%, 100%
-2512041756148242, gpt-5, OpenAI, 0, $0.000000, 0.00, 0%, 100%
-2512041756148291, gpt-5.1, OpenAI, 0, $0.000000, 0.00, 0%, 100%
-2512041756148338, gpt-5.1-codex, OpenAI, 0, $0.000000, 0.00, 0%, 100%
-2512041756148384, x-ai/grok-4.1-fast, OpenRouter, 28278, $0.000000, 7.65, 30%, 0%
+2512041850689262, G. Sitemap web search + medium reasoning, gemini-2.5-flash, Google, 31465, $0.010200, 3.82, 29%, 0%
+2512041850689346, G. Sitemap web search + medium reasoning, gpt-5-mini, OpenAI, 42830, $0.012458, 24.10, 0%, 0%
+2512041850689383, G. Sitemap web search + medium reasoning, gpt-5, OpenAI, 39120, $0.054457, 21.53, 7%, 0%
+2512041850689419, G. Sitemap web search + medium reasoning, gpt-5.1, OpenAI, 37295, $0.047170, 5.39, 24%, 0%
+2512041850689451, G. Sitemap web search + medium reasoning, gpt-5.1-codex, OpenAI, 44288, $0.062185, 26.53, 4%, 4%
+2512041850689487, G. Sitemap web search + medium reasoning, x-ai/grok-4.1-fast, OpenRouter, 28270, $0.000000, 8.25, 27%, 0%
+2512041853986901, C. Context + medium reasoning, gemini-2.5-flash, Google, 64927, $0.019931, 5.07, 0%, 0%
+2512041853986986, C. Context + medium reasoning, gpt-5-mini, OpenAI, 54361, $0.014292, 10.02, 7%, 0%
+2512041853987021, C. Context + medium reasoning, gpt-5, OpenAI, 54241, $0.070214, 16.85, 0%, 0%
+2512041853987055, C. Context + medium reasoning, gpt-5.1, OpenAI, 53985, $0.067674, 5.78, 3%, 0%
+2512041853987091, C. Context + medium reasoning, gpt-5.1-codex, OpenAI, 54044, $0.068276, 7.11, 2%, 0%
+2512041853987126, C. Context + medium reasoning, x-ai/grok-4.1-fast, OpenRouter, 53868, $0.000000, 7.92, 15%, 0%
 
-=== SUMMARY OF: C. Context + medium reasoning ===
-2512041757048895, gemini-2.5-flash, Google, 65007, $0.020127, 3.22, 0%, 0%
-2512041757049061, gpt-5-mini, OpenAI, 54425, $0.014424, 10.25, 0%, 0%
-2512041757049138, gpt-5, OpenAI, 54178, $0.069587, 12.24, 0%, 0%
-2512041757049183, gpt-5.1, OpenAI, 53982, $0.067687, 5.05, 0%, 0%
-2512041757049218, gpt-5.1-codex, OpenAI, 54046, $0.068301, 7.85, 7%, 0%
-2512041757049280, x-ai/grok-4.1-fast, OpenRouter, 53769, $0.000000, 6.65, 23%, 0%
-
-=== SUMMARY OF ALL TESTS in test_prompts.py ===
-2512041757049438, G. Sitemap web search + medium reasoning, mixed, 29869, $0.005104, 5.36, 30%, 67%
-2512041757049467, C. Context + medium reasoning, mixed, 54112, $0.043907, 7.54, 5%, 0%
-Logging finished: logs/test_prompts_2025-12-04_17-56-05.log

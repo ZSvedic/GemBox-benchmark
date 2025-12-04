@@ -19,7 +19,7 @@ async def main_test():
     print("\n===== test_prompts.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:5]
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
@@ -34,8 +34,8 @@ async def main_test():
         .by_min_context_length(doc_min_tokens)
         # .by_max_price(0.50, 3.00)
         # .by_tags(exclude={'rag', 'prompt'})
-        .by_names(['gpt-5-mini'])
-        # .by_names(['x-ai/grok-4.1-fast', 'gemini-2.5-flash', 'gpt-5-mini', 'gpt-5', 'gpt-5.1-codex', 'gpt-5.1'])
+        # .by_names(['gpt-5-mini'])
+        .by_names(['x-ai/grok-4.1-fast', 'gemini-2.5-flash', 'gpt-5-mini', 'gpt-5', 'gpt-5.1-codex', 'gpt-5.1'])
     )
     print(f"Filtered models ({len(models)}): {models}")
 
@@ -50,8 +50,8 @@ async def main_test():
     contexts = [
         dc.replace(s_ctx, description='G. Sitemap web search + medium reasoning',
             reasoning='medium', timeout_sec=60, web=True, system_doc=doc_sitemap, include_domains='gemboxsoftware.com'),
-        # dc.replace(s_ctx, description='C. Context + medium reasoning',
-        #     reasoning='medium', timeout_sec=60, web=False, system_doc=doc_examples),
+        dc.replace(s_ctx, description='C. Context + medium reasoning',
+            reasoning='medium', timeout_sec=60, web=False, system_doc=doc_examples),
     ]
 
     # Benchmark models.
