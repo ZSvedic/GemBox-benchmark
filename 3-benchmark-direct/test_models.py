@@ -32,7 +32,7 @@ async def main_test():
         # .by_min_context_length(doc_approx_tokens)
         # .by_tags(include={'openrouter'})
         # .by_max_price(0.50, 2.00)
-        .by_names(['deepseek/deepseek-v3.2']) 
+        .by_names(['gpt-5-mini']) 
     )
 
     print(f"Filtered models ({len(models)}): {models}")
@@ -40,6 +40,7 @@ async def main_test():
     # Starting context.
     s_ctx = benchmark.BenchmarkContext(
         models=models,
+        verbose=True,
         system_ins=bc.DEFAULT_SYSTEM_INS,
         questions=questions )
     
