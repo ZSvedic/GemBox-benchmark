@@ -1,22 +1,20 @@
 === SUMMARY OF: G. Sitemap web search + medium reasoning ===
-2512041357997473, gemini-2.5-flash, Google, 31901, $0.010504, 4.95, 20%, 0%
-2512041357997583, gpt-4o-mini, OpenAI, 8214, $0.001250, 8.51, 49%, 0%
-2512041357997637, gpt-5-nano, OpenAI, 42182, $0.002968, 28.14, 15%, 4%
-2512041357997679, gpt-5-mini, OpenAI, 43488, $0.012370, 23.30, 9%, 0%
-2512041357997719, gpt-5.1-codex-mini, OpenAI, 40784, $0.011844, 13.95, 8%, 0%
-2512041357997755, mistralai/devstral-medium, OpenRouter, 40092, $0.016063, 7.29, 57%, 0%
-2512041357997790, deepseek/deepseek-v3.2, OpenRouter, 39458, $0.011051, 9.91, 48%, 18%
+2512041756148061, gemini-2.5-flash, Google, 31461, $0.010208, 3.07, 30%, 0%
+2512041756148185, gpt-5-mini, OpenAI, 0, $0.000000, 0.00, 0%, 100%
+2512041756148242, gpt-5, OpenAI, 0, $0.000000, 0.00, 0%, 100%
+2512041756148291, gpt-5.1, OpenAI, 0, $0.000000, 0.00, 0%, 100%
+2512041756148338, gpt-5.1-codex, OpenAI, 0, $0.000000, 0.00, 0%, 100%
+2512041756148384, x-ai/grok-4.1-fast, OpenRouter, 28278, $0.000000, 7.65, 30%, 0%
 
 === SUMMARY OF: C. Context + medium reasoning ===
-2512041400745475, gemini-2.5-flash, Google, 64952, $0.019945, 7.05, 2%, 11%
-2512041400745557, gpt-4o-mini, OpenAI, 54047, $0.008113, 5.97, 47%, 0%
-2512041400745601, gpt-5-nano, OpenAI, 55522, $0.003300, 18.55, 20%, 0%
-2512041400745635, gpt-5-mini, OpenAI, 54370, $0.014189, 8.88, 6%, 0%
-2512041400745668, gpt-5.1-codex-mini, OpenAI, 54307, $0.014062, 6.55, 7%, 0%
-2512041400745700, mistralai/devstral-medium, OpenRouter, 57748, $0.023125, 6.22, 17%, 0%
-2512041400745732, deepseek/deepseek-v3.2, OpenRouter, 57278, $0.016040, 7.12, 32%, 14%
+2512041757048895, gemini-2.5-flash, Google, 65007, $0.020127, 3.22, 0%, 0%
+2512041757049061, gpt-5-mini, OpenAI, 54425, $0.014424, 10.25, 0%, 0%
+2512041757049138, gpt-5, OpenAI, 54178, $0.069587, 12.24, 0%, 0%
+2512041757049183, gpt-5.1, OpenAI, 53982, $0.067687, 5.05, 0%, 0%
+2512041757049218, gpt-5.1-codex, OpenAI, 54046, $0.068301, 7.85, 7%, 0%
+2512041757049280, x-ai/grok-4.1-fast, OpenRouter, 53769, $0.000000, 6.65, 23%, 0%
 
 === SUMMARY OF ALL TESTS in test_prompts.py ===
-2512041400745920, G. Sitemap web search + medium reasoning, mixed, 40092, $0.011051, 13.72, 29%, 3%
-2512041400745959, C. Context + medium reasoning, mixed, 55522, $0.014189, 8.62, 19%, 4%
-Logging finished: logs/test_prompts_2025-12-04_13-47-53.log
+2512041757049438, G. Sitemap web search + medium reasoning, mixed, 29869, $0.005104, 5.36, 30%, 67%
+2512041757049467, C. Context + medium reasoning, mixed, 54112, $0.043907, 7.54, 5%, 0%
+Logging finished: logs/test_prompts_2025-12-04_17-56-05.log

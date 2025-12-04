@@ -51,7 +51,7 @@ class OpenRouterHandler(bc.LLMHandler):
             if self.model_info.web is False:
                 raise ValueError(f"Model {model_name} does not support web search")
             elif self.include_domains:
-                raise NotImplementedError("Domain search is not supported in OpenRouterHandler.")
+                print("WARNING: Domain search is not supported in OpenRouterHandler.")
             else:
                 model_name += ':online'
         
@@ -120,7 +120,7 @@ _OPENROUTER_MODELS = [
     dc.replace(_base, name='google/gemini-3-pro-preview',   in_usd= 2.00, out_usd=12.00, context_len=1_050_000, web=True,  tags={'google', 'openrouter'}),
     
     # xAI models: https://openrouter.ai/provider/xai
-    dc.replace(_base, name='x-ai/grok-4.1-fast',            in_usd= 0.00, out_usd= 0.00, context_len=2_000_000, web=False,  tags={'xai', 'openrouter'}),
+    dc.replace(_base, name='x-ai/grok-4.1-fast',            in_usd= 0.00, out_usd= 0.00, context_len=2_000_000, web=True,  tags={'xai', 'openrouter'}),
 ]
 
 bc.Models._MODEL_REGISTRY += _OPENROUTER_MODELS

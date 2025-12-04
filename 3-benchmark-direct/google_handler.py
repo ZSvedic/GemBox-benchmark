@@ -62,7 +62,7 @@ class GoogleHandler(bc.LLMHandler):
             if self.model_info.web is False:
                 raise ValueError(f"Model {model_name} does not support web search.")
             elif self.include_domains:
-                raise NotImplementedError("Domain search is not supported in GoogleHandler.")
+                print("WARNING: Domain search is not supported in GoogleHandler.")
             else:
                 tools.append(types.Tool(google_search=types.GoogleSearchRetrieval()))
         
