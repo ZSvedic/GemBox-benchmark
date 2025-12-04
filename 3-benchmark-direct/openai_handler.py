@@ -69,19 +69,13 @@ class OpenAIHandler(bc.LLMHandler):
         if self.verbose:
             print(f"=== PROMPT DICT:\n{prompt_dict}\n\n=== TOOLS:\n{tools}\n\n=== INCLUDE LIST:\n{include_list}\n\n=== INPUTS:\n{inputs}")
 
-        # if self.parse_type:
-        #     format = self.parse_type
-        # else:
-        #     format = omit
-
         response = await OpenAIHandler.get_client().responses.create(
             model=model, prompt=prompt_dict, input=inputs, 
-            tools=tools, include=include_list, # text_format=format,
+            tools=tools, include=include_list, 
             )
 
         result = (self.parse_type.model_validate_json(response.output_text) if self.parse_type 
                   else response.output_text)
-        # result = response.output_parsed if self.parse_type else response.output_text
         links = self.get_web_search_links(response)
         usage = response.usage 
 

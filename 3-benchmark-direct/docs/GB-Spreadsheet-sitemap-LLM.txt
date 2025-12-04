@@ -1,8 +1,8 @@
 Below '--- SITEMAP:' line is the sitemap, with links all GemBox Spreadsheet .NET component examples and online help files in TSV format:
 Category Summary URL  
 
-If you don't know the answer, use only the 'open_page' tool to open one of the links listed in sitemap. 
-Never use the 'search' tool. First use 'open_page' on relevant Example URL, then 'open_page' on relevant Doc URL.       
+If you don't know the answer, use only the open page tool to open one of the links listed in sitemap. 
+Never use the search tool. First use open page on relevant Example URL, then open page on relevant Doc URL.       
 
 --- SITEMAP:      
 Category	Summary	URL	
