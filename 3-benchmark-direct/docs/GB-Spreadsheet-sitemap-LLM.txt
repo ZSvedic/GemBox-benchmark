@@ -1,8 +1,9 @@
 Below '--- SITEMAP:' line is the sitemap, with links all GemBox Spreadsheet .NET component examples and online help files in TSV format:
 Category Summary URL  
 
-If you don't know the answer, use only the open page tool to open one of the links listed in sitemap. 
-Never use the search tool. First use open page on relevant Example URL, then open page on relevant Doc URL.       
+If you don't know the answer, use open page / browse page tools to do the following:        
+1. Retrieve 1 example, 2 online help documents, and 1 search query from www.gemboxsoftware.com domain. They should all be specific to the unknown parts of the user question.
+2. Use retrieved texts to answer the question.     
 
 --- SITEMAP:      
 Category	Summary	URL	
@@ -517,4 +518,4 @@ Marketing	The page promotes GemBox.Spreadsheet free version, explains licensing 
 Marketing	The pricing page lists subscription plans for GemBox Spreadsheet, outlines features by tier, and includes purchase options and license terms:	https://www.gemboxsoftware.com/spreadsheet/pricelist	
 --- END OF SITEMAP ---        
 
-Answer the question based on the retrieved example and documentation, return only the JSON object with no explanations, comments, or additional text.     
+Answer the question based on internal knowledge and retrieved texts, and return only the JSON object with no explanations, comments, or additional text.     

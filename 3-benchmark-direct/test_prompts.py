@@ -23,7 +23,7 @@ async def main_test():
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
-    doc_sitemap, doc_sitemap_tokens = benchmark.load_txt_file("docs/GB-Spreadsheet-sitemap-LLM.txt")
+    doc_sitemap, doc_sitemap_tokens = benchmark.load_txt_file("docs/GB-Spreadsheet-sitemap-examples-LLM.txt")
     doc_examples, doc_examples_tokens = benchmark.load_txt_file("docs/GB-Spreadsheet-examples.txt")
     doc_min_tokens = max(doc_sitemap_tokens, doc_examples_tokens)
 
@@ -35,7 +35,7 @@ async def main_test():
         # .by_max_price(0.50, 3.00)
         # .by_tags(exclude={'rag', 'prompt'})
         # .by_names(['gpt-5-mini'])
-        .by_names(['x-ai/grok-4.1-fast', 'gemini-2.5-flash', 'gpt-5-mini', 'gpt-5', 'gpt-5.1-codex', 'gpt-5.1'])
+        .by_names(['gemini-2.5-flash', 'gpt-5-mini'])
     )
     print(f"Filtered models ({len(models)}): {models}")
 
@@ -48,10 +48,10 @@ async def main_test():
 
     # Testing contexts.
     contexts = [
-        dc.replace(s_ctx, description='G. Sitemap web search + medium reasoning',
+        dc.replace(s_ctx, description='G. Sitemap web search + medium reasoning (p2)',
             reasoning='medium', timeout_sec=60, web=True, system_doc=doc_sitemap, include_domains='gemboxsoftware.com'),
-        dc.replace(s_ctx, description='C. Context + medium reasoning',
-            reasoning='medium', timeout_sec=60, web=False, system_doc=doc_examples),
+        # dc.replace(s_ctx, description='C. Context + medium reasoning',
+        #     reasoning='medium', timeout_sec=60, web=False, system_doc=doc_examples),
     ]
 
     # Benchmark models.
