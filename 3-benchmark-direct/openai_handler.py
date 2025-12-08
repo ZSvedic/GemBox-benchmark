@@ -117,6 +117,7 @@ _base_prompt = bc.ModelInfo(handler=OpenAIHandler, tags={'openai', 'prompt'})
 
 _OPENAI_MODELS = [
     # OpenAI models: https://openrouter.ai/provider/openai
+    dc.replace(_base, name='gpt-4o',            in_usd=2.50, out_usd=10.00, context_len=  128_000, web=True),
     dc.replace(_base, name='gpt-4.1',           in_usd=2.00, out_usd= 8.00, context_len=1_050_000, web=False),
     dc.replace(_base, name='gpt-4o-mini',       in_usd=0.15, out_usd= 0.60, context_len=  128_000, web=True), 
     dc.replace(_base, name='gpt-5-nano',        in_usd=0.05, out_usd= 0.40, context_len=  400_000, web=True),

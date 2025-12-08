@@ -23,9 +23,9 @@ async def main_test():
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
-    doc_sitemap, doc_sitemap_tokens = benchmark.load_txt_file("docs/GB-Spreadsheet-sitemap-examples-LLM.txt")
-    doc_examples, doc_examples_tokens = benchmark.load_txt_file("docs/GB-Spreadsheet-examples.txt")
-    doc_min_tokens = max(doc_sitemap_tokens, doc_examples_tokens)
+    # doc_sitemap, doc_sitemap_tokens = benchmark.load_txt_file("docs/GB-Spreadsheet-sitemap-examples-LLM.txt")
+    doc_examples, doc_min_tokens = benchmark.load_txt_file("docs/GB-Spreadsheet-examples-small.txt")
+    # doc_min_tokens = max(doc_sitemap_tokens, doc_examples_tokens)
 
     # Filter models.
     models = (
@@ -48,10 +48,10 @@ async def main_test():
 
     # Testing contexts.
     contexts = [
-        dc.replace(s_ctx, description='G. Sitemap web search + medium reasoning (p2)',
-            reasoning='medium', timeout_sec=60, web=True, system_doc=doc_sitemap, include_domains='gemboxsoftware.com'),
-        # dc.replace(s_ctx, description='C. Context + medium reasoning',
-        #     reasoning='medium', timeout_sec=60, web=False, system_doc=doc_examples),
+        # dc.replace(s_ctx, description='G. Sitemap web search + medium reasoning (p2)',
+        #     reasoning='medium', timeout_sec=60, web=True, system_doc=doc_sitemap, include_domains='gemboxsoftware.com'),
+        dc.replace(s_ctx, description='H. Context (small examples) + medium reasoning',
+            reasoning='medium', timeout_sec=60, web=False, system_doc=doc_examples),
     ]
 
     # Benchmark models.

@@ -32,7 +32,7 @@ async def main_test():
         # .by_min_context_length(doc_approx_tokens)
         # .by_tags(include={'openrouter'})
         # .by_max_price(0.50, 2.00)
-        .by_names(['gpt-5-mini']) 
+        .by_names(['gpt-4o']) 
     )
 
     print(f"Filtered models ({len(models)}): {models}")
@@ -46,10 +46,10 @@ async def main_test():
     
     # Testing contexts.
     contexts = [
-        # dc.replace(s_ctx, description='A. Plain call + low reasoning', 
-        #            reasoning='low', timeout_sec=30),
-        # dc.replace(s_ctx, description='B. Web search + medium reasoning', 
-        #            reasoning='medium', web=True, timeout_sec=60),
+        dc.replace(s_ctx, description='A. Plain call + low reasoning', 
+                   reasoning='low', timeout_sec=30),
+        dc.replace(s_ctx, description='B. Web search + medium reasoning', 
+                   reasoning='medium', web=True, timeout_sec=60),
         dc.replace(s_ctx, description='C. Context + medium reasoning', 
                    reasoning='medium', timeout_sec=60, system_doc=doc),
         # dc.replace(s_ctx, description='D. RAG OpenAI + medium reasoning', 

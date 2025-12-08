@@ -1,13 +1,3 @@
-2512041850689262, G. Sitemap web search + medium reasoning, gemini-2.5-flash, Google, 31465, $0.010200, 3.82, 29%, 0%
-2512041850689346, G. Sitemap web search + medium reasoning, gpt-5-mini, OpenAI, 42830, $0.012458, 24.10, 0%, 0%
-2512041850689383, G. Sitemap web search + medium reasoning, gpt-5, OpenAI, 39120, $0.054457, 21.53, 7%, 0%
-2512041850689419, G. Sitemap web search + medium reasoning, gpt-5.1, OpenAI, 37295, $0.047170, 5.39, 24%, 0%
-2512041850689451, G. Sitemap web search + medium reasoning, gpt-5.1-codex, OpenAI, 44288, $0.062185, 26.53, 4%, 4%
-2512041850689487, G. Sitemap web search + medium reasoning, x-ai/grok-4.1-fast, OpenRouter, 28270, $0.000000, 8.25, 27%, 0%
-2512041853986901, C. Context + medium reasoning, gemini-2.5-flash, Google, 64927, $0.019931, 5.07, 0%, 0%
-2512041853986986, C. Context + medium reasoning, gpt-5-mini, OpenAI, 54361, $0.014292, 10.02, 7%, 0%
-2512041853987021, C. Context + medium reasoning, gpt-5, OpenAI, 54241, $0.070214, 16.85, 0%, 0%
-2512041853987055, C. Context + medium reasoning, gpt-5.1, OpenAI, 53985, $0.067674, 5.78, 3%, 0%
-2512041853987091, C. Context + medium reasoning, gpt-5.1-codex, OpenAI, 54044, $0.068276, 7.11, 2%, 0%
-2512041853987126, C. Context + medium reasoning, x-ai/grok-4.1-fast, OpenRouter, 53868, $0.000000, 7.92, 15%, 0%
-
+2512081211472911, A. Plain call + low reasoning, gpt-4o, OpenAI, 172, $0.000538, 2.79, 30%, 0%
+2512081211472944, B. Web search + medium reasoning, gpt-4o, OpenAI, 466, $0.001276, 2.47, 22%, 0%
+2512081211472972, C. Context + medium reasoning , gpt-4o, OpenAI, 53978, $0.135045, 4.07, 11%, 4%

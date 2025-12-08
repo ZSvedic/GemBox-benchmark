@@ -1,0 +1,112 @@
+Format:
+--------------------------------------------------
+REPLACE:
+
+NEW SIZE:
+
+Starting file size ("wc -c GB-Spreadsheet-examples-small.txt"):
+239190
+
+--------------------------------------------------
+REPLACE:
+using System;
+NEW SIZE:
+238850
+--------------------------------------------------
+REPLACE:
+using System.Windows.Forms;
+NEW SIZE:
+238706
+--------------------------------------------------
+REPLACE:
+    /// <summary>
+NEW SIZE:
+238272
+--------------------------------------------------
+REPLACE:
+    /// </summary>
+NEW SIZE:
+237714
+--------------------------------------------------
+REPLACE:
+regex: \uFEFF
+NEW SIZE:
+237618
+--------------------------------------------------
+REPLACE:
+            new ReportItemModel() { Id = 101, Name = "Jane Doe", Salary = 7200 },
+            new ReportItemModel() { Id = 102, Name = "Fred Nurk", Salary = 2580 },
+            new ReportItemModel() { Id = 103, Name = "Hans Meier", Salary = 3200 },
+            new ReportItemModel() { Id = 104, Name = "Ivan Horvat", Salary = 4100 },
+            new ReportItemModel() { Id = 105, Name = "Jean Dupont", Salary = 6850 },
+NEW SIZE:
+235958
+--------------------------------------------------
+REPLACE:
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+NEW SIZE:
+235394
+--------------------------------------------------
+REPLACE:
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+NEW SIZE:
+234764
+--------------------------------------------------
+REPLACE:
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+NEW SIZE:
+234266
+--------------------------------------------------
+REPLACE:
+[assembly: AssemblyCopyright("Copyright © GemBox Ltd.")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+NEW SIZE:
+233546
+--------------------------------------------------
+REPLACE:
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("GemBox Ltd.")]
+NEW SIZE:
+232868
+--------------------------------------------------
+REPLACE:
+
+NEW SIZE:
+
+--------------------------------------------------
+REPLACE:
+
+NEW SIZE:
+
+--------------------------------------------------
+REPLACE:
+
+NEW SIZE:
+
+--------------------------------------------------
+REPLACE:
+
+NEW SIZE:
+
+--------------------------------------------------
+REPLACE:
+
+NEW SIZE:
+
+--------------------------------------------------
+REPLACE:
+
+NEW SIZE:
+
