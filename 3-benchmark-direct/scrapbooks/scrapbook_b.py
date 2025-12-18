@@ -1,23 +1,56 @@
-import dotenv
-if not dotenv.load_dotenv():
-    raise FileExistsError(".env file not found or empty")
+import subprocess
+import tempfile
+import pathlib
+from typing import Dict, Any
+from pprint import pprint
 
-from google import genai
-from google.genai import types
+def compile_csharp(code: str, framework: str = "net10.0") -> Dict[str, Any]:
+    with tempfile.TemporaryDirectory() as d:
+        d = pathlib.Path(d)
 
-client = genai.Client(vertexai=True, project="gen-lang-client-0658217610", location="europe-west4")
+        # Create new console project
+        params = ["dotnet", "new", "console", "--framework", framework]
+        subprocess.run(params, cwd=d, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
 
-grounding_tool = types.Tool(google_search=types.GoogleSearch())
-config = types.GenerateContentConfig(tools=[grounding_tool])
+        # Write the provided code
+        (d / "Program.cs").write_text(code)
 
-response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents="What are the latest news?",
-    config=config
-)
+        # Build the project
+        params = ["dotnet", "build", "/p:TreatWarningsAsErrors=false"]
+        p = subprocess.run(params, cwd=d, capture_output=True, text=True)
 
-candidate = response.candidates[0]
-print(f"Text answer: {candidate.content.parts[0].text}")
-print(f"Web search queries: {candidate.grounding_metadata.web_search_queries}")
-for chunk in candidate.grounding_metadata.grounding_chunks:
-    print(f"Chunk URI: {chunk.web.uri}")
+        # Parse warnings and errors from output
+        warnings = []
+        errors = []
+
+        for line in (p.stdout + p.stderr).splitlines():
+            if ": warning " in line:
+                warnings.append(line.strip())
+            elif ": error " in line:
+                errors.append(line.strip())
+
+        return {
+            "success": p.returncode == 0,
+            "warnings": warnings,
+            "errors": errors,
+            "stdout": p.stdout,
+            "stderr": p.stderr,
+        }
+
+
+# Example usage
+if __name__ == "__main__":
+    code = """
+using System;
+class Program {
+    static void Main() {
+        Console.WriteLine("Hello")
+    }
+}
+"""
+    result = compile_csharp(code)
+
+    for key in ['success', 'warnings', 'errors']:
+        print(key.upper() + ":")
+        r = result[key]
+        pprint(r)

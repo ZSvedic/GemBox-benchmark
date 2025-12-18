@@ -118,6 +118,7 @@ _OPENROUTER_MODELS = [
     # Google's Gemini 3 Pro seems to be available via OpenRouter:
     # https://openrouter.ai/google/gemini-3-pro-preview
     dc.replace(_base, name='google/gemini-3-pro-preview',   in_usd= 2.00, out_usd=12.00, context_len=1_050_000, web=True,  tags={'google', 'openrouter'}),
+    dc.replace(_base, name='google/gemini-3-flash-preview', in_usd= 0.50, out_usd= 3.00, context_len=1_050_000, web=True,  tags={'google', 'openrouter'}),
     
     # xAI models: https://openrouter.ai/provider/xai
     dc.replace(_base, name='x-ai/grok-4.1-fast',            in_usd= 0.00, out_usd= 0.00, context_len=2_000_000, web=True,  tags={'xai', 'openrouter'}),

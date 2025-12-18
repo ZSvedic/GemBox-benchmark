@@ -5,47 +5,15 @@ if not dotenv.load_dotenv():
 from openai import OpenAI
 client = OpenAI()
 
-def get_web_search_links(response) -> set[str]:
-    return {
-        source.url 
-        for item in response.output if item.type == "web_search_call" 
-        for source in item.action.sources }
+padding_text = 'p932765a023474d692363d429823i675937n0121174g-'
+limit = 50_000 * (4+1)  # 4 bytes per character + 1 for safety
+n_repeats = limit // len(padding_text) + 1
+prompt = padding_text*n_repeats + "\n Answer what is the height of Eiffel Tower in meters?"
 
-def get_web_search_links_print(response) -> set[str]:
-    links = set()
-    for index, item in enumerate(response.output):
-        if item.type == "web_search_call":
-            sources = item.action.sources
-            print(f"web_search_call {index} has query '{item.action.query}' and has {len(sources)} sources:")
-            for source in sources:
-                print(f"    appending source: {source.url}")
-                links.add(source.url)
-    print(f"returning {len(links)} unique links")
-    return links
+print(f'n_repeats: {n_repeats}, len(prompt): {len(prompt)}')
+print(f'prompt[:100]: {prompt[:100]}...')
+print(f'prompt[limit:]: {prompt[limit:]}\n')
 
-response = client.responses.create(
-  model="gpt-5-mini",
-  reasoning={"effort": "low"},
-  tools=[
-      {
-          "type": "web_search",
-        #   "filters": {
-        #       "allowed_domains": [
-        #           "pubmed.ncbi.nlm.nih.gov",
-        #           "clinicaltrials.gov",
-        #           "www.who.int",
-        #           "www.cdc.gov",
-        #           "www.fda.gov",
-        #       ]
-        #   },
-      }
-  ],
-  tool_choice="auto",
-  include=["web_search_call.action.sources"],
-  input="Please perform a web search on how semaglutide is used in the treatment of diabetes.",
-)
+response = client.responses.create(model="gpt-5-mini", reasoning={"effort": "low"}, input=prompt)
 
 print(response.output_text)
-links = get_web_search_links(response)
-print(links)
-print('end of links') 

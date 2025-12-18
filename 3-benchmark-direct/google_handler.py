@@ -122,7 +122,7 @@ _GOOGLE_MODELS = [
     dc.replace(_base, name='gemini-2.5-flash-lite',     in_usd=0.10, out_usd= 0.40, web=False), 
     dc.replace(_base, name='gemini-2.5-flash',          in_usd=0.30, out_usd= 2.50, web=True),
     dc.replace(_base, name='gemini-2.5-pro',            in_usd=1.25, out_usd=10.00, web=True),
-    dc.replace(_base, name='gemini-3-flash-preview',    in_usd=0.50, out_usd= 4.00, web=True), # ?
+    dc.replace(_base, name='gemini-3-flash-preview',    in_usd=0.50, out_usd= 3.00, web=True), # ?
     dc.replace(_base, name='gemini-3-pro-preview',      in_usd=2.50, out_usd=12.00, web=True), # ?
     # Google Vertex AI models.
     dc.replace(_base_rag, name='rag-default-gemini-2.5-flash', prompt_id='gemini-2.5-flash:7991637538768945152',
