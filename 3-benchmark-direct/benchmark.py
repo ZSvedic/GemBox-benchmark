@@ -4,6 +4,7 @@ import dataclasses as dc
 import pathlib
 import textwrap as tw
 import time
+from pprint import pprint
 
 # Third-party.
 import dotenv
@@ -13,6 +14,7 @@ import google_handler, openai_handler, openrouter_handler  # Required to populat
 import base_classes as bc
 import metrics as mt
 import questions as qs
+import dotnet_compile
 
 # Constants.
 
@@ -36,6 +38,7 @@ class BenchmarkContext:
     system_ins: str = bc.DEFAULT_SYSTEM_INS    # System instructons.
     system_doc: str = ''                        # System documentation/examples.
     questions: tuple[qs.QuestionData] = ()      # Questions to benchmark.
+    parse_type: type = bc.ListOfStrings         # Expected response parse type.
 
     def __str__(self):
         '''Indented multi-line string representation of the dataclass.'''
@@ -54,7 +57,35 @@ def load_txt_file(file_path: str, verbose: bool = True) -> tuple[str, int]:
         print(f"Loaded {file_path} with approximately {size_tokens} tokens.")
     return txt, size_tokens
 
+def extract_code_block(text: str) -> str:
+    '''Extract the first code block from the text, if any.'''
+    try:
+        block = text.split("```", 2)[1]
+        return block.split("\n", 1)[1].strip()
+    except IndexError:
+        return text.strip()
+
+def truncate_middle(s, width, marker="..."):
+    '''Truncate in the middle, preserve all whitespace exactly.'''
+    if len(s) <= width:
+        return s
+    if width <= len(marker):
+        return marker[:width]
+    else:
+        keep = width - len(marker)
+        left = keep // 2
+        right = keep - left
+        return s[:left] + marker + s[-right:]
+    
 # Benchmarking functions.
+
+def extract_code_block(text: str) -> str:
+    '''Extract the first code block from the text, if any.'''
+    try:
+        block = text.split("```", 2)[1]
+        return block.split("\n", 1)[1].strip()
+    except IndexError:
+        return text.strip()
 
 async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: bc.LLMHandler,
     question_num: int, question: qs.QuestionData) -> mt.Metrics:
@@ -81,17 +112,28 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
                     continue
                 raise
         
+        # Calculate elapsed time, unpack response, and calculate cost.
         dt = time.perf_counter() - t0 - delay
-        str_list, links, (input_tokens, output_tokens) = response
-        results = str_list.completions
-
-        # Calculate tokens, cost, and accuracy.
+        raw_result, _, (input_tokens, output_tokens) = response
         cost = model.calculate_cost(input_tokens, output_tokens)
-        error_rate = mt.get_error_rate(f"Q{question_num}", results, question.answers)
-        
-        # Display results.  
+
+        # Calculate accuracy in one of two ways...
+        if ctx.parse_type:
+            # ...by direct comparison of list of strings.
+            result = raw_result.completions
+            error_rate = mt.get_error_rate(f"Q{question_num}", result, question.answers)
+        else:
+            # ...by compiling extracted code (errors INCORRECT, warnings PARTIAL).
+            result = extract_code_block(raw_result)
+            result_dict = dotnet_compile.compile_csharp(result)
+            n_warnings, n_errors, _ = result_dict.values()
+            if ctx.verbose:
+                pprint({'result': result, **result_dict})
+            error_rate = (1.0 if n_errors > 0 else 0.5 if n_warnings > 0 else 0.0)
+
+        # Display result.  
         if ctx.verbose:
-            print(f"A{question_num}: {tw.shorten(str(results), TRUNCATE_LENGTH)}")
+            print(f"A{question_num}: {tw.shorten(str(result), TRUNCATE_LENGTH)}")
             if error_rate == 0.0:
                 print("✓ CORRECT")
             elif error_rate < 1.0:
@@ -123,7 +165,7 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, r
                     ctx.system_doc if ctx.system_ins else '')
     
     if ctx.verbose:
-        print(f"INSTRUCTIONS:\n{instructions[:1100]}\n\n...\n\n{instructions[-300:]}", )
+        print(f"INSTRUCTIONS:\n{truncate_middle(instructions, 1500, '\n\n...\n\n')}\n")
 
     # Initialize model and agent.
     try:
@@ -131,7 +173,7 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, r
             web=ctx.web, 
             include_domains=ctx.include_domains,
             system_ins=instructions, 
-            parse_type=bc.ListOfStrings)
+            parse_type=ctx.parse_type)
     except Exception as e:
         print(f"\n--- Can't get model handler: {repr(e)}")
         return mt.Metrics(

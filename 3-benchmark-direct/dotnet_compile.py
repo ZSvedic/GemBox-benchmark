@@ -1,10 +1,10 @@
 import subprocess
 import pathlib
-from typing import Dict, Any
 from pprint import pprint
 
-def clean_lines(s: str, dir:str) -> list[str]:
-    lines = (s
+def _clean_lines(dotnet_output: str, dir:str) -> list[str]:
+    '''Internal helper to clean dotnet build output lines.'''
+    lines = (dotnet_output
             .partition('\nBuild ')[0] # Keep only the text before "\nBuild succeeded/failed".
             .replace(dir, '...') # Hide temp dir paths.
             .replace('  Determining projects to restore...\n', '') # Remove.
@@ -15,19 +15,19 @@ def clean_lines(s: str, dir:str) -> list[str]:
     # Now remove trailing [/private.../....csproj] and return.
     return [line.rsplit(' [', 1)[0] for line in lines]
 
-def compile_csharp(code: str, framework: str = "net10.0") -> Dict[str, Any]:
+def compile_csharp(code: str, dir: str = "CSConsoleApp") -> dict[str, int|str]:
+    '''Compiles the provided C# code in a predefined CS Project dir.'''
     # Always use the same CS Project dir.
-    d = pathlib.Path("scrapbooks/ScrapbookB")
+    d = pathlib.Path(dir)
 
     # Write the provided code
     (d / "Program.cs").write_text(code)
 
     # Build the project
-    p = subprocess.run(['dotnet', 'build'], 
-                        cwd=d, capture_output=True, text=True)
+    p = subprocess.run(['dotnet', 'build'], cwd=d, capture_output=True, text=True)
 
     # Clean the output lines
-    lines = clean_lines(p.stdout, str(d.resolve()))
+    lines = _clean_lines(p.stdout, str(d.resolve()))
 
     # Return number of warnings, errors, and the cleaned stdout.
     return {
@@ -36,11 +36,9 @@ def compile_csharp(code: str, framework: str = "net10.0") -> Dict[str, Any]:
         "stdout": '\n'.join(lines),
     }
 
+# Main test.
 
-# Example usage
-if __name__ == "__main__":
-    pprint(compile_csharp(
-"""using GemBox.Spreadsheet;
+_TEST_1_WARNING = """using GemBox.Spreadsheet;
 class Program {
     static void Main() {
         SpreadsheetInfo.SetLicense("FREE-LIMITED-KEY");
@@ -50,5 +48,26 @@ class Program {
         ef.Save("Output.xlsx");
         Console.WriteLine("Hello");
     }
-}
-"""))
+}"""
+
+_TEST_2_ERRORS = """
+class Program {
+    static void Main() {
+        int i = "string instead of int"; // Type error here
+        undeclaredVariable = 5; // Use of undeclared variable
+    }
+}"""
+
+def main_test():
+    print("\n===== dotnet_compile.main_test() =====")
+
+    compile_result = compile_csharp(_TEST_1_WARNING)
+    pprint(compile_result)
+    assert compile_result["n_warnings"] == 1, "FAIL: Expected 1 warning."
+
+    compile_result = compile_csharp(_TEST_2_ERRORS)
+    pprint(compile_result)
+    assert compile_result["n_errors"] == 2, "FAIL: Expected 2 errors."
+
+if __name__ == "__main__":
+    main_test()
