@@ -41,7 +41,7 @@ async def main_test():
     # Filter models.
     models = (
         bc.Models()
-        .by_names(['gemini-2.5-flash', 'gpt-5-mini'])
+        .by_names(['gpt-5-mini', 'gpt-5', 'gpt-5.1-codex', 'x-ai/grok-4.1-fast'])
     )
     print(f"Filtered models ({len(models)}): {models}")
 
@@ -55,8 +55,10 @@ async def main_test():
     
     # Testing contexts.
     contexts = [
-        dc.replace(s_ctx, description='A. Plain call + low reasoning', 
-                   reasoning='low', timeout_sec=30),
+        dc.replace(s_ctx, description='Plain call + low reasoning', 
+                   reasoning='low', timeout_sec=40),
+         dc.replace(s_ctx, description='Plain call + medium reasoning', 
+                   reasoning='medium', timeout_sec=60),   
     ]
     
     # Benchmark models.
