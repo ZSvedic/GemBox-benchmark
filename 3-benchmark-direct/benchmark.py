@@ -14,7 +14,7 @@ import google_handler, openai_handler, openrouter_handler  # Required to populat
 import base_classes as bc
 import metrics as mt
 import questions as qs
-import dotnet_compile
+import dotnet_cli
 
 # Constants.
 
@@ -35,7 +35,7 @@ class BenchmarkContext:
     verbose: bool = True                        # Verbose output?
     max_parallel_questions: int = 14            # Limit parallel question execution.
     retry_failures: bool = True                 # Retry failed requests?
-    system_ins: str = bc.DEFAULT_SYSTEM_INS    # System instructons.
+    system_ins: str = bc.DEFAULT_SYSTEM_INS     # System instructons.
     system_doc: str = ''                        # System documentation/examples.
     questions: tuple[qs.QuestionData] = ()      # Questions to benchmark.
     parse_type: type = bc.ListOfStrings         # Expected response parse type.
@@ -120,20 +120,24 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
         # Calculate accuracy in one of two ways...
         if ctx.parse_type:
             # ...by direct comparison of list of strings.
-            result = raw_result.completions
-            error_rate = mt.get_error_rate(f"Q{question_num}", result, question.answers)
+            code_block = raw_result.completions
+            error_rate = mt.get_error_rate(f"Q{question_num}", code_block, question.answers)
         else:
             # ...by compiling extracted code (errors INCORRECT, warnings PARTIAL).
-            result = extract_code_block(raw_result)
-            result_dict = dotnet_compile.compile_csharp(result)
-            n_warnings, n_errors, _ = result_dict.values()
+            code_block = extract_code_block(raw_result)
+            exec = dotnet_cli.cs_compile_execute(code_block, f"test_q{question_num}_model{model.name}")
             if ctx.verbose:
-                pprint({'result': result, **result_dict})
-            error_rate = (1.0 if n_errors > 0 else 0.5 if n_warnings > 0 else 0.0)
+                print(code_block)
+                pprint(exec)
+            error_rate = min(1.0 * (exec.compiler_errors>0) + # FAIL: doesn't compile.
+                             0.25 * (exec.compiler_warnings>0) + # PARTIAL: has warnings.
+                             0.25 * (exec.run_returncode != 0) + # PARTIAL: runtime error.
+                             0.25 * (exec.run_files == ""), # PARTIAL: no output files.
+                             1.0) # Cap at 1.0.
 
         # Display result.  
         if ctx.verbose:
-            print(f"A{question_num}: {tw.shorten(str(result), TRUNCATE_LENGTH)}")
+            print(f"A{question_num}: {tw.shorten(str(code_block), TRUNCATE_LENGTH)}")
             if error_rate == 0.0:
                 print("✓ CORRECT")
             elif error_rate < 1.0:

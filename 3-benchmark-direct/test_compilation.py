@@ -1,7 +1,6 @@
 # Python stdlib.
 import asyncio
 import dataclasses as dc
-import warnings
 
 # Third-party.
 import dotenv
@@ -11,21 +10,22 @@ import base_classes as bc
 import metrics as mt
 import questions as qs
 import benchmark
-import dotnet_compile
 from tee_logging import logging_context
 
 # Main test.
 
 _PROMPT = '''You are GemBoxGPT, a GPT chatbot that provides coding assistance for GemBox.Spreadsheet. 
-Assist only with GemBox-related queries. when giving code, give the complete C# code marked with ```csharp ... ``` blocks.'''
+Assist only with GemBox-related queries. When giving code, give the complete C# code marked with ```csharp ... ``` blocks.
+If you don't know something, do web search over "gemboxsoftware.com" domain to find relevant examples or API help pages.
+But, do not browse more than 3 pages, as GemBox website is small and your response time is limited.'''
 
 _QUESTIONS = [
-    qs.QuestionData(
-        category="compilation",
-        question="Write C# code that uses GemBox.Spreadsheet to create an Excel file with 'Hello!' in cell A1.",
-        masked_code="",
-        answers=["using GemBox.Spreadsheet;\nclass Program {\n    static void Main() {\n        SpreadsheetInfo.SetLicense(\"FREE-LIMITED-KEY\");\n        var ef = new ExcelFile();\n        var ws = ef.Worksheets.Add(\"Sheet1\");\n        ws.Cells[0, 0].Value = \"Hello!\";\n        ef.Save(\"Output.xlsx\");\n    }\n}"]
-    ),
+    # qs.QuestionData(
+    #     category="compilation",
+    #     question="Write C# code that uses GemBox.Spreadsheet to create an Excel file with 'Hello!' in cell A1.",
+    #     masked_code="",
+    #     answers=["using GemBox.Spreadsheet;\nclass Program {\n    static void Main() {\n        SpreadsheetInfo.SetLicense(\"FREE-LIMITED-KEY\");\n        var ef = new ExcelFile();\n        var ws = ef.Worksheets.Add(\"Sheet1\");\n        ws.Cells[0, 0].Value = \"Hello!\";\n        ef.Save(\"Output.xlsx\");\n    }\n}"]
+    # ),
     qs.QuestionData(
         category='compilation',
         question='''Using GemBox.Spreadsheet, generate C# code to create "../Earth–HHhMMm.xlsx", where HH and MM are current hours and minutes (24-hour time). A "Breakdown" sheet has columns "Continents" and "Area (km2)". List all known continents and respective areas that you know. Use thousands separators for km2, make columns autofit, and make header bold. 
@@ -41,7 +41,7 @@ async def main_test():
     # Filter models.
     models = (
         bc.Models()
-        .by_names(['gpt-5-mini', 'gpt-5', 'gpt-5.1-codex', 'x-ai/grok-4.1-fast'])
+        .by_names(['gpt-5-mini', 'gpt-5', 'gpt-5.1-codex'])
     )
     print(f"Filtered models ({len(models)}): {models}")
 
@@ -55,10 +55,12 @@ async def main_test():
     
     # Testing contexts.
     contexts = [
-        dc.replace(s_ctx, description='Plain call + low reasoning', 
-                   reasoning='low', timeout_sec=40),
-         dc.replace(s_ctx, description='Plain call + medium reasoning', 
-                   reasoning='medium', timeout_sec=60),   
+        # dc.replace(s_ctx, description='Plain call + low reasoning', 
+        #            reasoning='low', timeout_sec=40),
+        # dc.replace(s_ctx, description='Plain call + medium reasoning',
+        #            reasoning='medium', timeout_sec=60),   
+        dc.replace(s_ctx, description='Web search (domain) + low reasoning',
+                   reasoning='low', web=True, include_domains='gemboxsoftware.com', timeout_sec=160),
     ]
     
     # Benchmark models.

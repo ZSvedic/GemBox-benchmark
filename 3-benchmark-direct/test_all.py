@@ -13,7 +13,7 @@ import openai_handler
 import google_handler
 import openrouter_handler
 import benchmark
-import dotnet_compile
+import dotnet_cli
 
 # Main test.
 
@@ -22,7 +22,7 @@ async def main_test():
     metrics.main_test()
     questions.main_test()
     tee_logging.main_test()
-    dotnet_compile.main_test()
+    dotnet_cli.main_test()
     
     # Async calls.
     await base_classes.main_test()
