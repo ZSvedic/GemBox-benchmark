@@ -19,20 +19,15 @@ Assist only with GemBox-related queries. When giving code, give the complete C# 
 If you don't know something, do web search over "gemboxsoftware.com" domain to find relevant examples or API help pages.
 But, do not browse more than 3 pages, as GemBox website is small and your response time is limited.'''
 
+_TASK_HELLO = '''Write C# code that uses GemBox.Spreadsheet to create an Excel file with 'Hello!' in cell A1.'''
+
+_TASK_CHART = '''Using GemBox.Spreadsheet, generate C# code to create "Earth–HHhMMm.xlsx", where HH and MM are current hours and minutes (24-hour time). 
+A "Breakdown" sheet has columns "Continents" and "Area (km2)". List all known continents and respective areas that you know. Use thousands separators for km2, make columns autofit, and make header bold. 
+Right to the table, create a pie chart named "Landmass breakdown" that shows continent's area percentage. Each pie should have a label with continent name, area, and percentage. '''
+
 _QUESTIONS = [
-    # qs.QuestionData(
-    #     category="compilation",
-    #     question="Write C# code that uses GemBox.Spreadsheet to create an Excel file with 'Hello!' in cell A1.",
-    #     masked_code="",
-    #     answers=["using GemBox.Spreadsheet;\nclass Program {\n    static void Main() {\n        SpreadsheetInfo.SetLicense(\"FREE-LIMITED-KEY\");\n        var ef = new ExcelFile();\n        var ws = ef.Worksheets.Add(\"Sheet1\");\n        ws.Cells[0, 0].Value = \"Hello!\";\n        ef.Save(\"Output.xlsx\");\n    }\n}"]
-    # ),
-    qs.QuestionData(
-        category='compilation',
-        question='''Using GemBox.Spreadsheet, generate C# code to create "../Earth–HHhMMm.xlsx", where HH and MM are current hours and minutes (24-hour time). A "Breakdown" sheet has columns "Continents" and "Area (km2)". List all known continents and respective areas that you know. Use thousands separators for km2, make columns autofit, and make header bold. 
-Right to the table, create a pie chart named "Landmass breakdown" that shows continent's area percentage. Each pie should have a label with continent name, area, and percentage. ''',
-        masked_code="",
-        answers=[],
-    ),
+    # qs.QuestionData( category='compilation', question=_TASK_HELLO, masked_code='', answers=[] ),
+    qs.QuestionData( category='compilation', question=_TASK_CHART, masked_code='', answers=[] ),
 ]
 
 async def main_test():
