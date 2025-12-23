@@ -1,6 +1,7 @@
 # Python stdlib.
 import asyncio
 import dataclasses as dc
+from datetime import datetime
 import pathlib
 import textwrap as tw
 import time
@@ -88,7 +89,7 @@ def extract_code_block(text: str) -> str:
         return text.strip()
 
 async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: bc.LLMHandler,
-    question_num: int, question: qs.QuestionData) -> mt.Metrics:
+    question_num: int, question: qs.QuestionData, run_index: int) -> mt.Metrics:
     """Run a single question and return performance metrics."""
     # Prepare question and prompt.
     question_text = f"{question.question}\n{question.masked_code}"
@@ -125,7 +126,8 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
         else:
             # ...by compiling extracted code (errors INCORRECT, warnings PARTIAL).
             code_block = extract_code_block(raw_result)
-            exec = dotnet_cli.cs_compile_execute(code_block, f"test_q{question_num}_model{model.name}")
+            dir_name = f"test-at-{datetime.now().strftime("%H-%M")}_q-{question_num}_m-{model.name}_r-{run_index}" 
+            exec = dotnet_cli.cs_compile_execute(code_block, dir_name)
             if ctx.verbose:
                 print(code_block)
                 pprint(exec)
@@ -188,7 +190,7 @@ async def run_model_benchmark(ctx: BenchmarkContext, model_info: bc.ModelInfo, r
     
     # Create tasks for all questions to run in parallel.
     question_tasks = [
-        get_question_task(ctx, model_info, handler, qi, question) 
+        get_question_task(ctx, model_info, handler, qi, question, run_index) 
         for qi, question in enumerate(ctx.questions, 1)
     ]
     
