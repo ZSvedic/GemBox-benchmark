@@ -3,7 +3,7 @@ def extract_code_block(text: str) -> str:
         block = text.split("```", 2)[1]
         return block.split("\n", 1)[1].strip()
     except IndexError:
-        return text.strip()
+        return text.strip() 
 
 
 tests = [

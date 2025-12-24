@@ -50,10 +50,9 @@ class OpenRouterHandler(bc.LLMHandler):
         if self.web:
             if self.model_info.web is False:
                 raise ValueError(f"Model {model_name} does not support web search")
-            elif self.include_domains:
+            if self.include_domains:
                 print("WARNING: Domain search is not supported in OpenRouterHandler.")
-            else:
-                model_name += ':online'
+            model_name += ':online'
         
         if self.system_ins:
             messages.append({"role": "system", "content": self.system_ins})
@@ -86,7 +85,7 @@ class OpenRouterHandler(bc.LLMHandler):
             print(f"result: {result}")
             print(f"input_tokens: {input_tokens}, output_tokens: {output_tokens}")
 
-        # OpenRouter doesn't provide web web links in the same way
+        # OpenRouter doesn't provide web links in the same way
         links = None
 
         return result, links, (input_tokens, output_tokens)

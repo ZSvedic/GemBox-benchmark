@@ -18,7 +18,7 @@ async def main_test():
     print("\n===== test_models.main_test() =====")
     
     # Load questions from JSONL file.
-    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")
+    questions = qs.load_questions_from_jsonl("../2-bench-filter/test.jsonl")[:5]
     print(f"Using {len(questions)} questions.")
 
     # Load documentation.
@@ -40,7 +40,7 @@ async def main_test():
     # Starting context.
     s_ctx = benchmark.BenchmarkContext(
         models=models,
-        verbose=False,
+        verbose=True,
         system_ins=bc.DEFAULT_SYSTEM_INS,
         questions=questions )
     
@@ -48,10 +48,10 @@ async def main_test():
     contexts = [
         dc.replace(s_ctx, description='A. Plain call + low reasoning', 
                    reasoning='low', timeout_sec=30),
-        dc.replace(s_ctx, description='B. Web search + medium reasoning', 
-                   reasoning='medium', web=True, timeout_sec=60),
-        dc.replace(s_ctx, description='C. Context + medium reasoning', 
-                   reasoning='medium', timeout_sec=60, system_doc=doc),
+        # dc.replace(s_ctx, description='B. Web search + medium reasoning', 
+        #            reasoning='medium', web=True, timeout_sec=60),
+        # dc.replace(s_ctx, description='C. Context + medium reasoning', 
+        #            reasoning='medium', timeout_sec=60, system_doc=doc),
         # dc.replace(s_ctx, description='D. RAG OpenAI + medium reasoning', 
         #            reasoning='medium', timeout_sec=60),
     ]

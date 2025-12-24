@@ -126,7 +126,7 @@ async def main_test():
     # Filter models.
     models = (
         bc.Models()
-        .by_names(['gpt-5-mini', 'gpt-5'])#, 'gpt-5.1-codex'])
+        .by_names(['gemini-2.5-flash']) # 'google/gemini-3-pro-preview', 'gpt-5-mini', 'gpt-5'
     )
     print(f"Filtered models ({len(models)}): {models}")
 
@@ -136,7 +136,9 @@ async def main_test():
         verbose=True, 
         system_ins=_PROMPT,
         questions=_QUESTIONS,
-        parse_type=None )
+        parse_type=None,
+        bench_n_times=1, 
+    )
     
     # Testing contexts.
     contexts = [

@@ -16,3 +16,6 @@ cache/
 # Misc.
 *.log
 .DS_Store
+
+# Compiled CS projects.
+test-at-*/

@@ -126,7 +126,7 @@ async def get_question_task(ctx: BenchmarkContext, model: bc.ModelInfo, agent: b
         else:
             # ...by compiling extracted code (errors INCORRECT, warnings PARTIAL).
             code_block = extract_code_block(raw_result)
-            dir_name = f"test-at-{datetime.now().strftime("%H-%M")}_q-{question_num}_m-{model.name}_r-{run_index}" 
+            dir_name = f"test-at-{datetime.now().strftime("%H-%M")}_q-{question_num}_m-{model.name.split('/')[-1]}_r-{run_index}" 
             exec = dotnet_cli.cs_compile_execute(code_block, dir_name)
             if ctx.verbose:
                 print(code_block)
