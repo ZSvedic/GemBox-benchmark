@@ -1,12 +1,13 @@
 def extract_code_block(text: str) -> str:
     try:
         block = text.split("```", 2)[1]
-        return block.split("\n", 1)[1].strip()
-    except IndexError:
+        code = block.split("\n", 1)[1]
+        return code.strip()
+    except Exception:
         return text.strip() 
 
-
 tests = [
+    "```csharp\nConsole.WriteLine(\"Hi\");\nConsole.WriteLine(\"again\");```",
     "no code here",
     "before ```python\nprint('hi')\n``` after",
     "```csharp\nConsole.WriteLine(\"Hi\");\n```",
