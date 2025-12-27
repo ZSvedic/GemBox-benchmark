@@ -43,6 +43,19 @@ public class Program
         return links;
     }
 
+    public static string Shorten(string input, int charLimit)
+    {
+        if (string.IsNullOrEmpty(input)) return "";
+        if (charLimit <= 0) return "";
+        if (input.Length <= charLimit) return input;
+
+        int halfLimit = charLimit / 2;
+        string firstPart = input.Substring(0, halfLimit);
+        string lastPart = input.Substring(input.Length - halfLimit);
+
+        return $"{firstPart}\n...\n{lastPart}";
+    }
+
     static bool RunTest(string name, string input, string expected)
     {
         var result = ExtractCodeBlock(input);
@@ -60,6 +73,18 @@ public class Program
         if (!pass)
         {
             Console.WriteLine($"  Expected: [{string.Join(", ", expected)}]\n  Got: [{string.Join(", ", result)}]");
+        }
+        return pass;
+    }
+
+    static bool RunShortenTest(string name, string input, int charLimit, string expected)
+    {
+        var result = Shorten(input, charLimit);
+        bool pass = result == expected;
+        Console.WriteLine($"{(pass ? "✓" : "✗")} {name}");
+        if (!pass)
+        {
+            Console.WriteLine($"  Expected: \"{expected.Replace("\n", "\\n")}\"\n  Got: \"{result.Replace("\n", "\\n")}\"");
         }
         return pass;
     }
@@ -87,6 +112,13 @@ public class Program
         passed += RunLinkTest("Markdown link", "Check [the guide](https://docs.example.com/page) please.", new List<string> { "https://docs.example.com/page" }) ? 1 : 0;
         passed += RunLinkTest("Trailing punctuation", "See https://site.com/test, then https://next.com/end.", new List<string> { "https://site.com/test", "https://next.com/end" }) ? 1 : 0;
         passed += RunLinkTest("Mixed formats", "Link: https://one.com [alt](https://two.com/path).", new List<string> { "https://two.com/path", "https://one.com" }) ? 1 : 0;
+
+        total += 5;
+        passed += RunShortenTest("Long text shortening", "This is a very long LLM response that contains a lot of text and needs to be shortened for display purposes.", 40, "This is a very long LLM respo\n...\nened for display purposes.") ? 1 : 0;
+        passed += RunShortenTest("Short text no shortening", "Short text", 20, "Short text") ? 1 : 0;
+        passed += RunShortenTest("Empty string", "", 10, "") ? 1 : 0;
+        passed += RunShortenTest("Exact limit", "12345678901234567890", 20, "12345678901234567890") ? 1 : 0;
+        passed += RunShortenTest("Zero char limit", "Some text here", 0, "") ? 1 : 0;
 
         Console.WriteLine($"\n{passed}/{total} tests passed");
         Environment.Exit(passed == total ? 0 : 1);
