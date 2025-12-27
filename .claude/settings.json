@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/user/GemBox-benchmark/.claude/hooks/session-start-setup.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

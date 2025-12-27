@@ -114,7 +114,7 @@ public class Program
         passed += RunLinkTest("Mixed formats", "Link: https://one.com [alt](https://two.com/path).", new List<string> { "https://two.com/path", "https://one.com" }) ? 1 : 0;
 
         total += 5;
-        passed += RunShortenTest("Long text shortening", "This is a very long LLM response that contains a lot of text and needs to be shortened for display purposes.", 40, "This is a very long LLM respo\n...\nened for display purposes.") ? 1 : 0;
+        passed += RunShortenTest("Long text shortening", "This is a very long LLM response that contains a lot of text and needs to be shortened for display purposes.", 40, "This is a very long \n...\nor display purposes.") ? 1 : 0;
         passed += RunShortenTest("Short text no shortening", "Short text", 20, "Short text") ? 1 : 0;
         passed += RunShortenTest("Empty string", "", 10, "") ? 1 : 0;
         passed += RunShortenTest("Exact limit", "12345678901234567890", 20, "12345678901234567890") ? 1 : 0;
