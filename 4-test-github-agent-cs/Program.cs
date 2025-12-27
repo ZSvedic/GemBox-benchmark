@@ -49,9 +49,10 @@ public class Program
         if (charLimit <= 0) return "";
         if (input.Length <= charLimit) return input;
 
-        int halfLimit = charLimit / 2;
-        string firstPart = input.Substring(0, halfLimit);
-        string lastPart = input.Substring(input.Length - halfLimit);
+        int firstHalf = (charLimit + 18) / 2;
+        int lastHalf = (charLimit + 12) / 2;
+        string firstPart = input.Substring(0, firstHalf);
+        string lastPart = input.Substring(input.Length - lastHalf);
 
         return $"{firstPart}\n...\n{lastPart}";
     }
