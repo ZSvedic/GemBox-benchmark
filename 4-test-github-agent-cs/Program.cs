@@ -49,10 +49,9 @@ public class Program
         if (charLimit <= 0) return "";
         if (input.Length <= charLimit) return input;
 
-        int firstHalf = (charLimit + 18) / 2;
-        int lastHalf = (charLimit + 12) / 2;
-        string firstPart = input.Substring(0, firstHalf);
-        string lastPart = input.Substring(input.Length - lastHalf);
+        int halfLimit = charLimit / 2;
+        string firstPart = input.Substring(0, halfLimit);
+        string lastPart = input.Substring(input.Length - halfLimit);
 
         return $"{firstPart}\n...\n{lastPart}";
     }
@@ -115,7 +114,7 @@ public class Program
         passed += RunLinkTest("Mixed formats", "Link: https://one.com [alt](https://two.com/path).", new List<string> { "https://two.com/path", "https://one.com" }) ? 1 : 0;
 
         total += 5;
-        passed += RunShortenTest("Long text shortening", "This is a very long LLM response that contains a lot of text and needs to be shortened for display purposes.", 40, "This is a very long LLM respo\n...\nened for display purposes.") ? 1 : 0;
+        passed += RunShortenTest("Long text shortening", "This is a very long LLM response that contains a lot of text and needs to be shortened for display purposes.", 40, "This is a very long \n...\nor display purposes.") ? 1 : 0;
         passed += RunShortenTest("Short text no shortening", "Short text", 20, "Short text") ? 1 : 0;
         passed += RunShortenTest("Empty string", "", 10, "") ? 1 : 0;
         passed += RunShortenTest("Exact limit", "12345678901234567890", 20, "12345678901234567890") ? 1 : 0;
