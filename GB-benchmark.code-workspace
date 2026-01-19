@@ -8,9 +8,6 @@
 		},
 		{
 			"path": "3-benchmark-direct"
-		},
-		{
-			"path": "4-test-github-agent-cs"
 		}
 	],
 	"settings": {}
